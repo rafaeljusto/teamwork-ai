@@ -3,6 +3,7 @@ package teamwork
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -33,12 +34,18 @@ func (e *Engine) Do(entity Entity) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		if body, err := io.ReadAll(resp.Body); err == nil {
+			return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		}
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	decoder := json.NewDecoder(resp.Body)
-	return decoder.Decode(entity)
+	if req.Method == http.MethodGet {
+		decoder := json.NewDecoder(resp.Body)
+		return decoder.Decode(entity)
+	}
+	return nil
 }
 
 type Entity interface {

@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -37,7 +38,7 @@ type Task struct {
 type SingleTask Task
 
 func (t SingleTask) Request(server string) (*http.Request, error) {
-	uri := fmt.Sprintf(server+"/projects/api/v3/tasks/%d.json", t.ID)
+	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, t.ID)
 	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
@@ -57,9 +58,9 @@ func (t *SingleTask) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type TaskList []Task
+type MultipleTasks []Task
 
-func (t TaskList) Request(server string) (*http.Request, error) {
+func (t MultipleTasks) Request(server string) (*http.Request, error) {
 	req, err := http.NewRequest(http.MethodGet, server+"/projects/api/v3/tasks.json", nil)
 	if err != nil {
 		return nil, err
@@ -68,7 +69,7 @@ func (t TaskList) Request(server string) (*http.Request, error) {
 	return req, nil
 }
 
-func (t *TaskList) UnmarshalJSON(data []byte) error {
+func (t *MultipleTasks) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Tasks []Task `json:"tasks"`
 	}
@@ -77,4 +78,28 @@ func (t *TaskList) UnmarshalJSON(data []byte) error {
 	}
 	*t = raw.Tasks
 	return nil
+}
+
+type TaskCreation struct {
+	Name        string `json:"name"`
+	TasklistID  int64  `json:"tasklistId"`
+	Description string `json:"description"`
+}
+
+func (t TaskCreation) Request(server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, t.TasklistID)
+	paylaod := struct {
+		Task TaskCreation `json:"task"`
+	}{Task: t}
+	body, err := json.Marshal(paylaod)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
 }

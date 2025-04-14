@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"net/http"
 	"os"
@@ -25,6 +26,9 @@ const (
 func main() {
 	defer handleExit()
 
+	serverMode := flag.String("mode", "sse", "server mode")
+	flag.Parse()
+
 	c, errs := config.ParseFromEnvs()
 	if errs != nil {
 		// We are using a logger to print the errors because we don't have a
@@ -42,47 +46,58 @@ func main() {
 	}
 	resources := config.NewResources(c)
 
-	mcpServerAddress := ":" + strconv.FormatInt(c.Port, 10)
-	resources.Logger.Info("starting web server",
-		slog.String("address", mcpServerAddress),
-	)
-
 	mcpServer := server.NewMCPServer(mcpName, mcpVersion,
 		server.WithLogging(),
 	)
 	mcptask.Register(mcpServer, resources)
 
-	sseServer := server.NewSSEServer(mcpServer)
+	switch *serverMode {
+	case "stdio":
+		stdioServer := server.NewStdioServer(mcpServer)
+		if err := stdioServer.Listen(context.Background(), os.Stdin, os.Stdout); err != nil {
+			resources.Logger.Error("failed to serve",
+				slog.String("error", err.Error()),
+			)
+			exit(exitCodeSetupFailure)
+		}
 
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	case "sse":
+		sseServerAddress := ":" + strconv.FormatInt(c.Port, 10)
+		resources.Logger.Info("starting http server",
+			slog.String("address", sseServerAddress),
+		)
 
-	go func() {
-		if err := sseServer.Start(mcpServerAddress); err != nil {
-			if err != http.ErrServerClosed {
-				resources.Logger.Error("failed to serve",
-					slog.String("error", err.Error()),
-				)
-				select {
-				case <-done:
-				default:
-					close(done)
+		done := make(chan os.Signal, 1)
+		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+		sseServer := server.NewSSEServer(mcpServer)
+		go func() {
+			if err := sseServer.Start(sseServerAddress); err != nil {
+				if err != http.ErrServerClosed {
+					resources.Logger.Error("failed to serve",
+						slog.String("error", err.Error()),
+					)
+					select {
+					case <-done:
+					default:
+						close(done)
+					}
 				}
 			}
-		}
-	}()
+		}()
 
-	<-done
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer func() {
-		cancel()
-	}()
-	if err := sseServer.Shutdown(ctx); err != nil {
-		resources.Logger.Error("server shutdown failed",
-			slog.String("error", err.Error()),
-		)
+		<-done
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer func() {
+			cancel()
+		}()
+		if err := sseServer.Shutdown(ctx); err != nil {
+			resources.Logger.Error("server shutdown failed",
+				slog.String("error", err.Error()),
+			)
+		}
+		resources.Logger.Info("server stopped")
 	}
-	resources.Logger.Info("server stopped")
 }
 
 type exitCode int
