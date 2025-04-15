@@ -1,4 +1,4 @@
-package mcp
+package task
 
 import (
 	"context"
@@ -79,8 +79,58 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("task",
-			mcp.WithDescription("Task is an activity that need to be carried out by one or multiple project members."),
+		mcp.NewTool("retrieve-tasks",
+			mcp.WithDescription("Retrieve multiple tasks in a customer site of Teamwork.com. "+
+				"A task is an activity that need to be carried out by one or multiple project members."),
+		),
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var tasks twtask.MultipleTasks
+			if err := resources.TeamworkEngine.Do(&tasks); err != nil {
+				return nil, err
+			}
+			encoded, err := json.Marshal(tasks)
+			if err != nil {
+				return nil, err
+			}
+			return mcp.NewToolResultText(string(encoded)), nil
+		},
+	)
+
+	mcpServer.AddTool(
+		mcp.NewTool("retrieve-task",
+			mcp.WithDescription("Retrieve a specific task in a customer site of Teamwork.com. "+
+				"A task is an activity that need to be carried out by one or multiple project members."),
+			mcp.WithNumber("taskId",
+				mcp.Required(),
+				mcp.Description("The ID of the task."),
+			),
+		),
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var task twtask.SingleTask
+
+			id, ok := request.Params.Arguments["taskId"].(float64)
+			if !ok {
+				return nil, fmt.Errorf("invalid taskId")
+			} else if id == 0 {
+				return nil, fmt.Errorf("taskId is required")
+			}
+			task.ID = int64(id)
+
+			if err := resources.TeamworkEngine.Do(&task); err != nil {
+				return nil, err
+			}
+			encoded, err := json.Marshal(task)
+			if err != nil {
+				return nil, err
+			}
+			return mcp.NewToolResultText(string(encoded)), nil
+		},
+	)
+
+	mcpServer.AddTool(
+		mcp.NewTool("create-task",
+			mcp.WithDescription("Create a new task in a customer site of Teamwork.com. "+
+				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithString("name",
 				mcp.Required(),
 				mcp.Description("The name of the task."),
