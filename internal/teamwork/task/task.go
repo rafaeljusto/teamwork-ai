@@ -58,10 +58,24 @@ func (t *SingleTask) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type MultipleTasks []Task
+type MultipleTasks struct {
+	Tasks      []Task
+	ProjectID  int64
+	TasklistID int64
+}
 
 func (t MultipleTasks) Request(server string) (*http.Request, error) {
-	req, err := http.NewRequest(http.MethodGet, server+"/projects/api/v3/tasks.json", nil)
+	var url string
+	switch {
+	case t.ProjectID > 0:
+		url = fmt.Sprintf("%s/projects/api/v3/projects/%d/tasks.json", server, t.ProjectID)
+	case t.TasklistID > 0:
+		url = fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, t.TasklistID)
+	default:
+		url = fmt.Sprintf("%s/projects/api/v3/tasks.json", server)
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -76,20 +90,48 @@ func (t *MultipleTasks) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*t = raw.Tasks
+	t.Tasks = raw.Tasks
 	return nil
 }
 
 type TaskCreation struct {
-	Name        string `json:"name"`
-	TasklistID  int64  `json:"tasklistId"`
-	Description string `json:"description"`
+	Name        string               `json:"name"`
+	TasklistID  int64                `json:"tasklistId"`
+	Description string               `json:"description"`
+	Assignees   *teamwork.UserGroups `json:"assignees,omitempty"`
+	Priority    *string              `json:"priority,omitempty"`
 }
 
 func (t TaskCreation) Request(server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, t.TasklistID)
 	paylaod := struct {
 		Task TaskCreation `json:"task"`
+	}{Task: t}
+	body, err := json.Marshal(paylaod)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
+
+type TaskUpdate struct {
+	ID          int64                `json:"id"`
+	Name        *string              `json:"name,omitempty"`
+	Description *string              `json:"description,omitempty"`
+	Assignees   *teamwork.UserGroups `json:"assignees"`
+	Priority    *string              `json:"priority,omitempty"`
+}
+
+func (t TaskUpdate) Request(server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, t.ID)
+	paylaod := struct {
+		Task TaskUpdate `json:"task"`
 	}{Task: t}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
