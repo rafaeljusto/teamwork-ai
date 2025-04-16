@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
 env:
   GO_VERSION: "1.24.x"
