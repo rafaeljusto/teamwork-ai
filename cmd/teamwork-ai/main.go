@@ -16,6 +16,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	mcpproject "github.com/rafaeljusto/teamwork-ai/internal/mcp/project"
+	mcpskill "github.com/rafaeljusto/teamwork-ai/internal/mcp/skill"
 	mcptask "github.com/rafaeljusto/teamwork-ai/internal/mcp/task"
 	mcptasklist "github.com/rafaeljusto/teamwork-ai/internal/mcp/tasklist"
 	mcpuser "github.com/rafaeljusto/teamwork-ai/internal/mcp/user"
@@ -56,6 +57,7 @@ func main() {
 	mcptasklist.Register(mcpServer, resources)
 	mcpproject.Register(mcpServer, resources)
 	mcpuser.Register(mcpServer, resources)
+	mcpskill.Register(mcpServer, resources)
 
 	switch *serverMode {
 	case "stdio":
