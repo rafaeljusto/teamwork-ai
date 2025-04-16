@@ -18,6 +18,7 @@ import (
 	mcpproject "github.com/rafaeljusto/teamwork-ai/internal/mcp/project"
 	mcptask "github.com/rafaeljusto/teamwork-ai/internal/mcp/task"
 	mcptasklist "github.com/rafaeljusto/teamwork-ai/internal/mcp/tasklist"
+	mcpuser "github.com/rafaeljusto/teamwork-ai/internal/mcp/user"
 )
 
 const (
@@ -54,6 +55,7 @@ func main() {
 	mcptask.Register(mcpServer, resources)
 	mcptasklist.Register(mcpServer, resources)
 	mcpproject.Register(mcpServer, resources)
+	mcpuser.Register(mcpServer, resources)
 
 	switch *serverMode {
 	case "stdio":
