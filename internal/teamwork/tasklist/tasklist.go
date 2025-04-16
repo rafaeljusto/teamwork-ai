@@ -1,4 +1,4 @@
-package tasklists
+package tasklist
 
 import (
 	"bytes"
