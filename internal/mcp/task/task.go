@@ -10,6 +10,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
+	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 	twtask "github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
 )
 
@@ -244,47 +246,53 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			task.TasklistID = int64(tasklistID)
 
-			task.Description, ok = request.Params.Arguments["description"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid description")
+			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			if err != nil {
+				return nil, fmt.Errorf("invalid description: %w", err)
+			} else if ok {
+				task.Description = description
 			}
 
-			assignees, ok := request.Params.Arguments["assignees"].(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("invalid assignees")
-			} else if assignees != nil {
-				if userIDs, ok := assignees["userIds"].([]any); ok {
-					for _, userID := range userIDs {
-						if id, ok := userID.(float64); ok {
-							task.Assignees.UserIDs = append(task.Assignees.UserIDs, int64(id))
-						}
+			assignees, ok := request.Params.Arguments["assignees"]
+			if ok {
+				assigneesMap, ok := assignees.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid assignees")
+				} else if assignees != nil {
+					task.Assignees = new(teamwork.UserGroups)
+
+					userIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "userIds")
+					if err != nil {
+						return nil, fmt.Errorf("invalid userIds: %w", err)
+					} else if ok {
+						task.Assignees.UserIDs = userIDs
 					}
-				}
-				if companyIDs, ok := assignees["companyIds"].([]any); ok {
-					for _, companyID := range companyIDs {
-						if id, ok := companyID.(float64); ok {
-							task.Assignees.CompanyIDs = append(task.Assignees.CompanyIDs, int64(id))
-						}
+					companyIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "companyIds")
+					if err != nil {
+						return nil, fmt.Errorf("invalid userIds: %w", err)
+					} else if ok {
+						task.Assignees.UserIDs = companyIDs
 					}
-				}
-				if teamIDs, ok := assignees["teamIds"].([]any); ok {
-					for _, teamID := range teamIDs {
-						if id, ok := teamID.(float64); ok {
-							task.Assignees.TeamIDs = append(task.Assignees.TeamIDs, int64(id))
-						}
+					teamIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "teamIds")
+					if err != nil {
+						return nil, fmt.Errorf("invalid userIds: %w", err)
+					} else if ok {
+						task.Assignees.UserIDs = teamIDs
 					}
 				}
 			}
 
-			priority, ok := request.Params.Arguments["priority"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid priority")
-			} else if priority != "" {
-				switch priority {
-				case "low", "medium", "high":
-					task.Priority = &priority
-				default:
-					return nil, fmt.Errorf("invalid priority: %s", priority)
+			priority, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "priority")
+			if err != nil {
+				return nil, fmt.Errorf("invalid priority: %w", err)
+			} else if ok {
+				if priority != "" {
+					switch priority {
+					case "low", "medium", "high":
+						task.Priority = &priority
+					default:
+						return nil, fmt.Errorf("invalid priority: %s", priority)
+					}
 				}
 			}
 
@@ -332,7 +340,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var task twtask.TaskUpdate
+			var taskUpdate twtask.TaskUpdate
 			var ok bool
 
 			id, ok := request.Params.Arguments["id"].(float64)
@@ -341,62 +349,66 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			} else if id == 0 {
 				return nil, fmt.Errorf("id is required")
 			}
-			task.ID = int64(id)
+			taskUpdate.ID = int64(id)
 
 			name, ok := request.Params.Arguments["name"].(string)
 			if !ok {
 				return nil, fmt.Errorf("invalid name")
 			} else if name != "" {
-				task.Name = &name
+				taskUpdate.Task.Name = &name
 			}
 
-			description, ok := request.Params.Arguments["description"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid description")
-			} else if description != "" {
-				task.Description = &description
+			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			if err != nil {
+				return nil, fmt.Errorf("invalid description: %w", err)
+			} else if ok {
+				taskUpdate.Task.Description = &description
 			}
 
-			assignees, ok := request.Params.Arguments["assignees"].(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("invalid assignees")
-			} else if assignees != nil {
-				if userIDs, ok := assignees["userIds"].([]any); ok {
-					for _, userID := range userIDs {
-						if id, ok := userID.(float64); ok {
-							task.Assignees.UserIDs = append(task.Assignees.UserIDs, int64(id))
-						}
+			assignees, ok := request.Params.Arguments["assignees"]
+			if ok {
+				assigneesMap, ok := assignees.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid assignees")
+				} else if assignees != nil {
+					taskUpdate.Task.Assignees = new(teamwork.UserGroups)
+
+					userIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "userIds")
+					if err != nil {
+						return nil, fmt.Errorf("invalid userIds: %w", err)
+					} else if ok {
+						taskUpdate.Task.Assignees.UserIDs = userIDs
+					}
+					companyIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "companyIds")
+					if err != nil {
+						return nil, fmt.Errorf("invalid userIds: %w", err)
+					} else if ok {
+						taskUpdate.Task.Assignees.CompanyIDs = companyIDs
+					}
+					teamIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "teamIds")
+					if err != nil {
+						return nil, fmt.Errorf("invalid userIds: %w", err)
+					} else if ok {
+						taskUpdate.Task.Assignees.TeamIDs = teamIDs
 					}
 				}
-				if companyIDs, ok := assignees["companyIds"].([]any); ok {
-					for _, companyID := range companyIDs {
-						if id, ok := companyID.(float64); ok {
-							task.Assignees.CompanyIDs = append(task.Assignees.CompanyIDs, int64(id))
-						}
-					}
-				}
-				if teamIDs, ok := assignees["teamIds"].([]any); ok {
-					for _, teamID := range teamIDs {
-						if id, ok := teamID.(float64); ok {
-							task.Assignees.TeamIDs = append(task.Assignees.TeamIDs, int64(id))
-						}
+			}
+
+			priority, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "priority")
+			if err != nil {
+				return nil, fmt.Errorf("invalid priority: %w", err)
+			} else if ok {
+				if priority != "" {
+					switch priority {
+					case "low", "medium", "high":
+						taskUpdate.Task.Priority = &priority
+					default:
+						return nil, fmt.Errorf("invalid priority: %s", priority)
 					}
 				}
 			}
 
-			priority, ok := request.Params.Arguments["priority"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid priority")
-			} else if priority != "" {
-				switch priority {
-				case "low", "medium", "high":
-					task.Priority = &priority
-				default:
-					return nil, fmt.Errorf("invalid priority: %s", priority)
-				}
-			}
-
-			if err := resources.TeamworkEngine.Do(&task); err != nil {
+			if err := resources.TeamworkEngine.Do(&taskUpdate); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Task created successfully"), nil

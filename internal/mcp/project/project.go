@@ -10,6 +10,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
+	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
 	twproject "github.com/rafaeljusto/teamwork-ai/internal/teamwork/project"
 )
 
@@ -152,9 +153,11 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("name is required")
 			}
 
-			project.Description, ok = request.Params.Arguments["description"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid description")
+			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			if err != nil {
+				return nil, fmt.Errorf("invalid description: %w", err)
+			} else if ok {
+				project.Description = description
 			}
 
 			if err := resources.TeamworkEngine.Do(&project); err != nil {

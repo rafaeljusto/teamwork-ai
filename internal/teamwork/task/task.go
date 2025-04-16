@@ -121,23 +121,25 @@ func (t TaskCreation) Request(server string) (*http.Request, error) {
 }
 
 type TaskUpdate struct {
-	ID          int64                `json:"id"`
-	Name        *string              `json:"name,omitempty"`
-	Description *string              `json:"description,omitempty"`
-	Assignees   *teamwork.UserGroups `json:"assignees"`
-	Priority    *string              `json:"priority,omitempty"`
+	ID   int64
+	Task struct {
+		Name        *string              `json:"name,omitempty"`
+		Description *string              `json:"description,omitempty"`
+		Assignees   *teamwork.UserGroups `json:"assignees"`
+		Priority    *string              `json:"priority,omitempty"`
+	}
 }
 
 func (t TaskUpdate) Request(server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, t.ID)
 	paylaod := struct {
-		Task TaskUpdate `json:"task"`
-	}{Task: t}
+		Task any `json:"task"`
+	}{Task: t.Task}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPatch, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
