@@ -45,12 +45,9 @@ func OptionalPointerParam[T any](
 	if target == nil {
 		return fmt.Errorf("target cannot be nil")
 	}
-	var set bool
-	middlewares = append(middlewares, func(t *T) (bool, error) {
-		set = true
-		return true, nil
-	})
 	var temp T
+	var set bool
+	middlewares = append(middlewares, func(*T) (bool, error) { set = true; return true, nil })
 	if err := OptionalParam(params, &temp, key, middlewares...); err != nil {
 		return err
 	}
