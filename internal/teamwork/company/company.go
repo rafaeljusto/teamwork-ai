@@ -2,6 +2,7 @@ package company
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,9 @@ import (
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 )
 
+// Company represents a company or client in Teamwork.com. It contains
+// information about the company such as its name, address, contact details, and
+// relationships with other entities like industry, tags, and currency.
 type Company struct {
 	ID               int64                   `json:"id"`
 	Name             string                  `json:"name"`
@@ -41,11 +45,15 @@ type Company struct {
 	Currency         *teamwork.Relationship  `json:"currency"`
 }
 
-type SingleCompany Company
+// Single represents a request to retrieve a single company by its ID.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/companies/get-projects-api-v3-companies-company-id-json
+type Single Company
 
-func (t SingleCompany) Request(server string) (*http.Request, error) {
+// Request creates an HTTP request to retrieve a single company by its ID.
+func (t Single) Request(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/companies/%d.json", server, t.ID)
-	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -53,21 +61,26 @@ func (t SingleCompany) Request(server string) (*http.Request, error) {
 	return req, nil
 }
 
-func (t *SingleCompany) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON decodes the JSON data into a Single instance.
+func (t *Single) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Company Company `json:"company"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*t = SingleCompany(raw.Company)
+	*t = Single(raw.Company)
 	return nil
 }
 
-type MultipleCompanies []Company
+// Multiple represents a request to retrieve multiple companies.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/companies/get-projects-api-v3-companies-json
+type Multiple []Company
 
-func (t MultipleCompanies) Request(server string) (*http.Request, error) {
-	req, err := http.NewRequest(http.MethodGet, server+"/projects/api/v3/companies.json", nil)
+// Request creates an HTTP request to retrieve multiple companies.
+func (t Multiple) Request(ctx context.Context, server string) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, server+"/projects/api/v3/companies.json", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +88,8 @@ func (t MultipleCompanies) Request(server string) (*http.Request, error) {
 	return req, nil
 }
 
-func (t *MultipleCompanies) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON decodes the JSON data into a Multiple instance.
+func (t *Multiple) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Companies []Company `json:"companies"`
 	}
@@ -86,20 +100,24 @@ func (t *MultipleCompanies) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type CompanyCreation struct {
+// Creation represents the payload for creating a new company in Teamwork.com.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/companies/post-projects-api-v3-companies-json
+type Creation struct {
 	Name string `json:"name"`
 }
 
-func (t CompanyCreation) Request(server string) (*http.Request, error) {
+// Request creates an HTTP request to create a new company.
+func (t Creation) Request(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/companies.json", server)
 	paylaod := struct {
-		Company CompanyCreation `json:"company"`
+		Company Creation `json:"company"`
 	}{Company: t}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}

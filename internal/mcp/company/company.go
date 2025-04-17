@@ -25,11 +25,17 @@ var resourceItem = mcp.NewResourceTemplate("twapi://companies/{id}", "company",
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
+// Register registers the company resources and tools with the MCP server. It
+// provides functionality to retrieve, create, and manage companies in a
+// customer site of Teamwork.com. Companies, also known as clients, are
+// organizations that the customer offers services to. It also provides a list
+// of all companies and allows for the retrieval of a specific company by its
+// ID.
 func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	mcpServer.AddResource(resourceList,
-		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var companies twcompany.MultipleCompanies
-			if err := resources.TeamworkEngine.Do(&companies); err != nil {
+		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			var companies twcompany.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &companies); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
@@ -60,9 +66,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("invalid company ID")
 			}
 
-			var company twcompany.SingleCompany
+			var company twcompany.Single
 			company.ID = companyID
-			if err := resources.TeamworkEngine.Do(&company); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &company); err != nil {
 				return nil, err
 			}
 
@@ -85,9 +91,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			mcp.WithDescription("Retrieve multiple companies, also know as clients, in a customer site of Teamwork.com. "+
 				"Companies, also know as clients, are organizations that the customer offers services to."),
 		),
-		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var companies twcompany.MultipleCompanies
-			if err := resources.TeamworkEngine.Do(&companies); err != nil {
+		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var companies twcompany.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &companies); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(companies)
@@ -108,7 +114,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var company twcompany.SingleCompany
+			var company twcompany.Single
 
 			id, ok := request.Params.Arguments["companyId"].(float64)
 			if !ok {
@@ -118,7 +124,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			company.ID = int64(id)
 
-			if err := resources.TeamworkEngine.Do(&company); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &company); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(company)
@@ -145,7 +151,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var company twcompany.CompanyCreation
+			var company twcompany.Creation
 			var ok bool
 
 			company.Name, ok = request.Params.Arguments["name"].(string)
@@ -155,7 +161,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("name is required")
 			}
 
-			if err := resources.TeamworkEngine.Do(&company); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &company); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Company created successfully"), nil

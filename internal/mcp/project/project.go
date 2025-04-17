@@ -26,11 +26,18 @@ var resourceItem = mcp.NewResourceTemplate("twapi://projects/{id}", "task",
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
+// Register registers the project resources and tools with the MCP server. It
+// provides functionality to retrieve, create, and manage projects in a customer
+// site of Teamwork.com. A project is a central hub to manage all of the
+// components relating to what your team is working on. It also provides a list
+// of all projects and allows for the retrieval of a specific project by its ID.
+// It also provides tools to retrieve multiple projects, a specific project, and
+// to create a new project.
 func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	mcpServer.AddResource(resourceList,
-		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var projects twproject.MultipleProjects
-			if err := resources.TeamworkEngine.Do(&projects); err != nil {
+		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			var projects twproject.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &projects); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
@@ -61,9 +68,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("invalid project ID")
 			}
 
-			var project twproject.SingleProject
+			var project twproject.Single
 			project.ID = projectID
-			if err := resources.TeamworkEngine.Do(&project); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &project); err != nil {
 				return nil, err
 			}
 
@@ -86,9 +93,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			mcp.WithDescription("Retrieve multiple projects in a customer site of Teamwork.com. "+
 				"A project is central hubs to manage all of the components relating to what your team is working on."),
 		),
-		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var projects twproject.MultipleProjects
-			if err := resources.TeamworkEngine.Do(&projects); err != nil {
+		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var projects twproject.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &projects); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(projects)
@@ -109,7 +116,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var project twproject.SingleProject
+			var project twproject.Single
 
 			id, ok := request.Params.Arguments["projectId"].(float64)
 			if !ok {
@@ -119,7 +126,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			project.ID = int64(id)
 
-			if err := resources.TeamworkEngine.Do(&project); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &project); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(project)
@@ -143,7 +150,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var project twproject.ProjectCreation
+			var project twproject.Creation
 			var ok bool
 
 			project.Name, ok = request.Params.Arguments["name"].(string)
@@ -160,7 +167,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				project.Description = description
 			}
 
-			if err := resources.TeamworkEngine.Do(&project); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &project); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Project created successfully"), nil

@@ -25,11 +25,20 @@ var resourceItem = mcp.NewResourceTemplate("twapi://tasks/{id}", "task",
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
+// Register registers the task resources and tools with the MCP server. It
+// provides functionality to retrieve, create, and manage tasks in a customer
+// site of Teamwork.com. A task is an activity that needs to be carried out by
+// one or multiple project members. It also provides a list of all tasks and
+// allows for the retrieval of a specific task by its ID. Additionally, it
+// provides tools to retrieve multiple tasks, a specific task, create a new
+// task, and update an existing task. It also allows for the retrieval of tasks
+// from a specific project or tasklist. Tasks can be assigned to users,
+// companies, or teams, and can have a priority level (low, medium, high).
 func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	mcpServer.AddResource(resourceList,
-		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var tasks twtask.MultipleTasks
-			if err := resources.TeamworkEngine.Do(&tasks); err != nil {
+		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			var tasks twtask.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &tasks); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
@@ -60,9 +69,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("invalid task ID")
 			}
 
-			var task twtask.SingleTask
+			var task twtask.Single
 			task.ID = taskID
-			if err := resources.TeamworkEngine.Do(&task); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &task); err != nil {
 				return nil, err
 			}
 
@@ -85,9 +94,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			mcp.WithDescription("Retrieve multiple tasks in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 		),
-		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var tasks twtask.MultipleTasks
-			if err := resources.TeamworkEngine.Do(&tasks); err != nil {
+		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var tasks twtask.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &tasks); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(tasks)
@@ -108,7 +117,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var tasks twtask.MultipleTasks
+			var tasks twtask.Multiple
 
 			projectID, ok := request.Params.Arguments["projectId"].(float64)
 			if !ok {
@@ -118,7 +127,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			tasks.ProjectID = int64(projectID)
 
-			if err := resources.TeamworkEngine.Do(&tasks); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &tasks); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(tasks)
@@ -139,7 +148,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var tasks twtask.MultipleTasks
+			var tasks twtask.Multiple
 
 			tasklistID, ok := request.Params.Arguments["tasklistId"].(float64)
 			if !ok {
@@ -149,7 +158,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			tasks.TasklistID = int64(tasklistID)
 
-			if err := resources.TeamworkEngine.Do(&tasks); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &tasks); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(tasks)
@@ -170,7 +179,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var task twtask.SingleTask
+			var task twtask.Single
 
 			id, ok := request.Params.Arguments["taskId"].(float64)
 			if !ok {
@@ -180,7 +189,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			task.ID = int64(id)
 
-			if err := resources.TeamworkEngine.Do(&task); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &task); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(task)
@@ -228,7 +237,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var task twtask.TaskCreation
+			var task twtask.Creation
 			var ok bool
 
 			task.Name, ok = request.Params.Arguments["name"].(string)
@@ -296,7 +305,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				}
 			}
 
-			if err := resources.TeamworkEngine.Do(&task); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &task); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Task created successfully"), nil
@@ -340,7 +349,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var taskUpdate twtask.TaskUpdate
+			var taskUpdate twtask.Update
 			var ok bool
 
 			id, ok := request.Params.Arguments["id"].(float64)
@@ -408,7 +417,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				}
 			}
 
-			if err := resources.TeamworkEngine.Do(&taskUpdate); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &taskUpdate); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Task created successfully"), nil

@@ -2,6 +2,7 @@ package user
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,15 @@ import (
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 )
 
+// User represents a user in Teamwork.com. It contains information about the
+// user such as their ID, name, email, company affiliation, admin status, client
+// status, service account status, user type, deletion status, working hours,
+// rate, cost, job roles, skills, placeholder status, timezone, creation and
+// update details, and any additional metadata. Users can be administrators,
+// clients, or service accounts, and they can have various roles and skills
+// associated with them. This struct is used to manage user information within
+// Teamwork.com, allowing teams to organize and manage their members
+// effectively.
 type User struct {
 	ID            int64                   `json:"id"`
 	FirstName     string                  `json:"firstName"`
@@ -36,11 +46,15 @@ type User struct {
 	Meta          map[string]any          `json:"meta,omitempty"`
 }
 
-type SingleUser User
+// Single represents a request to retrieve a single user by their ID.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/person/get-projects-api-v3-people-person-id-json
+type Single User
 
-func (t SingleUser) Request(server string) (*http.Request, error) {
+// Request creates an HTTP request to retrieve a single user by their ID.
+func (t Single) Request(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/people/%d.json", server, t.ID)
-	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -48,23 +62,29 @@ func (t SingleUser) Request(server string) (*http.Request, error) {
 	return req, nil
 }
 
-func (t *SingleUser) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON decodes the JSON data into a Single instance.
+func (t *Single) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		User User `json:"person"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*t = SingleUser(raw.User)
+	*t = Single(raw.User)
 	return nil
 }
 
-type MultipleUsers struct {
+// Multiple represents a request to retrieve multiple users.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/people/get-projects-api-v3-people-json
+// https://apidocs.teamwork.com/docs/teamwork/v3/people/get-projects-api-v3-projects-project-id-people-json
+type Multiple struct {
 	Users     []User
 	ProjectID int64
 }
 
-func (t MultipleUsers) Request(server string) (*http.Request, error) {
+// Request creates an HTTP request to retrieve multiple users.
+func (t Multiple) Request(ctx context.Context, server string) (*http.Request, error) {
 	var url string
 	switch {
 	case t.ProjectID > 0:
@@ -72,7 +92,7 @@ func (t MultipleUsers) Request(server string) (*http.Request, error) {
 	default:
 		url = fmt.Sprintf("%s/projects/api/v3/people.json", server)
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +100,8 @@ func (t MultipleUsers) Request(server string) (*http.Request, error) {
 	return req, nil
 }
 
-func (t *MultipleUsers) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON decodes the JSON data into a Multiple instance.
+func (t *Multiple) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Users []User `json:"people"`
 	}
@@ -91,23 +112,27 @@ func (t *MultipleUsers) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type UserCreation struct {
+// Creation represents the payload for creating a new user in Teamwork.com.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v1/people/post-people-json
+type Creation struct {
 	FirstName string `json:"first-name"`
 	LastName  string `json:"last-name"`
 	Email     string `json:"email-address"`
 	Password  string `json:"password"`
 }
 
-func (t UserCreation) Request(server string) (*http.Request, error) {
+// Request creates an HTTP request to create a new user.
+func (t Creation) Request(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/people.json", server)
 	paylaod := struct {
-		User UserCreation `json:"person"`
+		User Creation `json:"person"`
 	}{User: t}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodPost, uri, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}

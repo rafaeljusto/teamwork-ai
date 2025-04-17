@@ -23,11 +23,18 @@ var resourceItem = mcp.NewResourceTemplate("twapi://users/{id}", "user",
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
+// Register registers the user resources and tools with the MCP server. It
+// provides functionality to retrieve, create, and manage users in a customer
+// site of Teamwork.com. A user, also known as a person, is an individual who
+// can be assigned to tasks. It also provides a list of all users and allows for
+// the retrieval of a specific user by their ID. Additionally, it provides tools
+// to retrieve multiple users, a specific user, create a new user, and update an
+// existing user.
 func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	mcpServer.AddResource(resourceList,
-		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var users twuser.MultipleUsers
-			if err := resources.TeamworkEngine.Do(&users); err != nil {
+		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			var users twuser.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &users); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
@@ -58,9 +65,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("invalid user ID")
 			}
 
-			var user twuser.SingleUser
+			var user twuser.Single
 			user.ID = userID
-			if err := resources.TeamworkEngine.Do(&user); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &user); err != nil {
 				return nil, err
 			}
 
@@ -82,9 +89,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 		mcp.NewTool("retrieve-users",
 			mcp.WithDescription("Users, also known as people, are the individuals who can be assigned to tasks."),
 		),
-		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var users twuser.MultipleUsers
-			if err := resources.TeamworkEngine.Do(&users); err != nil {
+		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var users twuser.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &users); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(users)
@@ -104,7 +111,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var users twuser.MultipleUsers
+			var users twuser.Multiple
 
 			projectID, ok := request.Params.Arguments["projectId"].(float64)
 			if !ok {
@@ -114,7 +121,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			users.ProjectID = int64(projectID)
 
-			if err := resources.TeamworkEngine.Do(&users); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &users); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(users)
@@ -134,7 +141,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var user twuser.SingleUser
+			var user twuser.Single
 
 			id, ok := request.Params.Arguments["userId"].(float64)
 			if !ok {
@@ -144,7 +151,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			user.ID = int64(id)
 
-			if err := resources.TeamworkEngine.Do(&user); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &user); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(user)
@@ -176,7 +183,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var user twuser.UserCreation
+			var user twuser.Creation
 			var ok bool
 
 			user.FirstName, ok = request.Params.Arguments["firstName"].(string)
@@ -207,7 +214,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("password is required")
 			}
 
-			if err := resources.TeamworkEngine.Do(&user); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &user); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("User created successfully"), nil

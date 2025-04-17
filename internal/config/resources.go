@@ -15,11 +15,12 @@ type Resources struct {
 
 // NewResources creates a new set of resources for the web server.
 func NewResources(config *Config) *Resources {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: config.LoggerLevel,
+	}))
 	resources := &Resources{
-		Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: config.LoggerLevel,
-		})),
-		TeamworkEngine: teamwork.NewEngine(config.TeamworkServer, config.TeamworkAPIToken),
+		Logger:         logger,
+		TeamworkEngine: teamwork.NewEngine(config.TeamworkServer, config.TeamworkAPIToken, logger),
 	}
 
 	return resources

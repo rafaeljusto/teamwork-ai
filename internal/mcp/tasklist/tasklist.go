@@ -24,15 +24,22 @@ var resourceItem = mcp.NewResourceTemplate("twapi://tasklists/{id}", "task",
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
+// Register registers the tasklist resources and tools with the MCP server. It
+// provides functionality to retrieve, create, and manage tasklists in a
+// customer site of Teamwork.com. A tasklist groups tasks together in a project
+// for better organization. It also provides a list of all tasklists and allows
+// for the retrieval of a specific tasklist by its ID. Additionally, it provides
+// tools to retrieve multiple tasklists, a specific tasklist, create a new
+// tasklist, and update an existing tasklist.
 func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	mcpServer.AddResource(resourceList,
-		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var tasklists twtasklist.MultipleTasklists
-			if err := resources.TeamworkEngine.Do(&tasklists); err != nil {
+		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			var tasklists twtasklist.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &tasklists); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
-			for _, tasklist := range tasklists {
+			for _, tasklist := range tasklists.Tasklists {
 				encoded, err := json.Marshal(tasklist)
 				if err != nil {
 					return nil, err
@@ -59,9 +66,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("invalid tasklist ID")
 			}
 
-			var tasklist twtasklist.SingleTasklist
+			var tasklist twtasklist.Single
 			tasklist.ID = tasklistID
-			if err := resources.TeamworkEngine.Do(&tasklist); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &tasklist); err != nil {
 				return nil, err
 			}
 
@@ -84,9 +91,40 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			mcp.WithDescription("Retrieve multiple tasklists in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 		),
+		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var tasklists twtasklist.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &tasklists); err != nil {
+				return nil, err
+			}
+			encoded, err := json.Marshal(tasklists)
+			if err != nil {
+				return nil, err
+			}
+			return mcp.NewToolResultText(string(encoded)), nil
+		},
+	)
+
+	mcpServer.AddTool(
+		mcp.NewTool("retrieve-project-tasklists",
+			mcp.WithDescription("Retrieve multiple tasklists from a specific project in a customer site of Teamwork.com. "+
+				"A tasklist group tasks together in a project for better organization."),
+			mcp.WithNumber("projectId",
+				mcp.Required(),
+				mcp.Description("The ID of the project from which to retrieve tasklists."),
+			),
+		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var tasklists twtasklist.MultipleTasklists
-			if err := resources.TeamworkEngine.Do(&tasklists); err != nil {
+			var tasklists twtasklist.Multiple
+
+			projectID, ok := request.Params.Arguments["projectId"].(float64)
+			if !ok {
+				return nil, fmt.Errorf("invalid projectId")
+			} else if projectID == 0 {
+				return nil, fmt.Errorf("projectId is required")
+			}
+			tasklists.ProjectID = int64(projectID)
+
+			if err := resources.TeamworkEngine.Do(ctx, &tasklists); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(tasklists)
@@ -107,7 +145,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var tasklist twtasklist.SingleTasklist
+			var tasklist twtasklist.Single
 
 			id, ok := request.Params.Arguments["tasklistId"].(float64)
 			if !ok {
@@ -117,7 +155,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			tasklist.ID = int64(id)
 
-			if err := resources.TeamworkEngine.Do(&tasklist); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &tasklist); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(tasklist)
@@ -145,7 +183,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var tasklist twtasklist.TasklistCreation
+			var tasklist twtasklist.Creation
 			var ok bool
 
 			tasklist.Name, ok = request.Params.Arguments["name"].(string)
@@ -170,7 +208,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				tasklist.Description = description
 			}
 
-			if err := resources.TeamworkEngine.Do(&tasklist); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &tasklist); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Tasklist created successfully"), nil

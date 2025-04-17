@@ -24,11 +24,18 @@ var resourceItem = mcp.NewResourceTemplate("twapi://skills/{id}", "skill",
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
+// Register registers the skill resources and tools with the MCP server. It
+// provides functionality to retrieve, create, and manage skills in a customer
+// site of Teamwork.com. A skill is a knowledge or ability that can be assigned
+// to users. It also provides a list of all skills and allows for the retrieval
+// of a specific skill by its ID. Additionally, it provides tools to retrieve
+// multiple skills, a specific skill, create a new skill, and update an existing
+// skill.
 func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 	mcpServer.AddResource(resourceList,
-		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var skills twskill.MultipleSkills
-			if err := resources.TeamworkEngine.Do(&skills); err != nil {
+		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			var skills twskill.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &skills); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
@@ -59,9 +66,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("invalid skill ID")
 			}
 
-			var skill twskill.SingleSkill
+			var skill twskill.Single
 			skill.ID = skillID
-			if err := resources.TeamworkEngine.Do(&skill); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &skill); err != nil {
 				return nil, err
 			}
 
@@ -84,9 +91,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			mcp.WithDescription("Retrieve multiple skills in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
 		),
-		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var skills twskill.MultipleSkills
-			if err := resources.TeamworkEngine.Do(&skills); err != nil {
+		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var skills twskill.Multiple
+			if err := resources.TeamworkEngine.Do(ctx, &skills); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(skills)
@@ -107,7 +114,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var skill twskill.SingleSkill
+			var skill twskill.Single
 
 			id, ok := request.Params.Arguments["skillId"].(float64)
 			if !ok {
@@ -117,7 +124,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			skill.ID = int64(id)
 
-			if err := resources.TeamworkEngine.Do(&skill); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &skill); err != nil {
 				return nil, err
 			}
 			encoded, err := json.Marshal(skill)
@@ -144,7 +151,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var skill twskill.SkillCreation
+			var skill twskill.Creation
 			var ok bool
 
 			skill.Name, ok = request.Params.Arguments["name"].(string)
@@ -161,7 +168,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				skill.UserIDs = userIDs
 			}
 
-			if err := resources.TeamworkEngine.Do(&skill); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &skill); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Skill created successfully"), nil
@@ -188,7 +195,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var skillUpdate twskill.SkillUpdate
+			var skillUpdate twskill.Update
 			var ok bool
 
 			id, ok := request.Params.Arguments["id"].(float64)
@@ -213,7 +220,7 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				skillUpdate.Skill.UserIDs = userIDs
 			}
 
-			if err := resources.TeamworkEngine.Do(&skillUpdate); err != nil {
+			if err := resources.TeamworkEngine.Do(ctx, &skillUpdate); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Skill created successfully"), nil
