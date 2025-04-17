@@ -255,11 +255,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			task.TasklistID = int64(tasklistID)
 
-			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			err := twmcp.OptionalParam(request.Params.Arguments, &task.Description, "description")
 			if err != nil {
 				return nil, fmt.Errorf("invalid description: %w", err)
-			} else if ok {
-				task.Description = description
 			}
 
 			assignees, ok := request.Params.Arguments["assignees"]
@@ -270,39 +268,36 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				} else if assignees != nil {
 					task.Assignees = new(teamwork.UserGroups)
 
-					userIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "userIds")
+					err := twmcp.OptionalNumericListParam(assigneesMap, &task.Assignees.UserIDs, "userIds")
 					if err != nil {
 						return nil, fmt.Errorf("invalid userIds: %w", err)
-					} else if ok {
-						task.Assignees.UserIDs = userIDs
 					}
-					companyIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "companyIds")
+					err = twmcp.OptionalNumericListParam(assigneesMap, &task.Assignees.UserIDs, "companyIds")
 					if err != nil {
 						return nil, fmt.Errorf("invalid userIds: %w", err)
-					} else if ok {
-						task.Assignees.UserIDs = companyIDs
 					}
-					teamIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "teamIds")
+					err = twmcp.OptionalNumericListParam(assigneesMap, &task.Assignees.UserIDs, "teamIds")
 					if err != nil {
 						return nil, fmt.Errorf("invalid userIds: %w", err)
-					} else if ok {
-						task.Assignees.UserIDs = teamIDs
 					}
 				}
 			}
 
-			priority, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "priority")
+			err = twmcp.OptionalPointerParam(request.Params.Arguments, &task.Priority, "priority",
+				func(priority *string) (bool, error) {
+					if priority == nil || *priority == "" {
+						return false, nil
+					}
+					switch *priority {
+					case "low", "medium", "high":
+						return true, nil
+					default:
+						return false, fmt.Errorf("%q is not a valid value", *priority)
+					}
+				},
+			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid priority: %w", err)
-			} else if ok {
-				if priority != "" {
-					switch priority {
-					case "low", "medium", "high":
-						task.Priority = &priority
-					default:
-						return nil, fmt.Errorf("invalid priority: %s", priority)
-					}
-				}
 			}
 
 			if err := resources.TeamworkEngine.Do(ctx, &task); err != nil {
@@ -367,11 +362,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				taskUpdate.Task.Name = &name
 			}
 
-			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			err := twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Description, "description")
 			if err != nil {
 				return nil, fmt.Errorf("invalid description: %w", err)
-			} else if ok {
-				taskUpdate.Task.Description = &description
 			}
 
 			assignees, ok := request.Params.Arguments["assignees"]
@@ -382,39 +375,36 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				} else if assignees != nil {
 					taskUpdate.Task.Assignees = new(teamwork.UserGroups)
 
-					userIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "userIds")
+					err := twmcp.OptionalNumericListParam(assigneesMap, &taskUpdate.Task.Assignees.UserIDs, "userIds")
 					if err != nil {
 						return nil, fmt.Errorf("invalid userIds: %w", err)
-					} else if ok {
-						taskUpdate.Task.Assignees.UserIDs = userIDs
 					}
-					companyIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "companyIds")
+					err = twmcp.OptionalNumericListParam(assigneesMap, &taskUpdate.Task.Assignees.CompanyIDs, "companyIds")
 					if err != nil {
 						return nil, fmt.Errorf("invalid userIds: %w", err)
-					} else if ok {
-						taskUpdate.Task.Assignees.CompanyIDs = companyIDs
 					}
-					teamIDs, ok, err := twmcp.OptionalNumericListParam[int64](assigneesMap, "teamIds")
+					err = twmcp.OptionalNumericListParam(assigneesMap, &taskUpdate.Task.Assignees.TeamIDs, "teamIds")
 					if err != nil {
 						return nil, fmt.Errorf("invalid userIds: %w", err)
-					} else if ok {
-						taskUpdate.Task.Assignees.TeamIDs = teamIDs
 					}
 				}
 			}
 
-			priority, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "priority")
+			err = twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Priority, "priority",
+				func(priority *string) (bool, error) {
+					if priority == nil || *priority == "" {
+						return false, nil
+					}
+					switch *priority {
+					case "low", "medium", "high":
+						return true, nil
+					default:
+						return false, fmt.Errorf("%q is not a valid value", *priority)
+					}
+				},
+			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid priority: %w", err)
-			} else if ok {
-				if priority != "" {
-					switch priority {
-					case "low", "medium", "high":
-						taskUpdate.Task.Priority = &priority
-					default:
-						return nil, fmt.Errorf("invalid priority: %s", priority)
-					}
-				}
 			}
 
 			if err := resources.TeamworkEngine.Do(ctx, &taskUpdate); err != nil {

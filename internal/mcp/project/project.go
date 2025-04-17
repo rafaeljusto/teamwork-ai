@@ -160,11 +160,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("name is required")
 			}
 
-			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			err := twmcp.OptionalParam(request.Params.Arguments, &project.Description, "description")
 			if err != nil {
 				return nil, fmt.Errorf("invalid description: %w", err)
-			} else if ok {
-				project.Description = description
 			}
 
 			if err := resources.TeamworkEngine.Do(ctx, &project); err != nil {

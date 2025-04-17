@@ -161,11 +161,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				return nil, fmt.Errorf("name is required")
 			}
 
-			userIDs, ok, err := twmcp.OptionalNumericListParam[int64](request.Params.Arguments, "userIds")
+			err := twmcp.OptionalNumericListParam(request.Params.Arguments, &skill.UserIDs, "userIds")
 			if err != nil {
 				return nil, fmt.Errorf("invalid userIds: %w", err)
-			} else if ok {
-				skill.UserIDs = userIDs
 			}
 
 			if err := resources.TeamworkEngine.Do(ctx, &skill); err != nil {
@@ -213,11 +211,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 				skillUpdate.Skill.Name = &name
 			}
 
-			userIDs, ok, err := twmcp.OptionalNumericListParam[int64](request.Params.Arguments, "userIds")
+			err := twmcp.OptionalNumericListParam(request.Params.Arguments, &skillUpdate.Skill.UserIDs, "userIds")
 			if err != nil {
 				return nil, fmt.Errorf("invalid userIds: %w", err)
-			} else if ok {
-				skillUpdate.Skill.UserIDs = userIDs
 			}
 
 			if err := resources.TeamworkEngine.Do(ctx, &skillUpdate); err != nil {

@@ -201,11 +201,9 @@ func Register(mcpServer *server.MCPServer, resources *config.Resources) {
 			}
 			tasklist.ProjectID = int64(projectID)
 
-			description, ok, err := twmcp.OptionalParam[string](request.Params.Arguments, "description")
+			err := twmcp.OptionalParam(request.Params.Arguments, &tasklist.Description, "description")
 			if err != nil {
 				return nil, fmt.Errorf("invalid description: %w", err)
-			} else if ok {
-				tasklist.Description = description
 			}
 
 			if err := resources.TeamworkEngine.Do(ctx, &tasklist); err != nil {
