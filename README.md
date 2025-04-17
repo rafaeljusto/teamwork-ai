@@ -44,7 +44,7 @@ tasklist name, the task title and description to find the best match for the
 users' skills.
 ```
 
-### Usage
+### ⚡️ Usage
 
 The server works using 2 different modes:
 
@@ -110,7 +110,7 @@ Where `<server>` is the URL of the remote MCP server.
 > for confirmation before executing a tool. This is a safety feature to prevent
 > unintended actions.
 
-### Debug
+### 🤓 Debug
 
 For debugging purposes, you can run the `MCP Inspector tool`:
 
