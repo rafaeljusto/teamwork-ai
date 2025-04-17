@@ -112,8 +112,13 @@ Where `<server>` is the URL of the remote MCP server.
 
 ### 🤓 Debug
 
-For debugging purposes, you can run the `MCP Inspector tool`:
+For debugging purposes, you can run the [MCP Inspector
+tool](https://github.com/modelcontextprotocol/inspector):
 
 ```bash
 npx @modelcontextprotocol/inspector node build/index.js
 ```
+
+> [!TIP]
+> For more information regarding the MCP Inspector tool and how to use it, check
+> it [here](https://modelcontextprotocol.io/docs/tools/inspector).
