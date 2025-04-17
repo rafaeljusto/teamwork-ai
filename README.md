@@ -3,6 +3,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/rafaeljusto/teamwork-ai.svg)](https://pkg.go.dev/github.com/rafaeljusto/teamwork-ai)
 ![Test](https://github.com/rafaeljusto/teamwork-ai/actions/workflows/test.yml/badge.svg)
 
+![Logo](teamwork-ai.gif)
+
 **Unofficial** extension for [Teamwork.com](https://teamwork.com) to integrate
 AI capabilities.
 
@@ -70,7 +72,9 @@ The server works using 2 different modes:
 
 > [!TIP]
 > For more information regarding the Claude Desktop configuration, refer to the
-> [MCP documentation](https://modelcontextprotocol.io/quickstart/user).
+> [MCP documentation](https://modelcontextprotocol.io/quickstart/user). To
+> further learn about Claude and MCP, you can also check [this
+> content](https://www.claudemcp.com/).
 
 It assumes that [the binary](cmd/mcp/main.go) is compiled and installed in one
 of the directories in your `PATH`. The `<installation>` is the name of your
@@ -100,6 +104,11 @@ profile (no support for OAuth2 yet).
 ```
 
 Where `<server>` is the URL of the remote MCP server.
+
+> [!INFO]
+> When using Claude Desktop, for every MCP tool execution the AI client will ask
+> for confirmation before executing a tool. This is a safety feature to prevent
+> unintended actions.
 
 ### Debug
 
