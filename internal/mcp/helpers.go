@@ -80,10 +80,9 @@ func param[T any](
 	return nil
 }
 
-// OptionalNumericParam retrieves a required numeric parameter from a map,
-// converting it to the target numeric type. It returns an error if the key is
-// not found or if the type conversion fails. If the target is nil, it returns
-// an error.
+// NumericParam retrieves a required numeric parameter from a map, converting it
+// to the target numeric type. It returns an error if the key is not found or if
+// the type conversion fails. If the target is nil, it returns an error.
 func NumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
 	params map[string]any, target *T, key string,
 ) error {
