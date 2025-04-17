@@ -105,7 +105,7 @@ profile (no support for OAuth2 yet).
 
 Where `<server>` is the URL of the remote MCP server.
 
-> [!INFO]
+> [!NOTE]
 > When using Claude Desktop, for every MCP tool execution the AI client will ask
 > for confirmation before executing a tool. This is a safety feature to prevent
 > unintended actions.
