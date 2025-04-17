@@ -69,7 +69,7 @@ The server works using 2 different modes:
 ```
 
 > [!TIP]
-> For more information regarfing the Claude Desktop configuration, refer to the
+> For more information regarding the Claude Desktop configuration, refer to the
 > [MCP documentation](https://modelcontextprotocol.io/quickstart/user).
 
 It assumes that [the binary](cmd/mcp/main.go) is compiled and installed in one
