@@ -2,32 +2,24 @@ package mcp
 
 import "fmt"
 
+// Param retrieves a required parameter from a map, converting it to the
+// specified type. It returns an error if the key is not found or if the type
+// conversion fails. If the target is nil, it returns an error. It also allows
+// for middleware functions to be applied to the value before setting it to the
+// target. Each middleware function should return a boolean indicating whether
+// to continue processing and an error if any issue occurs.
+func Param[T any](params map[string]any, target *T, key string, middlewares ...func(*T) (bool, error)) error {
+	return param(params, target, key, false, middlewares...)
+}
+
 // OptionalParam retrieves an optional parameter from a map, converting it to
-// the specified type. It returns an error if the key is not found or if the
-// type conversion fails. If the target is nil, it returns an error. It also
-// allows for middleware functions to be applied to the value before setting it
-// to the target. Each middleware function should return a boolean indicating
-// whether to continue processing and an error if any issue occurs.
+// the specified type. It returns an error if the type conversion fails. If the
+// target is nil, it returns an error. It also allows for middleware functions
+// to be applied to the value before setting it to the target. Each middleware
+// function should return a boolean indicating whether to continue processing
+// and an error if any issue occurs.
 func OptionalParam[T any](params map[string]any, target *T, key string, middlewares ...func(*T) (bool, error)) error {
-	if target == nil {
-		return fmt.Errorf("target cannot be nil")
-	}
-	value, ok := params[key]
-	if !ok {
-		return nil
-	}
-	v, ok := value.(T)
-	if !ok {
-		return fmt.Errorf("invalid type for %s: expected %T, got %T", key, *target, value)
-	}
-	for _, middleware := range middlewares {
-		var err error
-		if ok, err = middleware(&v); err != nil || !ok {
-			return err
-		}
-	}
-	*target = v
-	return nil
+	return param(params, target, key, true, middlewares...)
 }
 
 // OptionalPointerParam retrieves an optional parameter from a map and sets
@@ -48,7 +40,7 @@ func OptionalPointerParam[T any](
 	var temp T
 	var set bool
 	middlewares = append(middlewares, func(*T) (bool, error) { set = true; return true, nil })
-	if err := OptionalParam(params, &temp, key, middlewares...); err != nil {
+	if err := param(params, &temp, key, true, middlewares...); err != nil {
 		return err
 	}
 	if set {
@@ -57,19 +49,68 @@ func OptionalPointerParam[T any](
 	return nil
 }
 
-// OptionalNumericParam retrieves an optional numeric parameter from a map,
-// converting it to the target numeric type. It returns an error if the key is
-// not found or if the type conversion fails. If the target is nil, it returns
-// an error.
-func OptionalNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
-	params map[string]any, target *T, key string,
+func param[T any](
+	params map[string]any,
+	target *T,
+	key string,
+	optional bool,
+	middlewares ...func(*T) (bool, error),
 ) error {
 	if target == nil {
 		return fmt.Errorf("target cannot be nil")
 	}
 	value, ok := params[key]
 	if !ok {
-		return nil
+		if optional {
+			return nil
+		}
+		return fmt.Errorf("parameter %s is required", key)
+	}
+	v, ok := value.(T)
+	if !ok {
+		return fmt.Errorf("invalid type for %s: expected %T, got %T", key, *target, value)
+	}
+	for _, middleware := range middlewares {
+		var err error
+		if ok, err = middleware(&v); err != nil || !ok {
+			return err
+		}
+	}
+	*target = v
+	return nil
+}
+
+// OptionalNumericParam retrieves a required numeric parameter from a map,
+// converting it to the target numeric type. It returns an error if the key is
+// not found or if the type conversion fails. If the target is nil, it returns
+// an error.
+func NumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+	params map[string]any, target *T, key string,
+) error {
+	return numericParam(params, target, key, false)
+}
+
+// OptionalNumericParam retrieves an optional numeric parameter from a map,
+// converting it to the target numeric type. It returns an error if the type
+// conversion fails. If the target is nil, it returns an error.
+func OptionalNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+	params map[string]any, target *T, key string,
+) error {
+	return numericParam(params, target, key, true)
+}
+
+func numericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+	params map[string]any, target *T, key string, optional bool,
+) error {
+	if target == nil {
+		return fmt.Errorf("target cannot be nil")
+	}
+	value, ok := params[key]
+	if !ok {
+		if optional {
+			return nil
+		}
+		return fmt.Errorf("parameter %s is required", key)
 	}
 	v, ok := value.(float64)
 	if !ok {

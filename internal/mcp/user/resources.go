@@ -1,4 +1,4 @@
-package task
+package user
 
 import (
 	"context"
@@ -10,34 +10,34 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	twtask "github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
+	twuser "github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
 )
 
-var resourceList = mcp.NewResource("twapi://tasks", "tasks",
-	mcp.WithResourceDescription("Tasks are activities that need to be carried out by one or multiple project members."),
+var resourceList = mcp.NewResource("twapi://users", "users",
+	mcp.WithResourceDescription("Users, also known as people, are the individuals who can be assigned to tasks."),
 	mcp.WithMIMEType("application/json"),
 )
 
-var resourceItem = mcp.NewResourceTemplate("twapi://tasks/{id}", "task",
-	mcp.WithTemplateDescription("Task is an activity that need to be carried out by one or multiple project members."),
+var resourceItem = mcp.NewResourceTemplate("twapi://users/{id}", "user",
+	mcp.WithTemplateDescription("User, also known as person, is an individual who can be assigned to tasks."),
 	mcp.WithTemplateMIMEType("application/json"),
 )
 
 func registerResources(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddResource(resourceList,
 		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var tasks twtask.Multiple
-			if err := configResources.TeamworkEngine.Do(ctx, &tasks); err != nil {
+			var users twuser.Multiple
+			if err := configResources.TeamworkEngine.Do(ctx, &users); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
-			for _, task := range tasks.Tasks {
-				encoded, err := json.Marshal(task)
+			for _, user := range users.Users {
+				encoded, err := json.Marshal(user)
 				if err != nil {
 					return nil, err
 				}
 				resourceContents = append(resourceContents, mcp.TextResourceContents{
-					URI:      fmt.Sprintf("twapi://tasks/%d", task.ID),
+					URI:      fmt.Sprintf("twapi://users/%d", user.ID),
 					MIMEType: "application/json",
 					Text:     string(encoded),
 				})
@@ -46,31 +46,31 @@ func registerResources(mcpServer *server.MCPServer, configResources *config.Reso
 		},
 	)
 
-	reTaskID := regexp.MustCompile(`twapi://tasks/(\d+)`)
+	reUserID := regexp.MustCompile(`twapi://users/(\d+)`)
 	mcpServer.AddResourceTemplate(resourceItem,
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			matches := reTaskID.FindStringSubmatch(request.Params.URI)
+			matches := reUserID.FindStringSubmatch(request.Params.URI)
 			if len(matches) != 2 {
-				return nil, fmt.Errorf("invalid task ID")
+				return nil, fmt.Errorf("invalid user ID")
 			}
-			taskID, err := strconv.ParseInt(matches[1], 10, 64)
+			userID, err := strconv.ParseInt(matches[1], 10, 64)
 			if err != nil {
-				return nil, fmt.Errorf("invalid task ID")
+				return nil, fmt.Errorf("invalid user ID")
 			}
 
-			var task twtask.Single
-			task.ID = taskID
-			if err := configResources.TeamworkEngine.Do(ctx, &task); err != nil {
+			var user twuser.Single
+			user.ID = userID
+			if err := configResources.TeamworkEngine.Do(ctx, &user); err != nil {
 				return nil, err
 			}
 
-			encoded, err := json.Marshal(task)
+			encoded, err := json.Marshal(user)
 			if err != nil {
 				return nil, err
 			}
 			return []mcp.ResourceContents{
 				mcp.TextResourceContents{
-					URI:      fmt.Sprintf("twapi://tasks/%d", task.ID),
+					URI:      fmt.Sprintf("twapi://users/%d", user.ID),
 					MIMEType: "application/json",
 					Text:     string(encoded),
 				},

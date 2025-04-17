@@ -13,13 +13,13 @@ import (
 	twtask "github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
 )
 
-func tools(mcpServer *server.MCPServer, configResources *config.Resources) {
-	toolsRetrieve(mcpServer, configResources)
-	toolsCreate(mcpServer, configResources)
-	toolsUpdate(mcpServer, configResources)
+func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
+	registerToolsRetrieve(mcpServer, configResources)
+	registerToolsCreate(mcpServer, configResources)
+	registerToolsUpdate(mcpServer, configResources)
 }
 
-func toolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resources) {
+func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
 		mcp.NewTool("retrieve-tasks",
 			mcp.WithDescription("Retrieve multiple tasks in a customer site of Teamwork.com. "+
@@ -50,13 +50,10 @@ func toolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasks twtask.Multiple
 
-			projectID, ok := request.Params.Arguments["projectId"].(float64)
-			if !ok {
-				return nil, fmt.Errorf("invalid projectId")
-			} else if projectID == 0 {
-				return nil, fmt.Errorf("projectId is required")
+			err := twmcp.NumericParam(request.Params.Arguments, &tasks.ProjectID, "projectId")
+			if err != nil {
+				return nil, fmt.Errorf("invalid project ID: %w", err)
 			}
-			tasks.ProjectID = int64(projectID)
 
 			if err := configResources.TeamworkEngine.Do(ctx, &tasks); err != nil {
 				return nil, err
@@ -81,13 +78,10 @@ func toolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasks twtask.Multiple
 
-			tasklistID, ok := request.Params.Arguments["tasklistId"].(float64)
-			if !ok {
-				return nil, fmt.Errorf("invalid tasklistId")
-			} else if tasklistID == 0 {
-				return nil, fmt.Errorf("tasklistId is required")
+			err := twmcp.NumericParam(request.Params.Arguments, &tasks.TasklistID, "tasklistId")
+			if err != nil {
+				return nil, fmt.Errorf("invalid tasklist ID: %w", err)
 			}
-			tasks.TasklistID = int64(tasklistID)
 
 			if err := configResources.TeamworkEngine.Do(ctx, &tasks); err != nil {
 				return nil, err
@@ -112,13 +106,10 @@ func toolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var task twtask.Single
 
-			id, ok := request.Params.Arguments["taskId"].(float64)
-			if !ok {
-				return nil, fmt.Errorf("invalid taskId")
-			} else if id == 0 {
-				return nil, fmt.Errorf("taskId is required")
+			err := twmcp.NumericParam(request.Params.Arguments, &task.ID, "taskId")
+			if err != nil {
+				return nil, fmt.Errorf("invalid task ID: %w", err)
 			}
-			task.ID = int64(id)
 
 			if err := configResources.TeamworkEngine.Do(ctx, &task); err != nil {
 				return nil, err
@@ -132,7 +123,7 @@ func toolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 }
 
-func toolsCreate(mcpServer *server.MCPServer, configResources *config.Resources) {
+func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
 		mcp.NewTool("create-task",
 			mcp.WithDescription("Create a new task in a customer site of Teamwork.com. "+
@@ -173,26 +164,18 @@ func toolsCreate(mcpServer *server.MCPServer, configResources *config.Resources)
 			var task twtask.Creation
 			var ok bool
 
-			task.Name, ok = request.Params.Arguments["name"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid name")
-			} else if task.Name == "" {
-				return nil, fmt.Errorf("name is required")
+			err := twmcp.Param(request.Params.Arguments, &task.Name, "name")
+			if err != nil {
+				return nil, fmt.Errorf("invalid name: %w", err)
 			}
-
-			tasklistID, ok := request.Params.Arguments["tasklistId"].(float64)
-			if !ok {
-				return nil, fmt.Errorf("invalid tasklistId")
-			} else if tasklistID == 0 {
-				return nil, fmt.Errorf("tasklistId is required")
+			err = twmcp.NumericParam(request.Params.Arguments, &task.TasklistID, "tasklistId")
+			if err != nil {
+				return nil, fmt.Errorf("invalid tasklist ID: %w", err)
 			}
-			task.TasklistID = int64(tasklistID)
-
-			err := twmcp.OptionalParam(request.Params.Arguments, &task.Description, "description")
+			err = twmcp.OptionalParam(request.Params.Arguments, &task.Description, "description")
 			if err != nil {
 				return nil, fmt.Errorf("invalid description: %w", err)
 			}
-
 			assignees, ok := request.Params.Arguments["assignees"]
 			if ok {
 				assigneesMap, ok := assignees.(map[string]any)
@@ -215,7 +198,6 @@ func toolsCreate(mcpServer *server.MCPServer, configResources *config.Resources)
 					}
 				}
 			}
-
 			err = twmcp.OptionalPointerParam(request.Params.Arguments, &task.Priority, "priority",
 				func(priority *string) (bool, error) {
 					if priority == nil || *priority == "" {
@@ -241,7 +223,7 @@ func toolsCreate(mcpServer *server.MCPServer, configResources *config.Resources)
 	)
 }
 
-func toolsUpdate(mcpServer *server.MCPServer, configResources *config.Resources) {
+func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
 		mcp.NewTool("update-task",
 			mcp.WithDescription("Update an existing task in a customer site of Teamwork.com. "+
@@ -251,7 +233,6 @@ func toolsUpdate(mcpServer *server.MCPServer, configResources *config.Resources)
 				mcp.Description("The ID of the task to update."),
 			),
 			mcp.WithString("name",
-				mcp.Required(),
 				mcp.Description("The name of the task."),
 			),
 			mcp.WithString("description",
@@ -282,26 +263,18 @@ func toolsUpdate(mcpServer *server.MCPServer, configResources *config.Resources)
 			var taskUpdate twtask.Update
 			var ok bool
 
-			id, ok := request.Params.Arguments["id"].(float64)
-			if !ok {
-				return nil, fmt.Errorf("invalid id")
-			} else if id == 0 {
-				return nil, fmt.Errorf("id is required")
+			err := twmcp.NumericParam(request.Params.Arguments, &taskUpdate.ID, "id")
+			if err != nil {
+				return nil, fmt.Errorf("invalid id: %w", err)
 			}
-			taskUpdate.ID = int64(id)
-
-			name, ok := request.Params.Arguments["name"].(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid name")
-			} else if name != "" {
-				taskUpdate.Task.Name = &name
+			err = twmcp.OptionalParam(request.Params.Arguments, &taskUpdate.Task.Name, "name")
+			if err != nil {
+				return nil, fmt.Errorf("invalid name: %w", err)
 			}
-
-			err := twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Description, "description")
+			err = twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Description, "description")
 			if err != nil {
 				return nil, fmt.Errorf("invalid description: %w", err)
 			}
-
 			assignees, ok := request.Params.Arguments["assignees"]
 			if ok {
 				assigneesMap, ok := assignees.(map[string]any)
@@ -324,7 +297,6 @@ func toolsUpdate(mcpServer *server.MCPServer, configResources *config.Resources)
 					}
 				}
 			}
-
 			err = twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Priority, "priority",
 				func(priority *string) (bool, error) {
 					if priority == nil || *priority == "" {

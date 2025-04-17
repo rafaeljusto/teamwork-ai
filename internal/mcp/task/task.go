@@ -15,6 +15,6 @@ import (
 // from a specific project or tasklist. Tasks can be assigned to users,
 // companies, or teams, and can have a priority level (low, medium, high).
 func Register(mcpServer *server.MCPServer, configResources *config.Resources) {
-	resources(mcpServer, configResources)
-	tools(mcpServer, configResources)
+	registerResources(mcpServer, configResources)
+	registerTools(mcpServer, configResources)
 }
