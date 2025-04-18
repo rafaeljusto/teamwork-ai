@@ -50,7 +50,9 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasks twtask.Multiple
 
-			err := twmcp.NumericParam(request.Params.Arguments, &tasks.ProjectID, "projectId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&tasks.ProjectID, "projectId"),
+			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid project ID: %w", err)
 			}
@@ -78,7 +80,9 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasks twtask.Multiple
 
-			err := twmcp.NumericParam(request.Params.Arguments, &tasks.TasklistID, "tasklistId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&tasks.TasklistID, "tasklistId"),
+			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid tasklist ID: %w", err)
 			}
@@ -106,9 +110,11 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var task twtask.Single
 
-			err := twmcp.NumericParam(request.Params.Arguments, &task.ID, "taskId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&task.ID, "taskId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid task ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &task); err != nil {
@@ -164,18 +170,18 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 			var task twtask.Creation
 			var ok bool
 
-			err := twmcp.Param(request.Params.Arguments, &task.Name, "name")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredParam(&task.Name, "name"),
+				twmcp.RequiredNumericParam(&task.TasklistID, "tasklistId"),
+				twmcp.OptionalParam(&task.Description, "description"),
+				twmcp.OptionalPointerParam(&task.Priority, "priority",
+					twmcp.RestrictValues("low", "medium", "high"),
+				),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
-			err = twmcp.NumericParam(request.Params.Arguments, &task.TasklistID, "tasklistId")
-			if err != nil {
-				return nil, fmt.Errorf("invalid tasklist ID: %w", err)
-			}
-			err = twmcp.OptionalParam(request.Params.Arguments, &task.Description, "description")
-			if err != nil {
-				return nil, fmt.Errorf("invalid description: %w", err)
-			}
+
 			assignees, ok := request.Params.Arguments["assignees"]
 			if ok {
 				assigneesMap, ok := assignees.(map[string]any)
@@ -184,35 +190,15 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 				} else if assignees != nil {
 					task.Assignees = new(teamwork.UserGroups)
 
-					err := twmcp.OptionalNumericListParam(assigneesMap, &task.Assignees.UserIDs, "userIds")
+					err = twmcp.ParamGroup(assigneesMap,
+						twmcp.OptionalNumericListParam(&task.Assignees.UserIDs, "userIds"),
+						twmcp.OptionalNumericListParam(&task.Assignees.CompanyIDs, "companyIds"),
+						twmcp.OptionalNumericListParam(&task.Assignees.TeamIDs, "teamIds"),
+					)
 					if err != nil {
-						return nil, fmt.Errorf("invalid userIds: %w", err)
-					}
-					err = twmcp.OptionalNumericListParam(assigneesMap, &task.Assignees.UserIDs, "companyIds")
-					if err != nil {
-						return nil, fmt.Errorf("invalid userIds: %w", err)
-					}
-					err = twmcp.OptionalNumericListParam(assigneesMap, &task.Assignees.UserIDs, "teamIds")
-					if err != nil {
-						return nil, fmt.Errorf("invalid userIds: %w", err)
+						return nil, fmt.Errorf("invalid assignees: %w", err)
 					}
 				}
-			}
-			err = twmcp.OptionalPointerParam(request.Params.Arguments, &task.Priority, "priority",
-				func(priority *string) (bool, error) {
-					if priority == nil || *priority == "" {
-						return false, nil
-					}
-					switch *priority {
-					case "low", "medium", "high":
-						return true, nil
-					default:
-						return false, fmt.Errorf("%q is not a valid value", *priority)
-					}
-				},
-			)
-			if err != nil {
-				return nil, fmt.Errorf("invalid priority: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &task); err != nil {
@@ -228,7 +214,7 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 		mcp.NewTool("update-task",
 			mcp.WithDescription("Update an existing task in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
-			mcp.WithNumber("id",
+			mcp.WithNumber("taskId",
 				mcp.Required(),
 				mcp.Description("The ID of the task to update."),
 			),
@@ -263,18 +249,18 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 			var taskUpdate twtask.Update
 			var ok bool
 
-			err := twmcp.NumericParam(request.Params.Arguments, &taskUpdate.ID, "id")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&taskUpdate.ID, "taskId"),
+				twmcp.OptionalParam(&taskUpdate.Task.Name, "name"),
+				twmcp.OptionalPointerParam(&taskUpdate.Task.Description, "description"),
+				twmcp.OptionalPointerParam(&taskUpdate.Task.Priority, "priority",
+					twmcp.RestrictValues("low", "medium", "high"),
+				),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid id: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
-			err = twmcp.OptionalParam(request.Params.Arguments, &taskUpdate.Task.Name, "name")
-			if err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
-			}
-			err = twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Description, "description")
-			if err != nil {
-				return nil, fmt.Errorf("invalid description: %w", err)
-			}
+
 			assignees, ok := request.Params.Arguments["assignees"]
 			if ok {
 				assigneesMap, ok := assignees.(map[string]any)
@@ -283,35 +269,15 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 				} else if assignees != nil {
 					taskUpdate.Task.Assignees = new(teamwork.UserGroups)
 
-					err := twmcp.OptionalNumericListParam(assigneesMap, &taskUpdate.Task.Assignees.UserIDs, "userIds")
+					err = twmcp.ParamGroup(assigneesMap,
+						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.UserIDs, "userIds"),
+						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.CompanyIDs, "companyIds"),
+						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.TeamIDs, "teamIds"),
+					)
 					if err != nil {
-						return nil, fmt.Errorf("invalid userIds: %w", err)
-					}
-					err = twmcp.OptionalNumericListParam(assigneesMap, &taskUpdate.Task.Assignees.CompanyIDs, "companyIds")
-					if err != nil {
-						return nil, fmt.Errorf("invalid userIds: %w", err)
-					}
-					err = twmcp.OptionalNumericListParam(assigneesMap, &taskUpdate.Task.Assignees.TeamIDs, "teamIds")
-					if err != nil {
-						return nil, fmt.Errorf("invalid userIds: %w", err)
+						return nil, fmt.Errorf("invalid assignees: %w", err)
 					}
 				}
-			}
-			err = twmcp.OptionalPointerParam(request.Params.Arguments, &taskUpdate.Task.Priority, "priority",
-				func(priority *string) (bool, error) {
-					if priority == nil || *priority == "" {
-						return false, nil
-					}
-					switch *priority {
-					case "low", "medium", "high":
-						return true, nil
-					default:
-						return false, fmt.Errorf("%q is not a valid value", *priority)
-					}
-				},
-			)
-			if err != nil {
-				return nil, fmt.Errorf("invalid priority: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &taskUpdate); err != nil {

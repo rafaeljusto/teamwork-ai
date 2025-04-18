@@ -110,6 +110,20 @@ Where `<server>` is the URL of the remote MCP server.
 > for confirmation before executing a tool. This is a safety feature to prevent
 > unintended actions.
 
+### Supported entities
+
+Below is a table summarizing the supported entities and their operations in the
+MCP server.
+
+| Entity            | Create | Retrieve | Update | Delete | Extra                                     |
+|-------------------|--------|----------|--------|--------|-------------------------------------------|
+| Projects          | ✅     | ✅       | ❌      | ❌     |                                           |
+| Tasklists         | ✅     | ✅       | ❌      | ❌     | Retrieve by project                       |
+| Tasks             | ✅     | ✅       | ✅      | ❌     | Retrieve by project; retrieve by tasklist |
+| Companies/Clients | ✅     | ✅       | ❌      | ❌     |                                           |
+| Users/People      | ✅     | ✅       | ❌      | ❌     | Retrieve by project                       |
+| Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
+
 ### 🤓 Debug
 
 For debugging purposes, you can run the [MCP Inspector

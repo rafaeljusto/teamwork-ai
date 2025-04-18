@@ -43,9 +43,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var company twcompany.Single
 
-			err := twmcp.NumericParam(request.Params.Arguments, &company.ID, "companyId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&company.ID, "companyId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid company ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &company); err != nil {
@@ -77,9 +79,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var company twcompany.Creation
 
-			err := twmcp.Param(request.Params.Arguments, &company.Name, "name")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredParam(&company.Name, "name"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &company); err != nil {

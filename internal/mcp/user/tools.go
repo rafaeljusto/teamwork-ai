@@ -41,9 +41,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var users twuser.Multiple
 
-			err := twmcp.NumericParam(request.Params.Arguments, &users.ProjectID, "projectId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&users.ProjectID, "projectId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid project ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &users); err != nil {
@@ -68,9 +70,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var user twuser.Single
 
-			err := twmcp.NumericParam(request.Params.Arguments, &user.ID, "userId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&user.ID, "userId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid user ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &user); err != nil {
@@ -107,21 +111,14 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var user twuser.Creation
 
-			err := twmcp.Param(request.Params.Arguments, &user.FirstName, "firstName")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredParam(&user.FirstName, "firstName"),
+				twmcp.RequiredParam(&user.LastName, "lastName"),
+				twmcp.RequiredParam(&user.Email, "email"),
+				twmcp.RequiredParam(&user.Password, "password"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid first name: %w", err)
-			}
-			err = twmcp.Param(request.Params.Arguments, &user.LastName, "lastName")
-			if err != nil {
-				return nil, fmt.Errorf("invalid last name: %w", err)
-			}
-			err = twmcp.Param(request.Params.Arguments, &user.Email, "email")
-			if err != nil {
-				return nil, fmt.Errorf("invalid email: %w", err)
-			}
-			err = twmcp.Param(request.Params.Arguments, &user.Password, "password")
-			if err != nil {
-				return nil, fmt.Errorf("invalid password: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &user); err != nil {

@@ -43,9 +43,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var project twproject.Single
 
-			err := twmcp.NumericParam(request.Params.Arguments, &project.ID, "projectId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&project.ID, "projectId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid project ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &project); err != nil {
@@ -74,13 +76,12 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var project twproject.Creation
 
-			err := twmcp.Param(request.Params.Arguments, &project.Name, "name")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredParam(&project.Name, "name"),
+				twmcp.OptionalParam(&project.Description, "description"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
-			}
-			err = twmcp.OptionalParam(request.Params.Arguments, &project.Description, "description")
-			if err != nil {
-				return nil, fmt.Errorf("invalid description: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &project); err != nil {

@@ -43,8 +43,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var skill twskill.Single
 
-			if err := twmcp.NumericParam(request.Params.Arguments, &skill.ID, "skillId"); err != nil {
-				return nil, fmt.Errorf("invalid skill ID: %w", err)
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&skill.ID, "skillId"),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &skill); err != nil {
@@ -76,11 +79,12 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var skill twskill.Creation
 
-			if err := twmcp.Param(request.Params.Arguments, &skill.Name, "name"); err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
-			}
-			if err := twmcp.OptionalNumericListParam(request.Params.Arguments, &skill.UserIDs, "userIds"); err != nil {
-				return nil, fmt.Errorf("invalid userIds: %w", err)
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredParam(&skill.Name, "name"),
+				twmcp.OptionalNumericListParam(&skill.UserIDs, "userIds"),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &skill); err != nil {
@@ -94,7 +98,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("update-skill",
 			mcp.WithDescription("Update an existing skill in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
-			mcp.WithNumber("id",
+			mcp.WithNumber("skillId",
 				mcp.Required(),
 				mcp.Description("The ID of the skill to update."),
 			),
@@ -112,17 +116,13 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var skillUpdate twskill.Update
 
-			err := twmcp.NumericParam(request.Params.Arguments, &skillUpdate.ID, "id")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&skillUpdate.ID, "skillId"),
+				twmcp.RequiredParam(&skillUpdate.Skill.Name, "name"),
+				twmcp.OptionalNumericListParam(&skillUpdate.Skill.UserIDs, "userIds"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid id: %w", err)
-			}
-			err = twmcp.Param(request.Params.Arguments, &skillUpdate.Skill.Name, "name")
-			if err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
-			}
-			err = twmcp.OptionalNumericListParam(request.Params.Arguments, &skillUpdate.Skill.UserIDs, "userIds")
-			if err != nil {
-				return nil, fmt.Errorf("invalid userIds: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &skillUpdate); err != nil {

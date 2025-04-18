@@ -43,9 +43,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasklists twtasklist.Multiple
 
-			err := twmcp.NumericParam(request.Params.Arguments, &tasklists.ProjectID, "projectId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&tasklists.ProjectID, "projectId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid project ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &tasklists); err != nil {
@@ -71,9 +73,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasklist twtasklist.Single
 
-			err := twmcp.NumericParam(request.Params.Arguments, &tasklist.ID, "tasklistId")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredNumericParam(&tasklist.ID, "tasklistId"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid tasklist ID: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &tasklist); err != nil {
@@ -106,17 +110,13 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasklist twtasklist.Creation
 
-			err := twmcp.Param(request.Params.Arguments, &tasklist.Name, "name")
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredParam(&tasklist.Name, "name"),
+				twmcp.RequiredNumericParam(&tasklist.ProjectID, "projectId"),
+				twmcp.OptionalParam(&tasklist.Description, "description"),
+			)
 			if err != nil {
-				return nil, fmt.Errorf("invalid name: %w", err)
-			}
-			err = twmcp.NumericParam(request.Params.Arguments, &tasklist.ProjectID, "projectId")
-			if err != nil {
-				return nil, fmt.Errorf("invalid project ID: %w", err)
-			}
-			err = twmcp.OptionalParam(request.Params.Arguments, &tasklist.Description, "description")
-			if err != nil {
-				return nil, fmt.Errorf("invalid description: %w", err)
+				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &tasklist); err != nil {
