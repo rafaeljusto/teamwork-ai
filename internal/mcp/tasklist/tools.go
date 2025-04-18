@@ -35,7 +35,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("retrieve-project-tasklists",
 			mcp.WithDescription("Retrieve multiple tasklists from a specific project in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
-			mcp.WithNumber("projectId",
+			mcp.WithNumber("project-id",
 				mcp.Required(),
 				mcp.Description("The ID of the project from which to retrieve tasklists."),
 			),
@@ -44,7 +44,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var tasklists twtasklist.Multiple
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&tasklists.ProjectID, "projectId"),
+				twmcp.RequiredNumericParam(&tasklists.ProjectID, "project-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -65,7 +65,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("retrieve-tasklist",
 			mcp.WithDescription("Retrieve a specific tasklist in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
-			mcp.WithNumber("tasklistId",
+			mcp.WithNumber("tasklist-id",
 				mcp.Required(),
 				mcp.Description("The ID of the task."),
 			),
@@ -74,7 +74,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var tasklist twtasklist.Single
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&tasklist.ID, "tasklistId"),
+				twmcp.RequiredNumericParam(&tasklist.ID, "tasklist-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -99,7 +99,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Required(),
 				mcp.Description("The name of the tasklist."),
 			),
-			mcp.WithNumber("projectId",
+			mcp.WithNumber("project-id",
 				mcp.Required(),
 				mcp.Description("The ID of the project."),
 			),
@@ -112,7 +112,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.RequiredParam(&tasklist.Name, "name"),
-				twmcp.RequiredNumericParam(&tasklist.ProjectID, "projectId"),
+				twmcp.RequiredNumericParam(&tasklist.ProjectID, "project-id"),
 				twmcp.OptionalParam(&tasklist.Description, "description"),
 			)
 			if err != nil {

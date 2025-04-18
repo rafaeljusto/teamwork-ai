@@ -42,7 +42,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		mcp.NewTool("retrieve-project-tasks",
 			mcp.WithDescription("Retrieve multiple tasks from a specific project in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
-			mcp.WithNumber("projectId",
+			mcp.WithNumber("project-id",
 				mcp.Required(),
 				mcp.Description("The ID of the project from which to retrieve tasks."),
 			),
@@ -51,7 +51,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 			var tasks twtask.Multiple
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&tasks.ProjectID, "projectId"),
+				twmcp.RequiredNumericParam(&tasks.ProjectID, "project-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid project ID: %w", err)
@@ -72,7 +72,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		mcp.NewTool("retrieve-tasklist-tasks",
 			mcp.WithDescription("Retrieve multiple tasks from a specific tasklist in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
-			mcp.WithNumber("tasklistId",
+			mcp.WithNumber("tasklist-id",
 				mcp.Required(),
 				mcp.Description("The ID of the project from which to retrieve tasks."),
 			),
@@ -81,7 +81,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 			var tasks twtask.Multiple
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&tasks.TasklistID, "tasklistId"),
+				twmcp.RequiredNumericParam(&tasks.TasklistID, "tasklist-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid tasklist ID: %w", err)
@@ -102,7 +102,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		mcp.NewTool("retrieve-task",
 			mcp.WithDescription("Retrieve a specific task in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
-			mcp.WithNumber("taskId",
+			mcp.WithNumber("task-id",
 				mcp.Required(),
 				mcp.Description("The ID of the task."),
 			),
@@ -111,7 +111,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 			var task twtask.Single
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&task.ID, "taskId"),
+				twmcp.RequiredNumericParam(&task.ID, "task-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -138,7 +138,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 				mcp.Required(),
 				mcp.Description("The name of the task."),
 			),
-			mcp.WithNumber("tasklistId",
+			mcp.WithNumber("tasklist-id",
 				mcp.Required(),
 				mcp.Description("The ID of the tasklist."),
 			),
@@ -148,15 +148,15 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 			mcp.WithObject("assignees",
 				mcp.Description("The assignees of the task. This is a JSON object with user IDs, company IDs, and team IDs."),
 				mcp.Properties(map[string]any{
-					"userIds": map[string]any{
+					"user-ids": map[string]any{
 						"type":        "array",
 						"description": "List of user IDs assigned to the task.",
 					},
-					"companyIds": map[string]any{
+					"company-ids": map[string]any{
 						"type":        "array",
 						"description": "List of company IDs assigned to the task.",
 					},
-					"teamIds": map[string]any{
+					"team-ids": map[string]any{
 						"type":        "array",
 						"description": "List of team IDs assigned to the task.",
 					},
@@ -172,7 +172,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.RequiredParam(&task.Name, "name"),
-				twmcp.RequiredNumericParam(&task.TasklistID, "tasklistId"),
+				twmcp.RequiredNumericParam(&task.TasklistID, "tasklist-id"),
 				twmcp.OptionalParam(&task.Description, "description"),
 				twmcp.OptionalPointerParam(&task.Priority, "priority",
 					twmcp.RestrictValues("low", "medium", "high"),
@@ -191,9 +191,9 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 					task.Assignees = new(teamwork.UserGroups)
 
 					err = twmcp.ParamGroup(assigneesMap,
-						twmcp.OptionalNumericListParam(&task.Assignees.UserIDs, "userIds"),
-						twmcp.OptionalNumericListParam(&task.Assignees.CompanyIDs, "companyIds"),
-						twmcp.OptionalNumericListParam(&task.Assignees.TeamIDs, "teamIds"),
+						twmcp.OptionalNumericListParam(&task.Assignees.UserIDs, "user-ids"),
+						twmcp.OptionalNumericListParam(&task.Assignees.CompanyIDs, "company-ids"),
+						twmcp.OptionalNumericListParam(&task.Assignees.TeamIDs, "team-ids"),
 					)
 					if err != nil {
 						return nil, fmt.Errorf("invalid assignees: %w", err)
@@ -214,7 +214,7 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 		mcp.NewTool("update-task",
 			mcp.WithDescription("Update an existing task in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
-			mcp.WithNumber("taskId",
+			mcp.WithNumber("task-id",
 				mcp.Required(),
 				mcp.Description("The ID of the task to update."),
 			),
@@ -227,15 +227,15 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 			mcp.WithObject("assignees",
 				mcp.Description("The assignees of the task. This is a JSON object with user IDs, company IDs, and team IDs."),
 				mcp.Properties(map[string]any{
-					"userIds": map[string]any{
+					"user-ids": map[string]any{
 						"type":        "array",
 						"description": "List of user IDs assigned to the task.",
 					},
-					"companyIds": map[string]any{
+					"company-ids": map[string]any{
 						"type":        "array",
 						"description": "List of company IDs assigned to the task.",
 					},
-					"teamIds": map[string]any{
+					"team-ids": map[string]any{
 						"type":        "array",
 						"description": "List of team IDs assigned to the task.",
 					},
@@ -250,7 +250,7 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 			var ok bool
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&taskUpdate.ID, "taskId"),
+				twmcp.RequiredNumericParam(&taskUpdate.ID, "task-id"),
 				twmcp.OptionalParam(&taskUpdate.Task.Name, "name"),
 				twmcp.OptionalPointerParam(&taskUpdate.Task.Description, "description"),
 				twmcp.OptionalPointerParam(&taskUpdate.Task.Priority, "priority",
@@ -270,9 +270,9 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 					taskUpdate.Task.Assignees = new(teamwork.UserGroups)
 
 					err = twmcp.ParamGroup(assigneesMap,
-						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.UserIDs, "userIds"),
-						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.CompanyIDs, "companyIds"),
-						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.TeamIDs, "teamIds"),
+						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.UserIDs, "user-ids"),
+						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.CompanyIDs, "company-ids"),
+						twmcp.OptionalNumericListParam(&taskUpdate.Task.Assignees.TeamIDs, "team-ids"),
 					)
 					if err != nil {
 						return nil, fmt.Errorf("invalid assignees: %w", err)

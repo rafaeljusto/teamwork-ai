@@ -111,10 +111,12 @@ func param[T any](
 // not found or if the type conversion fails. If the target is nil, it returns
 // an error.
 func RequiredNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
-	target *T, key string,
+	target *T,
+	key string,
+	middlewares ...ParamMiddleware[T],
 ) ParamFunc {
 	return func(params map[string]any) error {
-		return numericParam(params, target, key, false)
+		return numericParam(params, target, key, false, middlewares...)
 	}
 }
 
@@ -122,15 +124,47 @@ func RequiredNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint
 // converting it to the target numeric type. It returns an error if the type
 // conversion fails. If the target is nil, it returns an error.
 func OptionalNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
-	target *T, key string,
+	target *T,
+	key string,
+	middlewares ...ParamMiddleware[T],
 ) ParamFunc {
 	return func(params map[string]any) error {
-		return numericParam(params, target, key, true)
+		return numericParam(params, target, key, true, middlewares...)
+	}
+}
+
+// OptionalNumericPointerParam retrieves an optional numeric parameter from a
+// map and sets it to a pointer target. It converts the value to the specified
+// numeric type and applies middleware functions to the value before setting it.
+// If the target is nil, it returns an error.
+func OptionalNumericPointerParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+	target **T,
+	key string,
+	middlewares ...ParamMiddleware[T],
+) ParamFunc {
+	return func(params map[string]any) error {
+		if target == nil {
+			return fmt.Errorf("target cannot be nil")
+		}
+		var temp T
+		var set bool
+		middlewares = append(middlewares, func(*T) (bool, error) { set = true; return true, nil })
+		if err := numericParam(params, &temp, key, true, middlewares...); err != nil {
+			return err
+		}
+		if set {
+			*target = &temp
+		}
+		return nil
 	}
 }
 
 func numericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
-	params map[string]any, target *T, key string, optional bool,
+	params map[string]any,
+	target *T,
+	key string,
+	optional bool,
+	middlewares ...ParamMiddleware[T],
 ) error {
 	if target == nil {
 		return fmt.Errorf("target cannot be nil")
@@ -146,7 +180,14 @@ func numericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uin
 	if !ok {
 		return fmt.Errorf("invalid type for %s: expected %T, got %T", key, *target, value)
 	}
-	*target = T(v)
+	vType := T(v)
+	for _, middleware := range middlewares {
+		var err error
+		if ok, err = middleware(&vType); err != nil || !ok {
+			return err
+		}
+	}
+	*target = vType
 	return nil
 }
 

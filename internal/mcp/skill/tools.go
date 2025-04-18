@@ -35,7 +35,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("retrieve-skill",
 			mcp.WithDescription("Retrieve a specific skill in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
-			mcp.WithNumber("skillId",
+			mcp.WithNumber("skill-id",
 				mcp.Required(),
 				mcp.Description("The ID of the skill."),
 			),
@@ -44,7 +44,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var skill twskill.Single
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&skill.ID, "skillId"),
+				twmcp.RequiredNumericParam(&skill.ID, "skill-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -69,7 +69,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Required(),
 				mcp.Description("The name of the skill."),
 			),
-			mcp.WithArray("userIds",
+			mcp.WithArray("user-ids",
 				mcp.Description("List of user IDs assigned to the skill. This is a JSON array of integers."),
 				mcp.Items(map[string]any{
 					"type": "number",
@@ -81,7 +81,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.RequiredParam(&skill.Name, "name"),
-				twmcp.OptionalNumericListParam(&skill.UserIDs, "userIds"),
+				twmcp.OptionalNumericListParam(&skill.UserIDs, "user-ids"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -98,7 +98,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("update-skill",
 			mcp.WithDescription("Update an existing skill in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
-			mcp.WithNumber("skillId",
+			mcp.WithNumber("skill-id",
 				mcp.Required(),
 				mcp.Description("The ID of the skill to update."),
 			),
@@ -106,7 +106,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Required(),
 				mcp.Description("The name of the skill."),
 			),
-			mcp.WithArray("userIds",
+			mcp.WithArray("user-ids",
 				mcp.Description("List of user IDs assigned to the skill. This is a JSON array of integers."),
 				mcp.Items(map[string]any{
 					"type": "number",
@@ -117,9 +117,9 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var skillUpdate twskill.Update
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&skillUpdate.ID, "skillId"),
+				twmcp.RequiredNumericParam(&skillUpdate.ID, "skill-id"),
 				twmcp.RequiredParam(&skillUpdate.Skill.Name, "name"),
-				twmcp.OptionalNumericListParam(&skillUpdate.Skill.UserIDs, "userIds"),
+				twmcp.OptionalNumericListParam(&skillUpdate.Skill.UserIDs, "user-ids"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)

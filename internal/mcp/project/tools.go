@@ -35,7 +35,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("retrieve-project",
 			mcp.WithDescription("Retrieve a specific project in a customer site of Teamwork.com. "+
 				"A project is central hubs to manage all of the components relating to what your team is working on."),
-			mcp.WithNumber("projectId",
+			mcp.WithNumber("project-id",
 				mcp.Required(),
 				mcp.Description("The ID of the task."),
 			),
@@ -44,7 +44,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var project twproject.Single
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&project.ID, "projectId"),
+				twmcp.RequiredNumericParam(&project.ID, "project-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)

@@ -120,7 +120,7 @@ MCP server.
 | Projects          | ✅     | ✅       | ❌      | ❌     |                                           |
 | Tasklists         | ✅     | ✅       | ❌      | ❌     | Retrieve by project                       |
 | Tasks             | ✅     | ✅       | ✅      | ❌     | Retrieve by project; retrieve by tasklist |
-| Companies/Clients | ✅     | ✅       | ❌      | ❌     |                                           |
+| Companies/Clients | ✅     | ✅       | ✅      | ❌     |                                           |
 | Users/People      | ✅     | ✅       | ❌      | ❌     | Retrieve by project                       |
 | Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
 

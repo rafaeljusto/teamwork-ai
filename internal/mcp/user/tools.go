@@ -33,7 +33,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	mcpServer.AddTool(
 		mcp.NewTool("retrieve-project-users",
 			mcp.WithDescription("Retrieve users, also known as people, from a specific project."),
-			mcp.WithNumber("projectId",
+			mcp.WithNumber("project-id",
 				mcp.Required(),
 				mcp.Description("The ID of the project from which to retrieve users."),
 			),
@@ -42,7 +42,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var users twuser.Multiple
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&users.ProjectID, "projectId"),
+				twmcp.RequiredNumericParam(&users.ProjectID, "project-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -62,7 +62,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	mcpServer.AddTool(
 		mcp.NewTool("retrieve-user",
 			mcp.WithDescription("Users, also known as person, is an individual who can be assigned to tasks."),
-			mcp.WithNumber("userId",
+			mcp.WithNumber("user-id",
 				mcp.Required(),
 				mcp.Description("The ID of the user."),
 			),
@@ -71,7 +71,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var user twuser.Single
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&user.ID, "userId"),
+				twmcp.RequiredNumericParam(&user.ID, "user-id"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)

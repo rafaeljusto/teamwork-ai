@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
@@ -15,34 +17,30 @@ import (
 // information about the company such as its name, address, contact details, and
 // relationships with other entities like industry, tags, and currency.
 type Company struct {
-	ID               int64                   `json:"id"`
-	Name             string                  `json:"name"`
-	CreatedAt        *time.Time              `json:"createdAt"`
-	UpdatedAt        *time.Time              `json:"updatedAt"`
-	AddressOne       string                  `json:"addressOne"`
-	AddressTwo       string                  `json:"addressTwo"`
-	City             string                  `json:"city"`
-	State            string                  `json:"state"`
-	Zip              string                  `json:"zip"`
-	CountryCode      string                  `json:"countryCode"`
-	EmailOne         string                  `json:"emailOne"`
-	EmailTwo         string                  `json:"emailTwo"`
-	EmailThree       string                  `json:"emailThree"`
-	Website          string                  `json:"website"`
-	CID              string                  `json:"cid"`
-	Phone            string                  `json:"phone"`
-	Fax              string                  `json:"fax"`
-	ProfileText      *string                 `json:"profileText,omitempty"`
-	PrivateNotesText *string                 `json:"privateNotesText,omitempty"`
-	PrivateNotes     *string                 `json:"privateNotes,omitempty"`
-	CanSeePrivate    bool                    `json:"canSeePrivate"`
-	IsOwner          bool                    `json:"isOwner"`
-	Industry         *teamwork.Relationship  `json:"industry"`
-	NameURL          string                  `json:"companyNameUrl"`
-	ClientManagedBy  *teamwork.Relationship  `json:"clientManagedBy"`
-	Tags             []teamwork.Relationship `json:"tags"`
-	Status           string                  `json:"status"`
-	Currency         *teamwork.Relationship  `json:"currency"`
+	ID          int64   `json:"id"`
+	AddressOne  string  `json:"addressOne"`
+	AddressTwo  string  `json:"addressTwo"`
+	City        string  `json:"city"`
+	CountryCode string  `json:"countryCode"`
+	EmailOne    string  `json:"emailOne"`
+	EmailThree  string  `json:"emailThree"`
+	EmailTwo    string  `json:"emailTwo"`
+	Fax         string  `json:"fax"`
+	Name        string  `json:"name"`
+	Phone       string  `json:"phone"`
+	Profile     *string `json:"profileText"`
+	State       string  `json:"state"`
+	Website     string  `json:"website"`
+	Zip         string  `json:"zip"`
+
+	ManagedBy *teamwork.Relationship  `json:"clientManagedBy"`
+	Currency  *teamwork.Relationship  `json:"currency"`
+	Industry  *teamwork.Relationship  `json:"industry"`
+	Tags      []teamwork.Relationship `json:"tags"`
+
+	CreatedAt *time.Time `json:"createdAt"`
+	UpdatedAt *time.Time `json:"updatedAt"`
+	Status    string     `json:"status"`
 }
 
 // Single represents a request to retrieve a single company by its ID.
@@ -51,8 +49,8 @@ type Company struct {
 type Single Company
 
 // Request creates an HTTP request to retrieve a single company by its ID.
-func (t Single) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/companies/%d.json", server, t.ID)
+func (s Single) Request(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/companies/%d.json", server, s.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
@@ -62,62 +60,152 @@ func (t Single) Request(ctx context.Context, server string) (*http.Request, erro
 }
 
 // UnmarshalJSON decodes the JSON data into a Single instance.
-func (t *Single) UnmarshalJSON(data []byte) error {
+func (s *Single) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Company Company `json:"company"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*t = Single(raw.Company)
+	*s = Single(raw.Company)
 	return nil
 }
 
 // Multiple represents a request to retrieve multiple companies.
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/companies/get-projects-api-v3-companies-json
-type Multiple []Company
+type Multiple struct {
+	Filters struct {
+		SearchTerm   string
+		TagIDs       []int64
+		MatchAllTags *bool
+		Page         int64
+		PageSize     int64
+	}
+	Result struct {
+		Meta struct {
+			Page struct {
+				HasMore bool `json:"hasMore"`
+			} `json:"page"`
+		} `json:"meta"`
+		Companies []Company `json:"companies"`
+	}
+}
 
 // Request creates an HTTP request to retrieve multiple companies.
-func (t Multiple) Request(ctx context.Context, server string) (*http.Request, error) {
+func (m Multiple) Request(ctx context.Context, server string) (*http.Request, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, server+"/projects/api/v3/companies.json", nil)
 	if err != nil {
 		return nil, err
 	}
+	query := req.URL.Query()
+	if m.Filters.SearchTerm != "" {
+		query.Set("searchTerm", m.Filters.SearchTerm)
+	}
+	if len(m.Filters.TagIDs) > 0 {
+		tagIDs := make([]string, len(m.Filters.TagIDs))
+		for i, id := range m.Filters.TagIDs {
+			tagIDs[i] = strconv.FormatInt(id, 10)
+		}
+		query.Set("tagIds", fmt.Sprintf("[%s]", strings.Join(tagIDs, ",")))
+	}
+	if m.Filters.MatchAllTags != nil {
+		query.Set("matchAllTags", strconv.FormatBool(*m.Filters.MatchAllTags))
+	}
+	req.URL.RawQuery = query.Encode()
 	req.Header.Set("Accept", "application/json")
 	return req, nil
 }
 
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
-func (t *Multiple) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Companies []Company `json:"companies"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	*t = raw.Companies
-	return nil
+func (m *Multiple) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &m.Result)
 }
 
 // Creation represents the payload for creating a new company in Teamwork.com.
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/companies/post-projects-api-v3-companies-json
 type Creation struct {
-	Name string `json:"name"`
+	AddressOne  *string `json:"addressOne,omitempty"`
+	AddressTwo  *string `json:"addressTwo,omitempty"`
+	City        *string `json:"city,omitempty"`
+	CountryCode *string `json:"countrycode,omitempty"`
+	EmailOne    *string `json:"emailOne,omitempty"`
+	EmailTwo    *string `json:"emailTwo,omitempty"`
+	EmailThree  *string `json:"emailThree,omitempty"`
+	Fax         *string `json:"fax,omitempty"`
+	Name        string  `json:"name"`
+	Phone       *string `json:"phone,omitempty"`
+	Profile     *string `json:"profile,omitempty"`
+	State       *string `json:"state,omitempty"`
+	Website     *string `json:"website,omitempty"`
+	Zip         *string `json:"zip,omitempty"`
+
+	ManagerID  *int64  `json:"clientManagedBy"`
+	CurrencyID *int64  `json:"currencyId,omitempty"`
+	IndustryID *int64  `json:"industryCatId,omitempty"`
+	TagIDs     []int64 `json:"tagIds,omitempty"`
 }
 
 // Request creates an HTTP request to create a new company.
-func (t Creation) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/companies.json", server)
+func (c Creation) Request(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/companies.json", server)
 	paylaod := struct {
 		Company Creation `json:"company"`
-	}{Company: t}
+	}{Company: c}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
+
+// Update represents the payload for updating an existing company in
+// Teamwork.com.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/companies/patch-projects-api-v3-companies-company-id-json
+type Update struct {
+	ID      int64
+	Company struct {
+		AddressOne  *string `json:"addressOne,omitempty"`
+		AddressTwo  *string `json:"addressTwo,omitempty"`
+		City        *string `json:"city,omitempty"`
+		CountryCode *string `json:"countrycode,omitempty"`
+		EmailOne    *string `json:"emailOne,omitempty"`
+		EmailTwo    *string `json:"emailTwo,omitempty"`
+		EmailThree  *string `json:"emailThree,omitempty"`
+		Fax         *string `json:"fax,omitempty"`
+		Name        *string `json:"name"`
+		Phone       *string `json:"phone,omitempty"`
+		Profile     *string `json:"profile,omitempty"`
+		State       *string `json:"state,omitempty"`
+		Website     *string `json:"website,omitempty"`
+		Zip         *string `json:"zip,omitempty"`
+
+		ManagerID  *int64  `json:"clientManagedBy"`
+		CurrencyID *int64  `json:"currencyId,omitempty"`
+		IndustryID *int64  `json:"industryCatId,omitempty"`
+		TagIDs     []int64 `json:"tagIds,omitempty"`
+	}
+}
+
+// Request creates an HTTP request to update a company.
+func (u Update) Request(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/companies/%d.json", server, u.ID)
+	paylaod := struct {
+		Company any `json:"company"`
+	}{Company: u.Company}
+	body, err := json.Marshal(paylaod)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
