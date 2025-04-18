@@ -110,7 +110,7 @@ Where `<server>` is the URL of the remote MCP server.
 > for confirmation before executing a tool. This is a safety feature to prevent
 > unintended actions.
 
-### Supported entities
+### 🔌 Supported entities
 
 Below is a table summarizing the supported entities and their operations in the
 MCP server.
