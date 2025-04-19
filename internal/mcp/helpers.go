@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 )
 
 // ParamGroup applies a series of functions to a map of parameters.
@@ -280,11 +282,11 @@ func timeParam(
 }
 
 // RequiredDateParam retrieves a required date parameter from a map, converting
-// it to a time.Time type. It returns an error if the key is not found or if the
-// type conversion fails. The date format is expected to be "YYYY-MM-DD". If the
-// target is nil, it returns an error.
+// it to a teamwork.Date type. It returns an error if the key is not found or if
+// the type conversion fails. The date format is expected to be "YYYY-MM-DD". If
+// the target is nil, it returns an error.
 func RequiredDateParam(
-	target *time.Time,
+	target *teamwork.Date,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -294,11 +296,11 @@ func RequiredDateParam(
 }
 
 // OptionalDateParam retrieves an optional date parameter from a map, converting
-// it to a time.Time type. It returns an error if the type conversion fails. The
-// date format is expected to be "YYYY-MM-DD". If the target is nil, it returns
-// an error. If the key is not found, it does not set the target.
+// it to a teamwork.Date type. It returns an error if the type conversion fails.
+// The date format is expected to be "YYYY-MM-DD". If the target is nil, it
+// returns an error. If the key is not found, it does not set the target.
 func OptionalDateParam(
-	target *time.Time,
+	target *teamwork.Date,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -308,11 +310,12 @@ func OptionalDateParam(
 }
 
 // OptionalDatePointerParam retrieves an optional date parameter from a map and
-// sets it to a pointer target. It converts the value to a time.Time type and
-// applies middleware functions to the value before setting it. The date format
-// is expected to be "YYYY-MM-DD". If the target is nil, it returns an error.
+// sets it to a pointer target. It converts the value to a teamwork.Date type
+// and applies middleware functions to the value before setting it. The date
+// format is expected to be "YYYY-MM-DD". If the target is nil, it returns an
+// error.
 func OptionalDatePointerParam(
-	target **time.Time,
+	target **teamwork.Date,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -320,7 +323,7 @@ func OptionalDatePointerParam(
 		if target == nil {
 			return fmt.Errorf("target cannot be nil")
 		}
-		var temp time.Time
+		var temp teamwork.Date
 		var set bool
 		middlewares = append(middlewares, func(*string) (bool, error) { set = true; return true, nil })
 		if err := dateParam(params, &temp, key, true, middlewares...); err != nil {
@@ -335,7 +338,7 @@ func OptionalDatePointerParam(
 
 func dateParam(
 	params map[string]any,
-	target *time.Time,
+	target *teamwork.Date,
 	key string,
 	optional bool,
 	middlewares ...ParamMiddleware[string],
@@ -360,11 +363,11 @@ func dateParam(
 			return err
 		}
 	}
-	var err error
-	*target, err = time.Parse("2006-01-02", v)
+	t, err := time.Parse("2006-01-02", v)
 	if err != nil {
 		return fmt.Errorf("invalid date format for %s: %w", key, err)
 	}
+	*target = teamwork.Date(t)
 	return nil
 }
 

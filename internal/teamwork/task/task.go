@@ -27,15 +27,15 @@ import (
 // a project. Each task can have various attributes such as priority, status,
 // and progress, which help in tracking and managing the work effectively.
 type Task struct {
-	ID                     int64      `json:"id"`
-	Name                   string     `json:"name"`
-	Description            *string    `json:"description"`
-	DescriptionContentType *string    `json:"descriptionContentType"`
-	Priority               *string    `json:"priority"`
-	Progress               int64      `json:"progress"`
-	StartDate              *time.Time `json:"startDate"`
-	DueDate                *time.Time `json:"dueDate"`
-	EstimateMinutes        int64      `json:"estimateMinutes"`
+	ID                     int64          `json:"id"`
+	Name                   string         `json:"name"`
+	Description            *string        `json:"description"`
+	DescriptionContentType *string        `json:"descriptionContentType"`
+	Priority               *string        `json:"priority"`
+	Progress               int64          `json:"progress"`
+	StartDate              *teamwork.Date `json:"startDate"`
+	DueDate                *teamwork.Date `json:"dueDate"`
+	EstimateMinutes        int64          `json:"estimateMinutes"`
 
 	Tasklist  teamwork.Relationship   `json:"tasklist"`
 	Assignees []teamwork.Relationship `json:"assignees"`
@@ -159,13 +159,13 @@ func (m *Multiple) UnmarshalJSON(data []byte) error {
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/post-projects-api-v3-tasklists-tasklist-id-tasks-json
 type Creation struct {
-	Name            string     `json:"name"`
-	Description     *string    `json:"description,omitempty"`
-	Priority        *string    `json:"priority,omitempty"`
-	Progress        *int64     `json:"progress,omitempty"`
-	StartDate       *time.Time `json:"startAt,omitempty"`
-	DueDate         *time.Time `json:"dueAt,omitempty"`
-	EstimateMinutes *int64     `json:"estimatedMinutes,omitempty"`
+	Name            string         `json:"name"`
+	Description     *string        `json:"description,omitempty"`
+	Priority        *string        `json:"priority,omitempty"`
+	Progress        *int64         `json:"progress,omitempty"`
+	StartDate       *teamwork.Date `json:"startAt,omitempty"`
+	DueDate         *teamwork.Date `json:"dueAt,omitempty"`
+	EstimateMinutes *int64         `json:"estimatedMinutes,omitempty"`
 
 	TasklistID int64                `json:"tasklistId"`
 	Assignees  *teamwork.UserGroups `json:"assignees,omitempty"`
@@ -196,14 +196,14 @@ func (c Creation) HTTPRequest(ctx context.Context, server string) (*http.Request
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/patch-projects-api-v3-tasks-task-id-json
 type Update struct {
-	ID              int64      `json:"-"`
-	Name            *string    `json:"name,omitempty"`
-	Description     *string    `json:"description,omitempty"`
-	Priority        *string    `json:"priority,omitempty"`
-	Progress        *int64     `json:"progress,omitempty"`
-	StartDate       *time.Time `json:"startDate,omitempty"`
-	DueDate         *time.Time `json:"dueDate,omitempty"`
-	EstimateMinutes *int64     `json:"estimateMinutes,omitempty"`
+	ID              int64          `json:"-"`
+	Name            *string        `json:"name,omitempty"`
+	Description     *string        `json:"description,omitempty"`
+	Priority        *string        `json:"priority,omitempty"`
+	Progress        *int64         `json:"progress,omitempty"`
+	StartDate       *teamwork.Date `json:"startDate,omitempty"`
+	DueDate         *teamwork.Date `json:"dueDate,omitempty"`
+	EstimateMinutes *int64         `json:"estimateMinutes,omitempty"`
 
 	TasklistID *int64               `json:"tasklistId,omitempty"`
 	Assignees  *teamwork.UserGroups `json:"assignees,omitempty"`
