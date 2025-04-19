@@ -17,13 +17,32 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("retrieve-skills",
 			mcp.WithDescription("Retrieve multiple skills in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
+			mcp.WithString("search-term",
+				mcp.Description("A search term to filter skills by name."),
+			),
+			mcp.WithNumber("page",
+				mcp.Description("Page number for pagination of results."),
+			),
+			mcp.WithNumber("page-size",
+				mcp.Description("Number of results per page for pagination."),
+			),
 		),
-		func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var skills twskill.Multiple
-			if err := configResources.TeamworkEngine.Do(ctx, &skills); err != nil {
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var multiple twskill.Multiple
+
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
+				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
+				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("invalid parameters: %w", err)
+			}
+
+			if err := configResources.TeamworkEngine.Do(ctx, &multiple); err != nil {
 				return nil, err
 			}
-			encoded, err := json.Marshal(skills)
+			encoded, err := json.Marshal(multiple)
 			if err != nil {
 				return nil, err
 			}
@@ -70,7 +89,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Description("The name of the skill."),
 			),
 			mcp.WithArray("user-ids",
-				mcp.Description("List of user IDs assigned to the skill. This is a JSON array of integers."),
+				mcp.Description("A list of user IDs assigned to the skill."),
 				mcp.Items(map[string]any{
 					"type": "number",
 				}),
@@ -103,29 +122,28 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Description("The ID of the skill to update."),
 			),
 			mcp.WithString("name",
-				mcp.Required(),
 				mcp.Description("The name of the skill."),
 			),
 			mcp.WithArray("user-ids",
-				mcp.Description("List of user IDs assigned to the skill. This is a JSON array of integers."),
+				mcp.Description("A list of user IDs assigned to the skill."),
 				mcp.Items(map[string]any{
 					"type": "number",
 				}),
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var skillUpdate twskill.Update
+			var skill twskill.Update
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&skillUpdate.ID, "skill-id"),
-				twmcp.RequiredParam(&skillUpdate.Skill.Name, "name"),
-				twmcp.OptionalNumericListParam(&skillUpdate.Skill.UserIDs, "user-ids"),
+				twmcp.RequiredNumericParam(&skill.ID, "skill-id"),
+				twmcp.OptionalPointerParam(&skill.Name, "name"),
+				twmcp.OptionalNumericListParam(&skill.UserIDs, "user-ids"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			if err := configResources.TeamworkEngine.Do(ctx, &skillUpdate); err != nil {
+			if err := configResources.TeamworkEngine.Do(ctx, &skill); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Skill created successfully"), nil

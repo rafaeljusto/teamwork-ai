@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -15,8 +16,9 @@ import (
 // that can be assigned to users, allowing for better task management and
 // organization within projects.
 type Skill struct {
-	ID              int64      `json:"id"`
-	Name            string     `json:"name"`
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+
 	CreatedByUserID int64      `json:"createdByUser"`
 	CreatedAt       time.Time  `json:"createdAt"`
 	UpdatedByUserID *int64     `json:"updatedByUser"`
@@ -30,9 +32,9 @@ type Skill struct {
 // No public documentation available yet.
 type Single Skill
 
-// Request creates an HTTP request to retrieve a single skill by its ID.
-func (t Single) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, t.ID)
+// HTTPRequest creates an HTTP request to retrieve a single skill by its ID.
+func (s Single) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, s.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
@@ -42,43 +44,63 @@ func (t Single) Request(ctx context.Context, server string) (*http.Request, erro
 }
 
 // UnmarshalJSON decodes the JSON data into a Single instance.
-func (t *Single) UnmarshalJSON(data []byte) error {
+func (s *Single) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Skill Skill `json:"skill"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*t = Single(raw.Skill)
+	*s = Single(raw.Skill)
 	return nil
 }
 
 // Multiple represents a request to retrieve multiple skills.
-type Multiple []Skill
-
-// Request creates an HTTP request to retrieve multiple skills.
 //
 // No public documentation available yet.
-func (t Multiple) Request(ctx context.Context, server string) (*http.Request, error) {
+type Multiple struct {
+	Request struct {
+		Filters struct {
+			SearchTerm string
+			Page       int64
+			PageSize   int64
+		}
+	}
+	Response struct {
+		Meta struct {
+			Page struct {
+				HasMore bool `json:"hasMore"`
+			} `json:"page"`
+		} `json:"meta"`
+		Skills []Skill `json:"skills"`
+	}
+}
+
+// HTTPRequest creates an HTTP request to retrieve multiple skills.
+func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	url := fmt.Sprintf("%s/projects/api/v3/skills.json", server)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
+	query := req.URL.Query()
+	if m.Request.Filters.SearchTerm != "" {
+		query.Set("searchTerm", m.Request.Filters.SearchTerm)
+	}
+	if m.Request.Filters.Page > 0 {
+		query.Set("page", strconv.FormatInt(m.Request.Filters.Page, 10))
+	}
+	if m.Request.Filters.PageSize > 0 {
+		query.Set("pageSize", strconv.FormatInt(m.Request.Filters.PageSize, 10))
+	}
+	req.URL.RawQuery = query.Encode()
 	req.Header.Set("Accept", "application/json")
 	return req, nil
 }
 
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
-func (t *Multiple) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Skills []Skill `json:"skills"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	*t = raw.Skills
-	return nil
+func (m *Multiple) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &m.Response)
 }
 
 // Creation represents the payload for creating a new skill in Teamwork.com.
@@ -89,12 +111,12 @@ type Creation struct {
 	UserIDs []int64 `json:"userIds"`
 }
 
-// Request creates an HTTP request to create a new skill in Teamwork.com.
-func (t Creation) Request(ctx context.Context, server string) (*http.Request, error) {
+// HTTPRequest creates an HTTP request to create a new skill in Teamwork.com.
+func (c Creation) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/skills.json", server)
 	paylaod := struct {
 		Skill Creation `json:"skill"`
-	}{Skill: t}
+	}{Skill: c}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err
@@ -112,19 +134,18 @@ func (t Creation) Request(ctx context.Context, server string) (*http.Request, er
 //
 // No public documentation available yet.
 type Update struct {
-	ID    int64
-	Skill struct {
-		Name    *string `json:"name,omitempty"`
-		UserIDs []int64 `json:"userIds,omitempty"`
-	}
+	ID      int64   `json:"-"`
+	Name    *string `json:"name,omitempty"`
+	UserIDs []int64 `json:"userIds,omitempty"`
 }
 
-// Request creates an HTTP request to update an existing skill in Teamwork.com.
-func (t Update) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, t.ID)
+// HTTPRequest creates an HTTP request to update an existing skill in
+// Teamwork.com.
+func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, u.ID)
 	paylaod := struct {
-		Skill any `json:"skill"`
-	}{Skill: t.Skill}
+		Skill Update `json:"skill"`
+	}{Skill: u}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err

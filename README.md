@@ -57,7 +57,7 @@ The server works using 2 different modes:
 {
   "mcpServers": {
     "Teamwork AI": {
-      "command": "teamwork-ai",
+      "command": "teamwork-mcp",
       "args": [
         "-mode=stdio"
       ],
@@ -117,11 +117,11 @@ MCP server.
 
 | Entity            | Create | Retrieve | Update | Delete | Extra                                     |
 |-------------------|--------|----------|--------|--------|-------------------------------------------|
-| Projects          | ✅     | ✅       | ❌      | ❌     |                                           |
-| Tasklists         | ✅     | ✅       | ❌      | ❌     | Retrieve by project                       |
+| Projects          | ✅     | ✅       | ✅      | ❌     |                                           |
+| Tasklists         | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
 | Tasks             | ✅     | ✅       | ✅      | ❌     | Retrieve by project; retrieve by tasklist |
 | Companies/Clients | ✅     | ✅       | ✅      | ❌     |                                           |
-| Users/People      | ✅     | ✅       | ❌      | ❌     | Retrieve by project                       |
+| Users/People      | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
 | Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
 
 ### 🤓 Debug

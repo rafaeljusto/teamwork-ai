@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
@@ -25,28 +27,29 @@ import (
 // a project. Each task can have various attributes such as priority, status,
 // and progress, which help in tracking and managing the work effectively.
 type Task struct {
-	ID                     int64                   `json:"id"`
-	Name                   string                  `json:"name"`
-	Status                 string                  `json:"status"`
-	Description            *string                 `json:"description"`
-	DescriptionContentType *string                 `json:"descriptionContentType"`
-	Priority               *string                 `json:"priority"`
-	Progress               int64                   `json:"progress"`
-	Tasklist               teamwork.Relationship   `json:"tasklist"`
-	Assignees              []teamwork.Relationship `json:"assignees"`
-	Tags                   []teamwork.Relationship `json:"tags"`
-	StartDate              *time.Time              `json:"startDate"`
-	DueDate                *time.Time              `json:"dueDate"`
-	EstimateMinutes        int64                   `json:"estimateMinutes"`
-	CreatedBy              *int64                  `json:"createdBy"`
-	CreatedAt              *time.Time              `json:"createdAt"`
-	UpdatedBy              *int64                  `json:"updatedBy"`
-	UpdatedAt              time.Time               `json:"updatedAt"`
-	DeletedBy              *int64                  `json:"deletedBy"`
-	DeletedAt              *time.Time              `json:"deletedAt"`
-	CompletedBy            *int64                  `json:"completedBy,omitempty"`
-	CompletedDate          *time.Time              `json:"completedAt,omitempty"`
-	Meta                   map[string]any          `json:"meta,omitempty"`
+	ID                     int64      `json:"id"`
+	Name                   string     `json:"name"`
+	Description            *string    `json:"description"`
+	DescriptionContentType *string    `json:"descriptionContentType"`
+	Priority               *string    `json:"priority"`
+	Progress               int64      `json:"progress"`
+	StartDate              *time.Time `json:"startDate"`
+	DueDate                *time.Time `json:"dueDate"`
+	EstimateMinutes        int64      `json:"estimateMinutes"`
+
+	Tasklist  teamwork.Relationship   `json:"tasklist"`
+	Assignees []teamwork.Relationship `json:"assignees"`
+	Tags      []teamwork.Relationship `json:"tags"`
+
+	CreatedBy     *int64     `json:"createdBy"`
+	CreatedAt     *time.Time `json:"createdAt"`
+	UpdatedBy     *int64     `json:"updatedBy"`
+	UpdatedAt     time.Time  `json:"updatedAt"`
+	DeletedBy     *int64     `json:"deletedBy"`
+	DeletedAt     *time.Time `json:"deletedAt"`
+	CompletedBy   *int64     `json:"completedBy,omitempty"`
+	CompletedDate *time.Time `json:"completedAt,omitempty"`
+	Status        string     `json:"status"`
 }
 
 // Single represents a request to retrieve a single task by its ID.
@@ -54,9 +57,9 @@ type Task struct {
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/get-projects-api-v3-tasks-task-id-json
 type Single Task
 
-// Request creates an HTTP request to retrieve a single task by its ID.
-func (t Single) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, t.ID)
+// HTTPRequest creates an HTTP request to retrieve a single task by its ID.
+func (s Single) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, s.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
@@ -66,14 +69,14 @@ func (t Single) Request(ctx context.Context, server string) (*http.Request, erro
 }
 
 // UnmarshalJSON decodes the JSON data into a Single instance.
-func (t *Single) UnmarshalJSON(data []byte) error {
+func (s *Single) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Task Task `json:"task"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*t = Single(raw.Task)
+	*s = Single(raw.Task)
 	return nil
 }
 
@@ -83,19 +86,37 @@ func (t *Single) UnmarshalJSON(data []byte) error {
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/get-projects-api-v3-projects-project-id-tasks-json
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/get-projects-api-v3-tasklists-tasklist-id-tasks-json
 type Multiple struct {
-	Tasks      []Task
-	ProjectID  int64
-	TasklistID int64
+	Request struct {
+		Path struct {
+			ProjectID  int64
+			TasklistID int64
+		}
+		Filters struct {
+			SearchTerm   string
+			TagIDs       []int64
+			MatchAllTags *bool
+			Page         int64
+			PageSize     int64
+		}
+	}
+	Response struct {
+		Meta struct {
+			Page struct {
+				HasMore bool `json:"hasMore"`
+			} `json:"page"`
+		} `json:"meta"`
+		Tasks []Task `json:"tasks"`
+	}
 }
 
-// Request creates an HTTP request to retrieve multiple tasks.
-func (t Multiple) Request(ctx context.Context, server string) (*http.Request, error) {
+// HTTPRequest creates an HTTP request to retrieve multiple tasks.
+func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	var url string
 	switch {
-	case t.ProjectID > 0:
-		url = fmt.Sprintf("%s/projects/api/v3/projects/%d/tasks.json", server, t.ProjectID)
-	case t.TasklistID > 0:
-		url = fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, t.TasklistID)
+	case m.Request.Path.ProjectID > 0:
+		url = fmt.Sprintf("%s/projects/api/v3/projects/%d/tasks.json", server, m.Request.Path.ProjectID)
+	case m.Request.Path.TasklistID > 0:
+		url = fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, m.Request.Path.TasklistID)
 	default:
 		url = fmt.Sprintf("%s/projects/api/v3/tasks.json", server)
 	}
@@ -104,39 +125,60 @@ func (t Multiple) Request(ctx context.Context, server string) (*http.Request, er
 	if err != nil {
 		return nil, err
 	}
+	query := req.URL.Query()
+	if m.Request.Filters.SearchTerm != "" {
+		query.Set("searchTerm", m.Request.Filters.SearchTerm)
+	}
+	if len(m.Request.Filters.TagIDs) > 0 {
+		tagIDs := make([]string, len(m.Request.Filters.TagIDs))
+		for i, id := range m.Request.Filters.TagIDs {
+			tagIDs[i] = strconv.FormatInt(id, 10)
+		}
+		query.Set("tagIds", strings.Join(tagIDs, ","))
+	}
+	if m.Request.Filters.MatchAllTags != nil {
+		query.Set("matchAllTags", strconv.FormatBool(*m.Request.Filters.MatchAllTags))
+	}
+	if m.Request.Filters.Page > 0 {
+		query.Set("page", strconv.FormatInt(m.Request.Filters.Page, 10))
+	}
+	if m.Request.Filters.PageSize > 0 {
+		query.Set("pageSize", strconv.FormatInt(m.Request.Filters.PageSize, 10))
+	}
+	req.URL.RawQuery = query.Encode()
 	req.Header.Set("Accept", "application/json")
 	return req, nil
 }
 
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
-func (t *Multiple) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Tasks []Task `json:"tasks"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	t.Tasks = raw.Tasks
-	return nil
+func (m *Multiple) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &m.Response)
 }
 
 // Creation represents the payload for creating a new task in Teamwork.com.
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/post-projects-api-v3-tasklists-tasklist-id-tasks-json
 type Creation struct {
-	Name        string               `json:"name"`
-	TasklistID  int64                `json:"tasklistId"`
-	Description string               `json:"description"`
-	Assignees   *teamwork.UserGroups `json:"assignees,omitempty"`
-	Priority    *string              `json:"priority,omitempty"`
+	Name            string     `json:"name"`
+	Description     *string    `json:"description,omitempty"`
+	Priority        *string    `json:"priority,omitempty"`
+	Progress        *int64     `json:"progress,omitempty"`
+	StartDate       *time.Time `json:"startDate,omitempty"`
+	DueDate         *time.Time `json:"dueDate,omitempty"`
+	EstimateMinutes *int64     `json:"estimateMinutes,omitempty"`
+
+	TasklistID int64                `json:"tasklistId"`
+	Assignees  *teamwork.UserGroups `json:"assignees,omitempty"`
+	Tags       []int64              `json:"tagIds,omitempty"`
 }
 
-// Request creates an HTTP request to create a new task in a specific tasklist.
-func (t Creation) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, t.TasklistID)
+// HTTPRequest creates an HTTP request to create a new task in a specific
+// tasklist.
+func (c Creation) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, c.TasklistID)
 	paylaod := struct {
 		Task Creation `json:"task"`
-	}{Task: t}
+	}{Task: c}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err
@@ -154,21 +196,27 @@ func (t Creation) Request(ctx context.Context, server string) (*http.Request, er
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/tasks/patch-projects-api-v3-tasks-task-id-json
 type Update struct {
-	ID   int64
-	Task struct {
-		Name        *string              `json:"name,omitempty"`
-		Description *string              `json:"description,omitempty"`
-		Assignees   *teamwork.UserGroups `json:"assignees"`
-		Priority    *string              `json:"priority,omitempty"`
-	}
+	ID              int64      `json:"-"`
+	Name            *string    `json:"name,omitempty"`
+	Description     *string    `json:"description,omitempty"`
+	Priority        *string    `json:"priority,omitempty"`
+	Progress        *int64     `json:"progress,omitempty"`
+	StartDate       *time.Time `json:"startDate,omitempty"`
+	DueDate         *time.Time `json:"dueDate,omitempty"`
+	EstimateMinutes *int64     `json:"estimateMinutes,omitempty"`
+
+	TasklistID *int64               `json:"tasklistId,omitempty"`
+	Assignees  *teamwork.UserGroups `json:"assignees,omitempty"`
+	Tags       []int64              `json:"tagIds,omitempty"`
 }
 
-// Request creates an HTTP request to update an existing task in Teamwork.com.
-func (t Update) Request(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, t.ID)
+// HTTPRequest creates an HTTP request to update an existing task in
+// Teamwork.com.
+func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, u.ID)
 	paylaod := struct {
-		Task any `json:"task"`
-	}{Task: t.Task}
+		Task Update `json:"task"`
+	}{Task: u}
 	body, err := json.Marshal(paylaod)
 	if err != nil {
 		return nil, err

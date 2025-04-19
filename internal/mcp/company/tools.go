@@ -37,10 +37,10 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var multiple twcompany.Multiple
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.OptionalParam(&multiple.Filters.SearchTerm, "search-term"),
-				twmcp.OptionalNumericListParam(&multiple.Filters.TagIDs, "tag-ids"),
-				twmcp.OptionalNumericParam(&multiple.Filters.Page, "page"),
-				twmcp.OptionalNumericParam(&multiple.Filters.PageSize, "page-size"),
+				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
+				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
+				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
+				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
@@ -49,7 +49,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			if err := configResources.TeamworkEngine.Do(ctx, &multiple); err != nil {
 				return nil, err
 			}
-			encoded, err := json.Marshal(multiple.Result)
+			encoded, err := json.Marshal(multiple.Response)
 			if err != nil {
 				return nil, err
 			}
@@ -251,34 +251,34 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var companyUpdate twcompany.Update
+			var company twcompany.Update
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
-				twmcp.RequiredNumericParam(&companyUpdate.ID, "company-id"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.Name, "name"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.AddressOne, "address-one"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.AddressTwo, "address-two"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.City, "city"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.State, "state"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.Zip, "zip"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.CountryCode, "country-code"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.Phone, "phone"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.Fax, "fax"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.EmailOne, "email-one"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.EmailTwo, "email-two"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.EmailThree, "email-three"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.Website, "website"),
-				twmcp.OptionalPointerParam(&companyUpdate.Company.Profile, "profile"),
-				twmcp.OptionalNumericPointerParam(&companyUpdate.Company.ManagerID, "manager-id"),
-				twmcp.OptionalNumericPointerParam(&companyUpdate.Company.CurrencyID, "currency-id"),
-				twmcp.OptionalNumericPointerParam(&companyUpdate.Company.IndustryID, "industry-id"),
-				twmcp.OptionalNumericListParam(&companyUpdate.Company.TagIDs, "tag-ids"),
+				twmcp.RequiredNumericParam(&company.ID, "company-id"),
+				twmcp.OptionalPointerParam(&company.Name, "name"),
+				twmcp.OptionalPointerParam(&company.AddressOne, "address-one"),
+				twmcp.OptionalPointerParam(&company.AddressTwo, "address-two"),
+				twmcp.OptionalPointerParam(&company.City, "city"),
+				twmcp.OptionalPointerParam(&company.State, "state"),
+				twmcp.OptionalPointerParam(&company.Zip, "zip"),
+				twmcp.OptionalPointerParam(&company.CountryCode, "country-code"),
+				twmcp.OptionalPointerParam(&company.Phone, "phone"),
+				twmcp.OptionalPointerParam(&company.Fax, "fax"),
+				twmcp.OptionalPointerParam(&company.EmailOne, "email-one"),
+				twmcp.OptionalPointerParam(&company.EmailTwo, "email-two"),
+				twmcp.OptionalPointerParam(&company.EmailThree, "email-three"),
+				twmcp.OptionalPointerParam(&company.Website, "website"),
+				twmcp.OptionalPointerParam(&company.Profile, "profile"),
+				twmcp.OptionalNumericPointerParam(&company.ManagerID, "manager-id"),
+				twmcp.OptionalNumericPointerParam(&company.CurrencyID, "currency-id"),
+				twmcp.OptionalNumericPointerParam(&company.IndustryID, "industry-id"),
+				twmcp.OptionalNumericListParam(&company.TagIDs, "tag-ids"),
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			if err := configResources.TeamworkEngine.Do(ctx, &companyUpdate); err != nil {
+			if err := configResources.TeamworkEngine.Do(ctx, &company); err != nil {
 				return nil, err
 			}
 			return mcp.NewToolResultText("Company updated successfully"), nil

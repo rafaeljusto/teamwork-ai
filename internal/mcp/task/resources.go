@@ -26,12 +26,12 @@ var resourceItem = mcp.NewResourceTemplate("twapi://tasks/{id}", "task",
 func registerResources(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddResource(resourceList,
 		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			var tasks twtask.Multiple
-			if err := configResources.TeamworkEngine.Do(ctx, &tasks); err != nil {
+			var multiple twtask.Multiple
+			if err := configResources.TeamworkEngine.Do(ctx, &multiple); err != nil {
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
-			for _, task := range tasks.Tasks {
+			for _, task := range multiple.Response.Tasks {
 				encoded, err := json.Marshal(task)
 				if err != nil {
 					return nil, err

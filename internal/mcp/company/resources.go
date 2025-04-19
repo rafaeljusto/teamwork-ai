@@ -33,7 +33,7 @@ func registerResources(mcpServer *server.MCPServer, configResources *config.Reso
 				return nil, err
 			}
 			var resourceContents []mcp.ResourceContents
-			for _, company := range multiple.Result.Companies {
+			for _, company := range multiple.Response.Companies {
 				encoded, err := json.Marshal(company)
 				if err != nil {
 					return nil, err
