@@ -18,7 +18,9 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			mcp.WithDescription("Retrieve multiple skills in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter skills by name."),
+				mcp.Description("A search term to filter skills by name, or by the first or last names of "+
+					"the user associated with the skill. The skill will be selected if each word of the term matches "+
+					"the skill name or the user first or last name, not requiring that the word matches are in the same field."),
 			),
 			mcp.WithNumber("page",
 				mcp.Description("Page number for pagination of results."),

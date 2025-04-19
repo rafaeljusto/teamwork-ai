@@ -163,9 +163,9 @@ type Creation struct {
 	Description     *string    `json:"description,omitempty"`
 	Priority        *string    `json:"priority,omitempty"`
 	Progress        *int64     `json:"progress,omitempty"`
-	StartDate       *time.Time `json:"startDate,omitempty"`
-	DueDate         *time.Time `json:"dueDate,omitempty"`
-	EstimateMinutes *int64     `json:"estimateMinutes,omitempty"`
+	StartDate       *time.Time `json:"startAt,omitempty"`
+	DueDate         *time.Time `json:"dueAt,omitempty"`
+	EstimateMinutes *int64     `json:"estimatedMinutes,omitempty"`
 
 	TasklistID int64                `json:"tasklistId"`
 	Assignees  *teamwork.UserGroups `json:"assignees,omitempty"`

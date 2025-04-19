@@ -18,7 +18,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			mcp.WithDescription("Retrieve multiple tasklists in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter tasklists by name or description."),
+				mcp.Description("A search term to filter tasklists by name."),
 			),
 			mcp.WithNumber("page",
 				mcp.Description("Page number for pagination of results."),
@@ -59,7 +59,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Description("The ID of the project from which to retrieve tasklists."),
 			),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter tasklists by name or description."),
+				mcp.Description("A search term to filter tasklists by name."),
 			),
 			mcp.WithNumber("page",
 				mcp.Description("Page number for pagination of results."),

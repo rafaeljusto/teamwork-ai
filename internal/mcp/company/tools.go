@@ -18,7 +18,8 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			mcp.WithDescription("Retrieve multiple companies, also know as clients, in a customer site of Teamwork.com. "+
 				"Companies, also know as clients, are organizations that the customer offers services to."),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter companies by name."),
+				mcp.Description("A search term to filter companies by name. "+
+					"Each word from the search term is used to match against the company name."),
 			),
 			mcp.WithArray("tag-ids",
 				mcp.Description("A list of tag IDs to filter companies by tags"),

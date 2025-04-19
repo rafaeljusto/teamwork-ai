@@ -25,7 +25,9 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 			mcp.WithDescription("Retrieve multiple tasks in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter tasks by name."),
+				mcp.Description("A search term to filter tasks by name, description or the related tasklist's name. "+
+					"The task will be selected if each word of the term matches the task name, task description, or the "+
+					"tasklist name, not requiring that the word matches are in the same field."),
 			),
 			mcp.WithArray("tag-ids",
 				mcp.Description("A list of tag IDs to filter tasks by tags"),
@@ -73,7 +75,9 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 				mcp.Description("The ID of the project from which to retrieve tasks."),
 			),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter tasks by name."),
+				mcp.Description("A search term to filter tasks by name, description or the related tasklist's name. "+
+					"The task will be selected if each word of the term matches the task name, task description, or the "+
+					"tasklist name, not requiring that the word matches are in the same field."),
 			),
 			mcp.WithArray("tag-ids",
 				mcp.Description("A list of tag IDs to filter tasks by tags"),
@@ -122,7 +126,9 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 				mcp.Description("The ID of the project from which to retrieve tasks."),
 			),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter tasks by name."),
+				mcp.Description("A search term to filter tasks by name, description or the related tasklist's name. "+
+					"The task will be selected if each word of the term matches the task name, task description, or the "+
+					"tasklist name, not requiring that the word matches are in the same field."),
 			),
 			mcp.WithArray("tag-ids",
 				mcp.Description("A list of tag IDs to filter tasks by tags"),
@@ -258,7 +264,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 				twmcp.OptionalPointerParam(&task.Priority, "priority",
 					twmcp.RestrictValues("low", "medium", "high"),
 				),
-				twmcp.OptionalPointerParam(&task.Progress, "progress"),
+				twmcp.OptionalNumericPointerParam(&task.Progress, "progress"),
 				twmcp.OptionalDatePointerParam(&task.StartDate, "start-date"),
 				twmcp.OptionalDatePointerParam(&task.DueDate, "due-date"),
 				twmcp.OptionalNumericPointerParam(&task.EstimateMinutes, "estimate-minutes"),

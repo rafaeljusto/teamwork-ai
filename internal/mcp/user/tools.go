@@ -18,7 +18,9 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			mcp.WithDescription("Retrieve multiple users, also know as people, in a customer site of Teamwork.com. "+
 				"Users, also known as people, are the individuals who can be assigned to tasks."),
 			mcp.WithString("search-term",
-				mcp.Description("A search term to filter users by name."),
+				mcp.Description("A search term to filter users by first or last names, or e-mail. "+
+					"The user will be selected if each word of the term matches the first or last name, or e-mail, not "+
+					"requiring that the word matches are in the same field."),
 			),
 			mcp.WithNumber("type",
 				mcp.Description("Type of user to filter by. The available options are account, collaborator or contact."),
@@ -63,6 +65,11 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Required(),
 				mcp.Description("The ID of the project from which to retrieve users."),
 			),
+			mcp.WithString("search-term",
+				mcp.Description("A search term to filter users by first or last names, or e-mail. "+
+					"The user will be selected if each word of the term matches the first or last name, or e-mail, not "+
+					"requiring that the word matches are in the same field."),
+			),
 			mcp.WithNumber("type",
 				mcp.Description("Type of user to filter by. The available options are account, collaborator or contact."),
 			),
@@ -78,6 +85,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.RequiredNumericParam(&multiple.Request.Path.ProjectID, "project-id"),
+				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalParam(&multiple.Request.Filters.Type, "type",
 					twmcp.RestrictValues("account", "collaborator", "contact"),
 				),
