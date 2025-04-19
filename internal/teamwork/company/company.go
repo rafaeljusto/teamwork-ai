@@ -15,7 +15,7 @@ import (
 
 // Company represents a company or client in Teamwork.com. It contains
 // information about the company such as its name, address, contact details, and
-// relationships with other entities like industry, tags, and currency.
+// relationships with other entities like industry and tags.
 type Company struct {
 	ID          int64   `json:"id"`
 	AddressOne  string  `json:"addressOne"`
@@ -34,7 +34,6 @@ type Company struct {
 	Zip         string  `json:"zip"`
 
 	ManagedBy *teamwork.Relationship  `json:"clientManagedBy"`
-	Currency  *teamwork.Relationship  `json:"currency"`
 	Industry  *teamwork.Relationship  `json:"industry"`
 	Tags      []teamwork.Relationship `json:"tags"`
 
@@ -150,7 +149,6 @@ type Creation struct {
 	Zip         *string `json:"zip,omitempty"`
 
 	ManagerID  *int64  `json:"clientManagedBy"`
-	CurrencyID *int64  `json:"currencyId,omitempty"`
 	IndustryID *int64  `json:"industryCatId,omitempty"`
 	TagIDs     []int64 `json:"tagIds,omitempty"`
 }
@@ -196,7 +194,6 @@ type Update struct {
 	Zip         *string `json:"zip,omitempty"`
 
 	ManagerID  *int64  `json:"clientManagedBy"`
-	CurrencyID *int64  `json:"currencyId,omitempty"`
 	IndustryID *int64  `json:"industryCatId,omitempty"`
 	TagIDs     []int64 `json:"tagIds,omitempty"`
 }

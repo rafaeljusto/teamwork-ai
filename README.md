@@ -123,6 +123,7 @@ MCP server.
 | Companies/Clients | ✅     | ✅       | ✅      | ❌     |                                           |
 | Users/People      | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
 | Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
+| Industries        | ❌     | ✅       | ❌      | ❌     |                                           |
 
 ### 🤓 Debug
 
