@@ -124,6 +124,11 @@ MCP server.
 | Users/People      | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
 | Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
 | Industries        | ❌     | ✅       | ❌      | ❌     |                                           |
+| Tags              | ✅     | ✅       | ✅      | ❌     |                                           |
+
+> [!NOTE]
+> Not all properties are supported for each entity. And, for now, delete actions
+> are not implemented for safety.
 
 ### 🤓 Debug
 

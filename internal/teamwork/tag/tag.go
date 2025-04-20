@@ -1,0 +1,168 @@
+package tag
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
+)
+
+// Tag are a way to mark items so that you can use a filter to see just those
+// items. Tags can be added to projects, tasks, milestones, messages, time logs,
+// notebooks, files and links.
+type Tag struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+
+	Project *teamwork.Relationship `json:"project"`
+}
+
+// Single represents a request to retrieve a single tag by its ID.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/tags/get-projects-api-v3-tags-tag-id-json
+type Single Tag
+
+// HTTPRequest creates an HTTP request to retrieve a single tag by its ID.
+func (s Single) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tags/%d.json", server, s.ID)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	return req, nil
+}
+
+// UnmarshalJSON decodes the JSON data into a Single instance.
+func (s *Single) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		Tag Tag `json:"tag"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	*s = Single(raw.Tag)
+	return nil
+}
+
+// Multiple represents a request to retrieve multiple tags.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/tags/get-projects-api-v3-tags-json
+type Multiple struct {
+	Request struct {
+		Filters struct {
+			SearchTerm string
+			ItemType   string
+			ProjectIDs []int64
+			Page       int64
+			PageSize   int64
+		}
+	}
+	Response struct {
+		Meta struct {
+			Page struct {
+				HasMore bool `json:"hasMore"`
+			} `json:"page"`
+		} `json:"meta"`
+		Tags []Tag `json:"tags"`
+	}
+}
+
+// HTTPRequest creates an HTTP request to retrieve multiple tags.
+func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, server+"/projects/api/v3/tags.json", nil)
+	if err != nil {
+		return nil, err
+	}
+	query := req.URL.Query()
+	if m.Request.Filters.SearchTerm != "" {
+		query.Set("searchTerm", m.Request.Filters.SearchTerm)
+	}
+	if m.Request.Filters.ItemType != "" {
+		query.Set("itemType", m.Request.Filters.ItemType)
+	}
+	if len(m.Request.Filters.ProjectIDs) > 0 {
+		projectIDs := make([]string, len(m.Request.Filters.ProjectIDs))
+		for i, id := range m.Request.Filters.ProjectIDs {
+			projectIDs[i] = strconv.FormatInt(id, 10)
+		}
+		query.Set("projectIds", strings.Join(projectIDs, ","))
+	}
+	if m.Request.Filters.Page > 0 {
+		query.Set("page", strconv.FormatInt(m.Request.Filters.Page, 10))
+	}
+	if m.Request.Filters.PageSize > 0 {
+		query.Set("pageSize", strconv.FormatInt(m.Request.Filters.PageSize, 10))
+	}
+	req.URL.RawQuery = query.Encode()
+	req.Header.Set("Accept", "application/json")
+	return req, nil
+}
+
+// UnmarshalJSON decodes the JSON data into a Multiple instance.
+func (m *Multiple) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &m.Response)
+}
+
+// Creation represents the payload for creating a new tag in Teamwork.com.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/tags/post-projects-api-v3-tags-json
+type Creation struct {
+	Name string `json:"name"`
+
+	ProjectID *int64 `json:"projectId,omitempty"`
+}
+
+// HTTPRequest creates an HTTP request to create a new tag.
+func (c Creation) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tags.json", server)
+	paylaod := struct {
+		Tag Creation `json:"tag"`
+	}{Tag: c}
+	body, err := json.Marshal(paylaod)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
+
+// Update represents the payload for updating an existing tag in
+// Teamwork.com.
+//
+// https://apidocs.teamwork.com/docs/teamwork/v3/tags/patch-projects-api-v3-tags-tag-id-json
+type Update struct {
+	ID   int64   `json:"-"`
+	Name *string `json:"name,omitempty"`
+
+	ProjectID *int64 `json:"projectId"`
+}
+
+// HTTPRequest creates an HTTP request to update a tag.
+func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/tags/%d.json", server, u.ID)
+	paylaod := struct {
+		Tag Update `json:"tag"`
+	}{Tag: u}
+	body, err := json.Marshal(paylaod)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, uri, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}

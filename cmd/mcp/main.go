@@ -19,6 +19,7 @@ import (
 	mcpindustry "github.com/rafaeljusto/teamwork-ai/internal/mcp/industry"
 	mcpproject "github.com/rafaeljusto/teamwork-ai/internal/mcp/project"
 	mcpskill "github.com/rafaeljusto/teamwork-ai/internal/mcp/skill"
+	mcptag "github.com/rafaeljusto/teamwork-ai/internal/mcp/tag"
 	mcptask "github.com/rafaeljusto/teamwork-ai/internal/mcp/task"
 	mcptasklist "github.com/rafaeljusto/teamwork-ai/internal/mcp/tasklist"
 	mcpuser "github.com/rafaeljusto/teamwork-ai/internal/mcp/user"
@@ -52,17 +53,7 @@ func main() {
 	}
 	resources := config.NewResources(c)
 
-	mcpServer := server.NewMCPServer(mcpName, mcpVersion,
-		server.WithLogging(),
-	)
-	mcptask.Register(mcpServer, resources)
-	mcptasklist.Register(mcpServer, resources)
-	mcpproject.Register(mcpServer, resources)
-	mcpuser.Register(mcpServer, resources)
-	mcpskill.Register(mcpServer, resources)
-	mcpcompany.Register(mcpServer, resources)
-	mcpindustry.Register(mcpServer, resources)
-
+	mcpServer := newMCPServer(resources)
 	switch *serverMode {
 	case "stdio":
 		stdioServer := server.NewStdioServer(mcpServer)
@@ -110,6 +101,23 @@ func main() {
 		}
 		resources.Logger.Info("server stopped")
 	}
+}
+
+func newMCPServer(resources *config.Resources) *server.MCPServer {
+	mcpServer := server.NewMCPServer(mcpName, mcpVersion,
+		server.WithLogging(),
+	)
+
+	mcptask.Register(mcpServer, resources)
+	mcptasklist.Register(mcpServer, resources)
+	mcpproject.Register(mcpServer, resources)
+	mcpuser.Register(mcpServer, resources)
+	mcpskill.Register(mcpServer, resources)
+	mcpcompany.Register(mcpServer, resources)
+	mcpindustry.Register(mcpServer, resources)
+	mcptag.Register(mcpServer, resources)
+
+	return mcpServer
 }
 
 type exitCode int
