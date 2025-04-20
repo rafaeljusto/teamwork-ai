@@ -138,9 +138,9 @@ func (m *Multiple) UnmarshalJSON(data []byte) error {
 //
 // https://apidocs.teamwork.com/docs/teamwork/v1/milestones/post-projects-id-milestones-json
 type Creation struct {
-	Name        string        `json:"title"`
-	Description *string       `json:"description,omitempty"`
-	DueDate     teamwork.Date `json:"deadline"`
+	Name        string              `json:"title"`
+	Description *string             `json:"description,omitempty"`
+	DueDate     teamwork.LegacyDate `json:"deadline"`
 
 	ProjectID   int64   `json:"-"`
 	TasklistIDs []int64 `json:"tasklistIds,omitempty"`

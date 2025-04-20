@@ -23,11 +23,11 @@ import (
 // manage and organize work, providing a central hub for all components related
 // to what the team is working on.
 type Project struct {
-	ID          int64      `json:"id"`
-	Description *string    `json:"description"`
-	EndAt       *time.Time `json:"endAt"`
-	Name        string     `json:"name"`
-	StartAt     *time.Time `json:"startAt"`
+	ID          int64                `json:"id"`
+	Description *string              `json:"description"`
+	Name        string               `json:"name"`
+	StartAt     *teamwork.LegacyDate `json:"startAt"`
+	EndAt       *teamwork.LegacyDate `json:"endAt"`
 
 	Category *teamwork.Relationship  `json:"category"`
 	Company  teamwork.Relationship   `json:"company"`

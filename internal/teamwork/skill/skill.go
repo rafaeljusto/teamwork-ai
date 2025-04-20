@@ -154,7 +154,7 @@ func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}

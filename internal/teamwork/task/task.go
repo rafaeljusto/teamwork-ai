@@ -30,15 +30,15 @@ import (
 // a project. Each task can have various attributes such as priority, status,
 // and progress, which help in tracking and managing the work effectively.
 type Task struct {
-	ID                     int64          `json:"id"`
-	Name                   string         `json:"name"`
-	Description            *string        `json:"description"`
-	DescriptionContentType *string        `json:"descriptionContentType"`
-	Priority               *string        `json:"priority"`
-	Progress               int64          `json:"progress"`
-	StartDate              *teamwork.Date `json:"startDate"`
-	DueDate                *teamwork.Date `json:"dueDate"`
-	EstimateMinutes        int64          `json:"estimateMinutes"`
+	ID                     int64      `json:"id"`
+	Name                   string     `json:"name"`
+	Description            *string    `json:"description"`
+	DescriptionContentType *string    `json:"descriptionContentType"`
+	Priority               *string    `json:"priority"`
+	Progress               int64      `json:"progress"`
+	StartAt                *time.Time `json:"startDate"`
+	DueAt                  *time.Time `json:"dueDate"`
+	EstimateMinutes        int64      `json:"estimateMinutes"`
 
 	Tasklist  teamwork.Relationship   `json:"tasklist"`
 	Assignees []teamwork.Relationship `json:"assignees"`

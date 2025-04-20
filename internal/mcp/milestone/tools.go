@@ -192,7 +192,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.RequiredParam(&milestone.Name, "name"),
 				twmcp.OptionalPointerParam(&milestone.Description, "description"),
-				twmcp.RequiredDateParam(&milestone.DueDate, "due-date"),
+				twmcp.RequiredLegacyDateParam(&milestone.DueDate, "due-date"),
 				twmcp.OptionalNumericListParam(&milestone.TasklistIDs, "tasklist-ids"),
 				twmcp.OptionalNumericListParam(&milestone.TagIDs, "tag-ids"),
 			)

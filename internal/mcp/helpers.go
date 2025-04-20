@@ -371,6 +371,97 @@ func dateParam(
 	return nil
 }
 
+// RequiredLegacyDateParam retrieves a required legacy date parameter from a
+// map, converting it to a teamwork.LegacyDate type. It returns an error if the
+// key is not found or if the type conversion fails. The date format is expected
+// to be "YYYYMMDD". If the target is nil, it returns an error.
+func RequiredLegacyDateParam(
+	target *teamwork.LegacyDate,
+	key string,
+	middlewares ...ParamMiddleware[string],
+) ParamFunc {
+	return func(params map[string]any) error {
+		return legacyDateParam(params, target, key, false, middlewares...)
+	}
+}
+
+// OptionalLegacyDateParam retrieves an optional legacy date parameter from a
+// map, converting it to a teamwork.LegacyDate type. It returns an error if the
+// type conversion fails. The date format is expected to be "YYYYMMDD". If the
+// target is nil, it returns an error. If the key is not found, it does not set
+// the target.
+func OptionalLegacyDateParam(
+	target *teamwork.LegacyDate,
+	key string,
+	middlewares ...ParamMiddleware[string],
+) ParamFunc {
+	return func(params map[string]any) error {
+		return legacyDateParam(params, target, key, true, middlewares...)
+	}
+}
+
+// OptionalLegacyDatePointerParam retrieves an optional date parameter from a
+// map and sets it to a pointer target. It converts the value to a
+// teamwork.LegacyDate type and applies middleware functions to the value before
+// setting it. The date format is expected to be "YYYYMMDD". If the target is
+// nil, it returns an error.
+func OptionalLegacyDatePointerParam(
+	target **teamwork.LegacyDate,
+	key string,
+	middlewares ...ParamMiddleware[string],
+) ParamFunc {
+	return func(params map[string]any) error {
+		if target == nil {
+			return fmt.Errorf("target cannot be nil")
+		}
+		var temp teamwork.LegacyDate
+		var set bool
+		middlewares = append(middlewares, func(*string) (bool, error) { set = true; return true, nil })
+		if err := legacyDateParam(params, &temp, key, true, middlewares...); err != nil {
+			return err
+		}
+		if set {
+			*target = &temp
+		}
+		return nil
+	}
+}
+
+func legacyDateParam(
+	params map[string]any,
+	target *teamwork.LegacyDate,
+	key string,
+	optional bool,
+	middlewares ...ParamMiddleware[string],
+) error {
+	if target == nil {
+		return fmt.Errorf("target cannot be nil")
+	}
+	value, ok := params[key]
+	if !ok {
+		if optional {
+			return nil
+		}
+		return fmt.Errorf("parameter %s is required", key)
+	}
+	v, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("invalid type for %s: expected string, got %T", key, value)
+	}
+	for _, middleware := range middlewares {
+		var err error
+		if ok, err = middleware(&v); err != nil || !ok {
+			return err
+		}
+	}
+	t, err := time.Parse("20060102", v)
+	if err != nil {
+		return fmt.Errorf("invalid date format for %s: %w", key, err)
+	}
+	*target = teamwork.LegacyDate(t)
+	return nil
+}
+
 // OptionalListParam retrieves an optional list parameter from a map, converting
 // each item to the specified type. It returns an error if the key is not found
 // or if the type conversion fails. If the target is nil, it returns an error.

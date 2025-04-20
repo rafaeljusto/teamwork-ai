@@ -7,13 +7,15 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 )
 
 // Industry represents an industry that a company can belong to in Teamwork.com.
 // It contains an ID and a name for the industry.
 type Industry struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID   teamwork.LegacyNumber `json:"id"`
+	Name string                `json:"name"`
 }
 
 // Multiple represents a request to retrieve multiple industries.
