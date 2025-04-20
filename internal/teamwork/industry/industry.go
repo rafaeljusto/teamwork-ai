@@ -1,3 +1,6 @@
+// Package industry provides a functionality to manage industries in
+// Teamwork.com. It allows for the retrieval of multiple industries, each
+// represented by an Industry struct that contains an ID and a name.
 package industry
 
 import (

@@ -1,3 +1,6 @@
+// Package project provides the API implementation for managing projects in
+// Teamwork.com. It includes functionalities for retrieving single or multiple
+// projects, creating new projects, and updating existing ones.
 package project
 
 import (

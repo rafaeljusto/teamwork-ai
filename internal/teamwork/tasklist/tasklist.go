@@ -1,3 +1,8 @@
+// Package tasklist implements the API layer for managing task lists in
+// Teamwork.com. It provides functionality to create, update, retrieve, and
+// delete task lists, as well as to retrieve multiple task lists associated with
+// a project. Task lists are used to organize tasks within a project, allowing
+// teams to group related tasks together for better organization and management.
 package tasklist
 
 import (

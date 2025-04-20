@@ -1,3 +1,9 @@
+// Package company provides functionality to manage companies in Teamwork.com.
+// It includes operations for retrieving, creating, and updating company
+// information. It defines structures for representing company data, including
+// details like address, contact information, and relationships with industries
+// and tags. It is part of the Teamwork AI project, which integrates with
+// Teamwork.com to provide AI-driven insights and operations.
 package company
 
 import (

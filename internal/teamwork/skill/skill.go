@@ -1,3 +1,7 @@
+// Package skill provides functionality to manage skills in Teamwork.com. It
+// allows for the retrieval, creation, and updating of skills, which are
+// knowledge or abilities that can be assigned to users. Skills help in better
+// task management and organization within projects.
 package skill
 
 import (

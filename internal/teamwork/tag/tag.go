@@ -1,3 +1,9 @@
+// Package tag provides functionality to manage tags in Teamwork.com. Tags are
+// used to mark items for filtering and organization across various resources
+// such as projects, tasks, milestones, messages, time logs, notebooks, files,
+// and links. It includes operations for retrieving, creating, and updating
+// tags, as well as handling HTTP requests to the Teamwork.com API for tag
+// management.
 package tag
 
 import (

@@ -1,3 +1,6 @@
+// Package task implements the API layer for managing tasks in Teamwork.com. It
+// provides structures and methods for creating, updating, retrieving, and
+// listing tasks.
 package task
 
 import (
