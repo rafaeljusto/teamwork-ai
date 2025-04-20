@@ -17,6 +17,7 @@ import (
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	mcpcompany "github.com/rafaeljusto/teamwork-ai/internal/mcp/company"
 	mcpindustry "github.com/rafaeljusto/teamwork-ai/internal/mcp/industry"
+	mcpmilestone "github.com/rafaeljusto/teamwork-ai/internal/mcp/milestone"
 	mcpproject "github.com/rafaeljusto/teamwork-ai/internal/mcp/project"
 	mcpskill "github.com/rafaeljusto/teamwork-ai/internal/mcp/skill"
 	mcptag "github.com/rafaeljusto/teamwork-ai/internal/mcp/tag"
@@ -116,6 +117,7 @@ func newMCPServer(resources *config.Resources) *server.MCPServer {
 	mcpcompany.Register(mcpServer, resources)
 	mcpindustry.Register(mcpServer, resources)
 	mcptag.Register(mcpServer, resources)
+	mcpmilestone.Register(mcpServer, resources)
 
 	return mcpServer
 }

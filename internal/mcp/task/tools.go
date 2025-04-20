@@ -35,6 +35,11 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 					"type": "number",
 				}),
 			),
+			mcp.WithBoolean("match-all-tags",
+				mcp.Description("If true, the search will match tasks that have all the specified tags. "+
+					"If false, the search will match tasks that have any of the specified tags. "+
+					"Defaults to false."),
+			),
 			mcp.WithNumber("page",
 				mcp.Description("Page number for pagination of results."),
 			),
@@ -48,6 +53,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
+				twmcp.OptionalPointerParam(&multiple.Request.Filters.MatchAllTags, "match-all-tags"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
 			)
@@ -85,6 +91,11 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 					"type": "number",
 				}),
 			),
+			mcp.WithBoolean("match-all-tags",
+				mcp.Description("If true, the search will match tasks that have all the specified tags. "+
+					"If false, the search will match tasks that have any of the specified tags. "+
+					"Defaults to false."),
+			),
 			mcp.WithNumber("page",
 				mcp.Description("Page number for pagination of results."),
 			),
@@ -99,6 +110,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 				twmcp.RequiredNumericParam(&multiple.Request.Path.ProjectID, "project-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
+				twmcp.OptionalPointerParam(&multiple.Request.Filters.MatchAllTags, "match-all-tags"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
 			)
@@ -136,6 +148,11 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 					"type": "number",
 				}),
 			),
+			mcp.WithBoolean("match-all-tags",
+				mcp.Description("If true, the search will match tasks that have all the specified tags. "+
+					"If false, the search will match tasks that have any of the specified tags. "+
+					"Defaults to false."),
+			),
 			mcp.WithNumber("page",
 				mcp.Description("Page number for pagination of results."),
 			),
@@ -150,6 +167,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 				twmcp.RequiredNumericParam(&multiple.Request.Path.TasklistID, "tasklist-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
+				twmcp.OptionalPointerParam(&multiple.Request.Filters.MatchAllTags, "match-all-tags"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
 			)
@@ -345,6 +363,12 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 						"type":        "array",
 						"description": "List of team IDs assigned to the task.",
 					},
+				}),
+			),
+			mcp.WithArray("tag-ids",
+				mcp.Description("A list of tag IDs to assign to the task."),
+				mcp.Items(map[string]any{
+					"type": "number",
 				}),
 			),
 		),

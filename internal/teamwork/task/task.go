@@ -170,7 +170,7 @@ type Creation struct {
 	DueDate         *teamwork.Date `json:"dueAt,omitempty"`
 	EstimateMinutes *int64         `json:"estimatedMinutes,omitempty"`
 
-	TasklistID int64                `json:"tasklistId"`
+	TasklistID int64                `json:"-"`
 	Assignees  *teamwork.UserGroups `json:"assignees,omitempty"`
 	Tags       []int64              `json:"tagIds,omitempty"`
 }

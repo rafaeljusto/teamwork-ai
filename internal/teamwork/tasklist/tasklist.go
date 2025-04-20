@@ -131,7 +131,7 @@ type Creation struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 
-	ProjectID   int64  `json:"projectId"`
+	ProjectID   int64  `json:"-"`
 	MilestoneID *int64 `json:"milestone-Id,omitempty"`
 }
 
