@@ -125,7 +125,7 @@ MCP server.
 | Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
 | Industries        | ❌     | ✅       | ❌      | ❌     |                                           |
 | Tags              | ✅     | ✅       | ✅      | ❌     |                                           |
-| Milestones        | ✅     | ✅       | ✅      | ❌     |                                           |
+| Milestones        | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
 
 > [!NOTE]
 > Not all properties are supported for each entity. And, for now, delete actions
