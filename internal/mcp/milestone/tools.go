@@ -176,7 +176,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			),
 			mcp.WithObject("assignees",
 				mcp.Required(),
-				mcp.Description("A list of assignees for the milestone."),
+				mcp.Description("A list of assignees for the milestone. At least one assignee must be provided."),
 				mcp.Properties(map[string]any{
 					"user-ids": map[string]any{
 						"type":        "array",
@@ -236,6 +236,9 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			)
 			if err != nil {
 				return nil, fmt.Errorf("invalid assignees: %w", err)
+			}
+			if milestone.Assignees.IsEmpty() {
+				return nil, fmt.Errorf("at least one assignee must be provided")
 			}
 
 			if err := configResources.TeamworkEngine.Do(ctx, &milestone); err != nil {
