@@ -97,6 +97,11 @@ func (m *LegacyUserGroups) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// IsEmpty checks if the LegacyUserGroups contains no IDs.
+func (m LegacyUserGroups) IsEmpty() bool {
+	return len(m.UserIDs) == 0 && len(m.CompanyIDs) == 0 && len(m.TeamIDs) == 0
+}
+
 // Date is a type alias for time.Time, used to represent date values in the API.
 type Date time.Time
 
