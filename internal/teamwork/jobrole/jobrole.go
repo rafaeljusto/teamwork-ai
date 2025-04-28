@@ -1,8 +1,8 @@
-// Package skill provides functionality to manage skills in Teamwork.com. It
-// allows for the retrieval, creation, and updating of skills, which are
-// knowledge or abilities that can be assigned to users. Skills help in better
-// task management and organization within projects.
-package skill
+// Package jobrole provides functionality to manage job roles in Teamwork.com.
+// It includes operations for retrieving, creating, and updating a job role. It
+// is part of the Teamwork AI project, which integrates with Teamwork.com to
+// provide AI-driven insights and operations.
+package jobrole
 
 import (
 	"bytes"
@@ -12,16 +12,17 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 )
 
-// Skill represents a skill in Teamwork.com. It contains information about the
-// skill such as its ID, name, creation and update timestamps, and the users who
-// created, updated, or deleted the skill. Skills are knowledge or abilities
-// that can be assigned to users, allowing for better task management and
-// organization within projects.
-type Skill struct {
+// JobRole represents a job role in Teamwork.com.
+type JobRole struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
+
+	Users        []teamwork.Relationship `json:"users"`
+	PrimaryUsers []teamwork.Relationship `json:"primaryUsers"`
 
 	CreatedByUserID int64      `json:"createdByUser"`
 	CreatedAt       time.Time  `json:"createdAt"`
@@ -29,16 +30,17 @@ type Skill struct {
 	UpdatedAt       *time.Time `json:"updatedAt"`
 	DeletedByUserID *int64     `json:"deletedByUser"`
 	DeletedAt       *time.Time `json:"deletedAt"`
+	IsActive        bool       `json:"isActive"`
 }
 
-// Single represents a request to retrieve a single skill by its ID.
+// Single represents a request to retrieve a single job role by its ID.
 //
 // No public documentation available yet.
-type Single Skill
+type Single JobRole
 
-// HTTPRequest creates an HTTP request to retrieve a single skill by its ID.
+// HTTPRequest creates an HTTP request to retrieve a single job role by its ID.
 func (s Single) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, s.ID)
+	uri := fmt.Sprintf("%s/projects/api/v3/jobroles/%d.json", server, s.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
@@ -50,16 +52,16 @@ func (s Single) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 // UnmarshalJSON decodes the JSON data into a Single instance.
 func (s *Single) UnmarshalJSON(data []byte) error {
 	var raw struct {
-		Skill Skill `json:"skill"`
+		JobRole JobRole `json:"jobRole"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*s = Single(raw.Skill)
+	*s = Single(raw.JobRole)
 	return nil
 }
 
-// Multiple represents a request to retrieve multiple skills.
+// Multiple represents a request to retrieve multiple job roles.
 //
 // No public documentation available yet.
 type Multiple struct {
@@ -76,14 +78,14 @@ type Multiple struct {
 				HasMore bool `json:"hasMore"`
 			} `json:"page"`
 		} `json:"meta"`
-		Skills []Skill `json:"skills"`
+		JobRoles []JobRole `json:"jobRoles"`
 	}
 }
 
-// HTTPRequest creates an HTTP request to retrieve multiple skills.
+// HTTPRequest creates an HTTP request to retrieve multiple job roles.
 func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
-	url := fmt.Sprintf("%s/projects/api/v3/skills.json", server)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	uri := fmt.Sprintf("%s/projects/api/v3/jobroles.json", server)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -107,20 +109,19 @@ func (m *Multiple) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &m.Response)
 }
 
-// Create represents the payload for creating a new skill in Teamwork.com.
+// Create represents the payload for creating a new job role in Teamwork.com.
 //
 // No public documentation available yet.
 type Create struct {
-	Name    string  `json:"name"`
-	UserIDs []int64 `json:"userIds"`
+	Name string `json:"name"`
 }
 
-// HTTPRequest creates an HTTP request to create a new skill in Teamwork.com.
+// HTTPRequest creates an HTTP request to create a new job role.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/skills.json", server)
+	uri := fmt.Sprintf("%s/projects/api/v3/jobroles.json", server)
 	payload := struct {
-		Skill Create `json:"skill"`
-	}{Skill: c}
+		JobRole Create `json:"jobRole"`
+	}{JobRole: c}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -134,22 +135,21 @@ func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 	return req, nil
 }
 
-// Update represents the payload for updating an existing skill in Teamwork.com.
+// Update represents the payload for updating an existing job role in
+// Teamwork.com.
 //
 // No public documentation available yet.
 type Update struct {
-	ID      int64   `json:"-"`
-	Name    *string `json:"name,omitempty"`
-	UserIDs []int64 `json:"userIds,omitempty"`
+	ID   int64  `json:"-"`
+	Name string `json:"name"`
 }
 
-// HTTPRequest creates an HTTP request to update an existing skill in
-// Teamwork.com.
+// HTTPRequest creates an HTTP request to update a job role.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, u.ID)
+	uri := fmt.Sprintf("%s/projects/api/v3/jobroles/%d.json", server, u.ID)
 	payload := struct {
-		Skill Update `json:"skill"`
-	}{Skill: u}
+		JobRole Update `json:"jobrole"`
+	}{JobRole: u}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 	return req, nil
 }
 
-// Delete represents the payload for deleting an existing skill in
+// Delete represents the payload for deleting an existing job role in
 // Teamwork.com.
 //
 // No public documentation available yet.
@@ -175,9 +175,9 @@ type Delete struct {
 	}
 }
 
-// HTTPRequest creates an HTTP request to update a milestone.
+// HTTPRequest creates an HTTP request to update a job role.
 func (d Delete) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, d.Request.Path.ID)
+	uri := fmt.Sprintf("%s/projects/api/v3/jobroles/%d.json", server, d.Request.Path.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, uri, nil)
 	if err != nil {
 		return nil, err

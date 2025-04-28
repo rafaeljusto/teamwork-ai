@@ -179,10 +179,10 @@ type Create struct {
 // tasklist.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tasklists/%d/tasks.json", server, c.TasklistID)
-	paylaod := struct {
+	payload := struct {
 		Task Create `json:"task"`
 	}{Task: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -217,10 +217,10 @@ type Update struct {
 // Teamwork.com.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tasks/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		Task Update `json:"task"`
 	}{Task: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

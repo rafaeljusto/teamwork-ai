@@ -147,10 +147,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new user.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/people.json", server)
-	paylaod := struct {
+	payload := struct {
 		User Create `json:"person"`
 	}{User: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -182,10 +182,10 @@ type Update struct {
 // HTTPRequest creates an HTTP request to update a new user.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/people/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		User Update `json:"person"`
 	}{User: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

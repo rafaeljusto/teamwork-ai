@@ -117,17 +117,18 @@ Where `<server>` is the URL of the remote MCP server.
 Below is a table summarizing the supported entities and their operations in the
 MCP server.
 
-| Entity            | Create | Retrieve | Update | Delete | Extra                                     |
-|-------------------|--------|----------|--------|--------|-------------------------------------------|
-| Projects          | ✅     | ✅       | ✅      | ❌     |                                           |
-| Tasklists         | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
-| Tasks             | ✅     | ✅       | ✅      | ❌     | Retrieve by project; retrieve by tasklist |
-| Companies/Clients | ✅     | ✅       | ✅      | ❌     |                                           |
-| Users/People      | ✅     | ✅       | ✅      | ❌     | Retrieve by project; add to a project     |
-| Skills            | ✅     | ✅       | ✅      | ❌     |                                           |
-| Industries        | ❌     | ✅       | ❌      | ❌     |                                           |
-| Tags              | ✅     | ✅       | ✅      | ❌     |                                           |
-| Milestones        | ✅     | ✅       | ✅      | ❌     | Retrieve by project                       |
+| Entity            | Create | Retrieve | Update | Delete | Extra                                                           |
+|-------------------|--------|----------|--------|--------|-----------------------------------------------------------------|
+| Projects          | ✅     | ✅       | ✅      | ❌     |                                                                 |
+| Tasklists         | ✅     | ✅       | ✅      | ❌     | Retrieve by project                                             |
+| Tasks             | ✅     | ✅       | ✅      | ❌     | Retrieve by project; retrieve by tasklist                       |
+| Companies/Clients | ✅     | ✅       | ✅      | ❌     |                                                                 |
+| Users/People      | ✅     | ✅       | ✅      | ❌     | Retrieve by project; add to a project; assign/unassign job role |
+| Skills            | ✅     | ✅       | ✅      | ❌     |                                                                 |
+| Industries        | ❌     | ✅       | ❌      | ❌     |                                                                 |
+| Tags              | ✅     | ✅       | ✅      | ❌     |                                                                 |
+| Milestones        | ✅     | ✅       | ✅      | ❌     | Retrieve by project                                             |
+| Job roles         | ✅     | ✅       | ✅      | ❌     |                                                                 |
 
 > [!NOTE]
 > Not all properties are supported for each entity. And, for now, delete actions

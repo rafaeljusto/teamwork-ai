@@ -127,10 +127,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new tag.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tags.json", server)
-	paylaod := struct {
+	payload := struct {
 		Tag Create `json:"tag"`
 	}{Tag: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -157,10 +157,10 @@ type Update struct {
 // HTTPRequest creates an HTTP request to update a tag.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tags/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		Tag Update `json:"tag"`
 	}{Tag: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

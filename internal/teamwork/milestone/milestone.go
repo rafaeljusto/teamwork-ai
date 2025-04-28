@@ -152,10 +152,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new milestone.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/%d/milestones.json", server, c.ProjectID)
-	paylaod := struct {
+	payload := struct {
 		Milestone Create `json:"milestone"`
 	}{Milestone: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -186,10 +186,10 @@ type Update struct {
 // HTTPRequest creates an HTTP request to update a milestone.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/milestones/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		Milestone Update `json:"milestone"`
 	}{Milestone: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
