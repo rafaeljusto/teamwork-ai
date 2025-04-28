@@ -3,7 +3,7 @@ VERSION    = v$(shell git describe --always --match "v*")
 TAG        = rafaeljusto/teamwork-ai:$(VERSION)
 LATEST_TAG = rafaeljusto/teamwork-ai:latest
 
-.PHONY: deploy build
+.PHONY: build deploy artifacts
 
 default: build
 
