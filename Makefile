@@ -21,3 +21,10 @@ deploy:
 	  --push \
 	  --progress=plain \
 	  .
+
+artifacts:
+	GOOS=windows GOARCH=amd64 go build -o teamwork-mcp-windows-amd64 ./cmd/mcp
+	GOOS=linux   GOARCH=amd64 go build -o teamwork-mcp-linux-amd64 ./cmd/mcp
+	GOOS=linux   GOARCH=arm64 go build -o teamwork-mcp-linux-arm64 ./cmd/mcp
+	GOOS=darwin  GOARCH=amd64 go build -o teamwork-mcp-darwin-amd64 ./cmd/mcp
+	GOOS=darwin  GOARCH=arm64 go build -o teamwork-mcp-darwin-arm64 ./cmd/mcp
