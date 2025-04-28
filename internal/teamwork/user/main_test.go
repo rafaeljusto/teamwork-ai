@@ -11,6 +11,7 @@ import (
 
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/company"
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/jobrole"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/project"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
 )
@@ -23,6 +24,7 @@ var (
 		projectID int64
 		userID    int64
 		companyID int64
+		jobRoleID int64
 	}
 )
 
@@ -177,6 +179,51 @@ func createCompany(logger *slog.Logger) func() {
 	}
 }
 
+func createjobRole(logger *slog.Logger) func() {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	jobRoleCreate := jobrole.Create{
+		Name: fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
+	}
+
+	jobRoleIDSetter := teamwork.WithIDCallback("id", func(id int64) {
+		resourceIDs.jobRoleID = id
+	})
+
+	logger.Info("⚙️  Creating job role")
+	if err := engine.Do(ctx, &jobRoleCreate, jobRoleIDSetter); err != nil {
+		logger.Error("failed to create job role",
+			slog.String("error", err.Error()),
+		)
+		return func() {}
+	}
+	logger.Info("✅ Created job role",
+		slog.Int64("id", resourceIDs.jobRoleID),
+		slog.String("name", jobRoleCreate.Name),
+	)
+
+	return func() {
+		logger.Info("🗑️  Cleaning up job role",
+			slog.Int64("id", resourceIDs.jobRoleID),
+		)
+
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		var jobRoleDelete jobrole.Delete
+		jobRoleDelete.Request.Path.ID = resourceIDs.jobRoleID
+		if err := engine.Do(ctx, &jobRoleDelete); err != nil {
+			logger.Warn("⚠️  failed to delete job role",
+				slog.Int64("id", resourceIDs.jobRoleID),
+				slog.String("error", err.Error()),
+			)
+		}
+	}
+}
+
 func pointerTo[T any](t T) *T {
 	return &t
 }
@@ -223,6 +270,13 @@ func TestMain(m *testing.M) {
 		return
 	}
 	defer deleteCompany()
+
+	deleteJobRole := createjobRole(logger)
+	if resourceIDs.jobRoleID == 0 {
+		exitCode = 1
+		return
+	}
+	defer deleteJobRole()
 
 	reference := time.Now()
 	defer func() {
