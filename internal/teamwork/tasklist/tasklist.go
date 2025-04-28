@@ -138,10 +138,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new tasklist.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/%d/tasklists.json", server, c.ProjectID)
-	paylaod := struct {
+	payload := struct {
 		Tasklist Create `json:"todo-list"`
 	}{Tasklist: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -169,10 +169,10 @@ type Update struct {
 // HTTPRequest creates an HTTP request to create a new tasklist.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/tasklists/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		Tasklist Update `json:"todo-list"`
 	}{Tasklist: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

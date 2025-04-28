@@ -119,10 +119,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new job role.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/jobroles.json", server)
-	paylaod := struct {
+	payload := struct {
 		JobRole Create `json:"jobRole"`
 	}{JobRole: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -147,10 +147,10 @@ type Update struct {
 // HTTPRequest creates an HTTP request to update a job role.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/jobroles/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		JobRole Update `json:"jobrole"`
 	}{JobRole: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

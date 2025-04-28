@@ -105,7 +105,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			if err := configResources.TeamworkEngine.Do(ctx, &jobrole); err != nil {
 				return nil, err
 			}
-			return mcp.NewToolResultText("Milestone created successfully"), nil
+			return mcp.NewToolResultText("Job role created successfully"), nil
 		},
 	)
 
@@ -136,7 +136,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			if err := configResources.TeamworkEngine.Do(ctx, &jobrole); err != nil {
 				return nil, err
 			}
-			return mcp.NewToolResultText("Milestone updated successfully"), nil
+			return mcp.NewToolResultText("Job role updated successfully"), nil
 		},
 	)
 }

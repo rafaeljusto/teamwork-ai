@@ -118,10 +118,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new skill in Teamwork.com.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/skills.json", server)
-	paylaod := struct {
+	payload := struct {
 		Skill Create `json:"skill"`
 	}{Skill: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -147,10 +147,10 @@ type Update struct {
 // Teamwork.com.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/skills/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		Skill Update `json:"skill"`
 	}{Skill: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}

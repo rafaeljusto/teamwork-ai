@@ -162,10 +162,10 @@ type Create struct {
 // HTTPRequest creates an HTTP request to create a new company.
 func (c Create) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/companies.json", server)
-	paylaod := struct {
+	payload := struct {
 		Company Create `json:"company"`
 	}{Company: c}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -207,10 +207,10 @@ type Update struct {
 // HTTPRequest creates an HTTP request to update a company.
 func (u Update) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/companies/%d.json", server, u.ID)
-	paylaod := struct {
+	payload := struct {
 		Company Update `json:"company"`
 	}{Company: u}
-	body, err := json.Marshal(paylaod)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
