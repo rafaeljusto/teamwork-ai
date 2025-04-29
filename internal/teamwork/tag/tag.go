@@ -26,6 +26,17 @@ type Tag struct {
 	Name string `json:"name"`
 
 	Project *teamwork.Relationship `json:"project"`
+
+	WebLink *string `json:"webLink,omitempty"`
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (t *Tag) PopulateResourceWebLink(server string) {
+	if t.ID == 0 {
+		return
+	}
+	t.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/settings/tags", server))
 }
 
 // Single represents a request to retrieve a single tag by its ID.
@@ -54,6 +65,12 @@ func (s *Single) UnmarshalJSON(data []byte) error {
 	}
 	*s = Single(raw.Tag)
 	return nil
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (s *Single) PopulateResourceWebLink(server string) {
+	(*Tag)(s).PopulateResourceWebLink(server)
 }
 
 // Multiple represents a request to retrieve multiple tags.
@@ -113,6 +130,14 @@ func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
 func (m *Multiple) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &m.Response)
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Multiple) PopulateResourceWebLink(server string) {
+	for i := range m.Response.Tags {
+		m.Response.Tags[i].PopulateResourceWebLink(server)
+	}
 }
 
 // Create represents the payload for creating a new tag in Teamwork.com.

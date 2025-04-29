@@ -41,6 +41,16 @@ type Project struct {
 	CompletedBy *int64     `json:"completedBy"`
 	Status      string     `json:"status"`
 	Type        string     `json:"type"`
+	WebLink     *string    `json:"webLink,omitempty"`
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (p *Project) PopulateResourceWebLink(server string) {
+	if p.ID == 0 {
+		return
+	}
+	p.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/projects/%d", server, p.ID))
 }
 
 // Single represents a request to retrieve a single project by its ID.
@@ -69,6 +79,12 @@ func (s *Single) UnmarshalJSON(data []byte) error {
 	}
 	*s = Single(raw.Project)
 	return nil
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (s *Single) PopulateResourceWebLink(server string) {
+	(*Project)(s).PopulateResourceWebLink(server)
 }
 
 // Multiple represents a request to retrieve multiple projects.
@@ -128,6 +144,14 @@ func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
 func (m *Multiple) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &m.Response)
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Multiple) PopulateResourceWebLink(server string) {
+	for i := range m.Response.Projects {
+		m.Response.Projects[i].PopulateResourceWebLink(server)
+	}
 }
 
 // Create represents the payload for creating a new project in Teamwork.com.
