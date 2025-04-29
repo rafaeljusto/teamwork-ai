@@ -36,6 +36,16 @@ type Milestone struct {
 	CompletedBy *int64     `json:"completedBy"`
 	Completed   bool       `json:"completed"`
 	Status      string     `json:"status"`
+	WebLink     *string    `json:"webLink,omitempty"`
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Milestone) PopulateResourceWebLink(server string) {
+	if m.ID == 0 {
+		return
+	}
+	m.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/milestones/%d", server, m.ID))
 }
 
 // Single represents a request to retrieve a single milestone by its ID.
@@ -64,6 +74,12 @@ func (s *Single) UnmarshalJSON(data []byte) error {
 	}
 	*s = Single(raw.Milestone)
 	return nil
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (s *Single) PopulateResourceWebLink(server string) {
+	(*Milestone)(s).PopulateResourceWebLink(server)
 }
 
 // Multiple represents a request to retrieve multiple milestones.
@@ -133,6 +149,14 @@ func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
 func (m *Multiple) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &m.Response)
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Multiple) PopulateResourceWebLink(server string) {
+	for i := range m.Response.Milestones {
+		m.Response.Milestones[i].PopulateResourceWebLink(server)
+	}
 }
 
 // Create represents the payload for creating a new milestone in Teamwork.com.

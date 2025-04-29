@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 )
 
 // Skill represents a skill in Teamwork.com. It contains information about the
@@ -29,6 +31,16 @@ type Skill struct {
 	UpdatedAt       *time.Time `json:"updatedAt"`
 	DeletedByUserID *int64     `json:"deletedByUser"`
 	DeletedAt       *time.Time `json:"deletedAt"`
+	WebLink         *string    `json:"webLink,omitempty"`
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (s *Skill) PopulateResourceWebLink(server string) {
+	if s.ID == 0 {
+		return
+	}
+	s.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/people/skills", server))
 }
 
 // Single represents a request to retrieve a single skill by its ID.
@@ -57,6 +69,12 @@ func (s *Single) UnmarshalJSON(data []byte) error {
 	}
 	*s = Single(raw.Skill)
 	return nil
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (s *Single) PopulateResourceWebLink(server string) {
+	(*Skill)(s).PopulateResourceWebLink(server)
 }
 
 // Multiple represents a request to retrieve multiple skills.
@@ -105,6 +123,14 @@ func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
 func (m *Multiple) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &m.Response)
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Multiple) PopulateResourceWebLink(server string) {
+	for i := range m.Response.Skills {
+		m.Response.Skills[i].PopulateResourceWebLink(server)
+	}
 }
 
 // Create represents the payload for creating a new skill in Teamwork.com.

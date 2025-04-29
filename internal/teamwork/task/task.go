@@ -53,6 +53,16 @@ type Task struct {
 	CompletedBy   *int64     `json:"completedBy,omitempty"`
 	CompletedDate *time.Time `json:"completedAt,omitempty"`
 	Status        string     `json:"status"`
+	WebLink       *string    `json:"webLink,omitempty"`
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (t *Task) PopulateResourceWebLink(server string) {
+	if t.ID == 0 {
+		return
+	}
+	t.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/tasks/%d", server, t.ID))
 }
 
 // Single represents a request to retrieve a single task by its ID.
@@ -81,6 +91,12 @@ func (s *Single) UnmarshalJSON(data []byte) error {
 	}
 	*s = Single(raw.Task)
 	return nil
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (s *Single) PopulateResourceWebLink(server string) {
+	(*Task)(s).PopulateResourceWebLink(server)
 }
 
 // Multiple represents a request to retrieve multiple tasks.
@@ -156,6 +172,14 @@ func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request
 // UnmarshalJSON decodes the JSON data into a Multiple instance.
 func (m *Multiple) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &m.Response)
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Multiple) PopulateResourceWebLink(server string) {
+	for i := range m.Response.Tasks {
+		m.Response.Tasks[i].PopulateResourceWebLink(server)
+	}
 }
 
 // Create represents the payload for creating a new task in Teamwork.com.

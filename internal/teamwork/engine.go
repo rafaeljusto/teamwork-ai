@@ -103,7 +103,12 @@ func (e *Engine) Do(ctx context.Context, entity Entity, optFuncs ...Option) erro
 	switch req.Method {
 	case http.MethodGet:
 		decoder := json.NewDecoder(resp.Body)
-		return decoder.Decode(entity)
+		if err := decoder.Decode(entity); err != nil {
+			return fmt.Errorf("failed to decode response body: %w", err)
+		}
+		if resource, ok := entity.(interface{ PopulateResourceWebLink(server string) }); ok {
+			resource.PopulateResourceWebLink(e.server)
+		}
 	case http.MethodPost:
 		var body map[string]any
 		decoder := json.NewDecoder(resp.Body)
