@@ -70,6 +70,10 @@ twai_mcp_url=$(curl -s https://api.github.com/repos/rafaeljusto/teamwork-ai/rele
 sudo curl -s -O /usr/local/bin/teamwork-mcp ${twai_mcp_url}
 ```
 
+The example above uses `jq` to parse the JSON response from the GitHub API,
+which is a command-line JSON processor. You can find installation instructions
+for it [here](https://jqlang.org/download/).
+
 ### ⚡️ Usage
 
 The server works using 2 different modes:
