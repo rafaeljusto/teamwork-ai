@@ -43,6 +43,33 @@ tasklist name, the task title and description to find the best match for the
 users' skills.
 ```
 
+### 📦 Installing
+
+You can install the MCP server using [`go`](https://go.dev/doc/install):
+
+```bash
+go install -o teamwork-mcp github.com/rafaeljusto/teamwork-ai/cmd/mcp@latest
+```
+
+The binary will be installed in your `GOPATH/bin` directory, which is usually
+`$HOME/go/bin`. Make sure to add this directory to your `PATH` environment
+variable to run the `teamwork-mcp` command from anywhere.
+
+Alternatively, you can use the pre-built binaries available in the
+[releases](https://github.com/rafaeljusto/teamwork-ai/releases/latest) page.
+Download the appropriate binary for your operating system, extract it, and place
+it in a directory included in your `PATH`. For example, on Linux (amd64) using
+`curl`:
+
+```bash
+# detect the latest release
+twai_mcp_url=$(curl -s https://api.github.com/repos/rafaeljusto/teamwork-ai/releases/latest | \
+  jq '.assets[] | select(.name | contains ("teamwork-mcp-linux-amd64")) | .browser_download_url')
+
+# download the binary and place it in /usr/local/bin
+sudo curl -s -O /usr/local/bin/teamwork-mcp ${twai_mcp_url}
+```
+
 ### ⚡️ Usage
 
 The server works using 2 different modes:
