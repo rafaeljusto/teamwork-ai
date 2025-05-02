@@ -21,13 +21,15 @@ import (
 // is used to manage user information within Teamwork.com, allowing teams to
 // organize and manage their members effectively.
 type User struct {
-	ID        int64   `json:"id"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Title     *string `json:"title"`
-	Email     string  `json:"email"`
-	Admin     bool    `json:"isAdmin"`
-	Type      string  `json:"type"`
+	ID        int64           `json:"id"`
+	FirstName string          `json:"firstName"`
+	LastName  string          `json:"lastName"`
+	Title     *string         `json:"title"`
+	Email     string          `json:"email"`
+	Admin     bool            `json:"isAdmin"`
+	Type      string          `json:"type"`
+	Cost      *teamwork.Money `json:"userCost"`
+	Rate      *teamwork.Money `json:"userRate"`
 
 	Company  teamwork.Relationship   `json:"company"`
 	JobRoles []teamwork.Relationship `json:"jobRoles,omitempty"`

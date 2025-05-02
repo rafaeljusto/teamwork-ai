@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
@@ -86,6 +87,7 @@ type Multiple struct {
 			SearchTerm string
 			Page       int64
 			PageSize   int64
+			Include    []string
 		}
 	}
 	Response struct {
@@ -114,6 +116,9 @@ func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request
 	}
 	if m.Request.Filters.PageSize > 0 {
 		query.Set("pageSize", strconv.FormatInt(m.Request.Filters.PageSize, 10))
+	}
+	if len(m.Request.Filters.Include) > 0 {
+		query.Set("include", strings.Join(m.Request.Filters.Include, ","))
 	}
 	req.URL.RawQuery = query.Encode()
 	req.Header.Set("Accept", "application/json")

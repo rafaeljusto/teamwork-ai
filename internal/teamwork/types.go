@@ -124,6 +124,18 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalText decodes a text string into a Date type. This is required when
+// using Date type as a map key.
+func (d *Date) UnmarshalText(text []byte) error {
+	return d.UnmarshalJSON(text)
+}
+
+// String returns the string representation of the Date in the format
+// "2006-01-02".
+func (d Date) String() string {
+	return time.Time(d).Format("2006-01-02")
+}
+
 // LegacyDate is a type alias for time.Time, used to represent date values in
 // the API.
 type LegacyDate time.Time
@@ -168,4 +180,17 @@ func (n *LegacyNumber) UnmarshalJSON(data []byte) error {
 	}
 	*n = LegacyNumber(parsedInt)
 	return nil
+}
+
+// Money represents a monetary value in the API.
+type Money int64
+
+// Set sets the value of Money from a float64.
+func (m *Money) Set(value float64) {
+	*m = Money(value * 100)
+}
+
+// Value returns the value of Money as a float64.
+func (m Money) Value() float64 {
+	return float64(m) / 100
 }

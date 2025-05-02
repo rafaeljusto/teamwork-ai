@@ -21,6 +21,16 @@ type Config struct {
 
 	// TeamworkAPIToken is the API token of the Teamwork API.
 	TeamworkAPIToken string
+
+	// Agentic is the agentic configuration.
+	Agentic struct {
+		// Name is the name of the agentic implementation.
+		Name string
+
+		// DSN is the data source name for the agentic model. The format depends on
+		// the chosen implementation.
+		DSN string
+	}
 }
 
 // ParseFromEnvs parses the configuration from environment variables.
@@ -47,6 +57,9 @@ func ParseFromEnvs() (*Config, error) {
 
 	config.TeamworkServer = os.Getenv("TWAI_TEAMWORK_SERVER")
 	config.TeamworkAPIToken = os.Getenv("TWAI_TEAMWORK_API_TOKEN")
+
+	config.Agentic.Name = os.Getenv("TWAI_AGENTIC_NAME")
+	config.Agentic.DSN = os.Getenv("TWAI_AGENTIC_DSN")
 
 	if errs != nil {
 		return nil, errs
