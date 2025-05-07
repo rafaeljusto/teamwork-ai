@@ -31,6 +31,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twskill.Multiple
+			multiple.Request.Filters.Include = []string{"users"}
 
 			err := twmcp.ParamGroup(request.Params.Arguments,
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),

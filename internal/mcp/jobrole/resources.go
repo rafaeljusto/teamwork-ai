@@ -27,6 +27,8 @@ func registerResources(mcpServer *server.MCPServer, configResources *config.Reso
 	mcpServer.AddResource(resourceList,
 		func(ctx context.Context, _ mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 			var multiple twjobrole.Multiple
+			multiple.Request.Filters.Include = []string{"users"}
+
 			if err := configResources.TeamworkEngine.Do(ctx, &multiple); err != nil {
 				return nil, err
 			}

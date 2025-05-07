@@ -28,3 +28,9 @@ artifacts:
 	GOOS=linux   GOARCH=arm64 go build -o teamwork-mcp-linux-arm64 ./cmd/mcp
 	GOOS=darwin  GOARCH=amd64 go build -o teamwork-mcp-darwin-amd64 ./cmd/mcp
 	GOOS=darwin  GOARCH=arm64 go build -o teamwork-mcp-darwin-arm64 ./cmd/mcp
+
+	GOOS=windows GOARCH=amd64 go build -o teamwork-assigner-windows-amd64 ./cmd/assigner
+	GOOS=linux   GOARCH=amd64 go build -o teamwork-assigner-linux-amd64 ./cmd/assigner
+	GOOS=linux   GOARCH=arm64 go build -o teamwork-assigner-linux-arm64 ./cmd/assigner
+	GOOS=darwin  GOARCH=amd64 go build -o teamwork-assigner-darwin-amd64 ./cmd/assigner
+	GOOS=darwin  GOARCH=arm64 go build -o teamwork-assigner-darwin-arm64 ./cmd/assigner
