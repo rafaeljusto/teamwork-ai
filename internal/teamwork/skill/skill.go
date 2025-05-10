@@ -43,7 +43,7 @@ func (s *Skill) PopulateResourceWebLink(server string) {
 	if s.ID == 0 {
 		return
 	}
-	s.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/people/skills", server))
+	s.WebLink = teamwork.Ref(fmt.Sprintf("%s/app/people/skills", server))
 }
 
 // Single represents a request to retrieve a single skill by its ID.

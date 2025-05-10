@@ -45,7 +45,7 @@ func (m *Milestone) PopulateResourceWebLink(server string) {
 	if m.ID == 0 {
 		return
 	}
-	m.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/milestones/%d", server, m.ID))
+	m.WebLink = teamwork.Ref(fmt.Sprintf("%s/app/milestones/%d", server, m.ID))
 }
 
 // Single represents a request to retrieve a single milestone by its ID.

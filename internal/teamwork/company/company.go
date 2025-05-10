@@ -55,7 +55,7 @@ func (c *Company) PopulateResourceWebLink(server string) {
 	if c.ID == 0 {
 		return
 	}
-	c.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/clients/%d", server, c.ID))
+	c.WebLink = teamwork.Ref(fmt.Sprintf("%s/app/clients/%d", server, c.ID))
 }
 
 // Single represents a request to retrieve a single company by its ID.

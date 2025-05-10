@@ -41,7 +41,7 @@ func (j *JobRole) PopulateResourceWebLink(server string) {
 	if j.ID == 0 {
 		return
 	}
-	j.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/people/roles", server))
+	j.WebLink = teamwork.Ref(fmt.Sprintf("%s/people/roles", server))
 }
 
 // Single represents a request to retrieve a single job role by its ID.

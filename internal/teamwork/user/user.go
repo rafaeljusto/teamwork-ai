@@ -49,7 +49,7 @@ func (u *User) PopulateResourceWebLink(server string) {
 	if u.ID == 0 {
 		return
 	}
-	u.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/people/%d", server, u.ID))
+	u.WebLink = teamwork.Ref(fmt.Sprintf("%s/app/people/%d", server, u.ID))
 }
 
 // Single represents a request to retrieve a single user by their ID.

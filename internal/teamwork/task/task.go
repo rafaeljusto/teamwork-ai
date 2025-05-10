@@ -62,7 +62,7 @@ func (t *Task) PopulateResourceWebLink(server string) {
 	if t.ID == 0 {
 		return
 	}
-	t.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/tasks/%d", server, t.ID))
+	t.WebLink = teamwork.Ref(fmt.Sprintf("%s/app/tasks/%d", server, t.ID))
 }
 
 // Single represents a request to retrieve a single task by its ID.
