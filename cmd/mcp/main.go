@@ -15,6 +15,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
+	mcpcomment "github.com/rafaeljusto/teamwork-ai/internal/mcp/comment"
 	mcpcompany "github.com/rafaeljusto/teamwork-ai/internal/mcp/company"
 	mcpindustry "github.com/rafaeljusto/teamwork-ai/internal/mcp/industry"
 	mcpjobrole "github.com/rafaeljusto/teamwork-ai/internal/mcp/jobrole"
@@ -120,6 +121,7 @@ func newMCPServer(resources *config.Resources) *server.MCPServer {
 	mcptag.Register(mcpServer, resources)
 	mcpmilestone.Register(mcpServer, resources)
 	mcpjobrole.Register(mcpServer, resources)
+	mcpcomment.Register(mcpServer, resources)
 
 	return mcpServer
 }
