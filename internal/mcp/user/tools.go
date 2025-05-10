@@ -10,6 +10,7 @@ import (
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
 	twuser "github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
+	twworkload "github.com/rafaeljusto/teamwork-ai/internal/teamwork/workload"
 )
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
@@ -276,6 +277,61 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				return nil, err
 			}
 			return mcp.NewToolResultText("Users assigned to project successfully"), nil
+		},
+	)
+
+	mcpServer.AddTool(
+		mcp.NewTool("retrieve-users-workload",
+			mcp.WithDescription("Retrieve the workload of users, also known as people, in a customer site of Teamwork.com. "+
+				"The workload allows you to see the users' overall workload on a short term, day-to-day basis, allowing for "+
+				"a more granular view of each person's capacity. An individual's capacity is based on their working hours, "+
+				"returned in the workload response, versus the total estimated time on their assigned tasks (minus any "+
+				"unavailable time assigned to them) in the selected time frame. A user is considered over capacity when "+
+				"their capacity exceeds their working hours."),
+			mcp.WithString("start-date",
+				mcp.Required(),
+				mcp.Description("The start date of the workload period. The date must be in the format YYYY-MM-DD."),
+			),
+			mcp.WithString("end-date",
+				mcp.Required(),
+				mcp.Description("The end date of the workload period. The date must be in the format YYYY-MM-DD."),
+			),
+			mcp.WithArray("user-ids",
+				mcp.Description("An array of user IDs to assign to the project."),
+				mcp.Items(map[string]any{
+					"type": "number",
+				}),
+			),
+			mcp.WithNumber("page",
+				mcp.Description("Page number for pagination of results."),
+			),
+			mcp.WithNumber("page-size",
+				mcp.Description("Number of results per page for pagination."),
+			),
+		),
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var single twworkload.Single
+			single.Request.Filters.Include = []string{"users.workingHours.workingHoursEntry"}
+
+			err := twmcp.ParamGroup(request.Params.Arguments,
+				twmcp.RequiredDateParam(&single.Request.Filters.StartDate, "start-date"),
+				twmcp.RequiredDateParam(&single.Request.Filters.EndDate, "end-date"),
+				twmcp.OptionalNumericListParam(&single.Request.Filters.UserIDs, "user-ids"),
+				twmcp.OptionalNumericParam(&single.Request.Filters.Page, "page"),
+				twmcp.OptionalNumericParam(&single.Request.Filters.PageSize, "page-size"),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("invalid parameters: %w", err)
+			}
+
+			if err := configResources.TeamworkEngine.Do(ctx, &single); err != nil {
+				return nil, err
+			}
+			encoded, err := json.Marshal(single.Response)
+			if err != nil {
+				return nil, err
+			}
+			return mcp.NewToolResultText(string(encoded)), nil
 		},
 	)
 }

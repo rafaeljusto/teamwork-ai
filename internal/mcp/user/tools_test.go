@@ -194,6 +194,42 @@ func TestTools_updateUser(t *testing.T) {
 	}
 }
 
+func TestTools_retrieveUsersWorload(t *testing.T) {
+	mcpServer := server.NewMCPServer("test-server", "1.0.0")
+	user.Register(mcpServer, &config.Resources{
+		TeamworkEngine: engineMock{},
+	})
+
+	request := &toolRequest{
+		JSONRPC: mcp.JSONRPC_VERSION,
+		ID:      1,
+		CallToolRequest: mcp.CallToolRequest{
+			Request: mcp.Request{
+				Method: string(mcp.MethodToolsCall),
+			},
+		},
+	}
+	request.Params.Name = "retrieve-users-workload"
+	request.Params.Arguments = map[string]any{
+		"start-date": "2023-01-01",
+		"end-date":   "2023-01-31",
+		"user-ids":   []float64{1, 2, 3},
+		"page":       float64(1),
+		"page-size":  float64(10),
+	}
+
+	encodedRequest, err := json.Marshal(request)
+	if err != nil {
+		t.Fatalf("failed to encode request: %v", err)
+	}
+
+	ctx := context.Background()
+	message := mcpServer.HandleMessage(ctx, encodedRequest)
+	if err, ok := message.(mcp.JSONRPCError); ok {
+		t.Errorf("tool failed to execute: %v", err.Error)
+	}
+}
+
 type toolRequest struct {
 	mcp.CallToolRequest
 

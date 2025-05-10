@@ -124,6 +124,11 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalText encodes the Date as a string in the format "2006-01-02".
+func (d Date) MarshalText() ([]byte, error) {
+	return d.MarshalJSON()
+}
+
 // UnmarshalText decodes a text string into a Date type. This is required when
 // using Date type as a map key.
 func (d *Date) UnmarshalText(text []byte) error {
