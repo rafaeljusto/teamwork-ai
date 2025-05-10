@@ -49,7 +49,7 @@ func (c *Comment) PopulateResourceWebLink(server string) {
 	if c.Object == nil || c.ID == 0 {
 		return
 	}
-	c.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/#%s/%d?c=%d", server, c.Object.Type, c.Object.ID, c.ID))
+	c.WebLink = teamwork.Ref(fmt.Sprintf("%s/#%s/%d?c=%d", server, c.Object.Type, c.Object.ID, c.ID))
 }
 
 // Single represents a request to retrieve a single comment by its ID.

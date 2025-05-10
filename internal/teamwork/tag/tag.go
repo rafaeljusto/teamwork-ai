@@ -36,7 +36,7 @@ func (t *Tag) PopulateResourceWebLink(server string) {
 	if t.ID == 0 {
 		return
 	}
-	t.WebLink = teamwork.Ref(fmt.Sprintf("https://%s/app/settings/tags", server))
+	t.WebLink = teamwork.Ref(fmt.Sprintf("%s/app/settings/tags", server))
 }
 
 // Single represents a request to retrieve a single tag by its ID.
