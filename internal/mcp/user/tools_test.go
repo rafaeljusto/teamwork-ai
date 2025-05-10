@@ -194,7 +194,7 @@ func TestTools_updateUser(t *testing.T) {
 	}
 }
 
-func TestTools_retrieveUsersWorload(t *testing.T) {
+func TestTools_retrieveUsersWorkload(t *testing.T) {
 	mcpServer := server.NewMCPServer("test-server", "1.0.0")
 	user.Register(mcpServer, &config.Resources{
 		TeamworkEngine: engineMock{},
