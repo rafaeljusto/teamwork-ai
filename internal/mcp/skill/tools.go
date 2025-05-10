@@ -45,7 +45,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			if err := configResources.TeamworkEngine.Do(ctx, &multiple); err != nil {
 				return nil, err
 			}
-			encoded, err := json.Marshal(multiple)
+			encoded, err := json.Marshal(multiple.Response)
 			if err != nil {
 				return nil, err
 			}
