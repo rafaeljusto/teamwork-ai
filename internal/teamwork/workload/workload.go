@@ -113,6 +113,11 @@ func (s Single) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 	if len(s.Request.Filters.Include) > 0 {
 		query.Set("include", strings.Join(s.Request.Filters.Include, ","))
 	}
+
+	// to reduce the size of the response, we omit empty date entries where the
+	// user has no capacity and is not unavailable.
+	query.Set("omitEmptyDateEntries", "true")
+
 	req.URL.RawQuery = query.Encode()
 	req.Header.Set("Accept", "application/json")
 	return req, nil

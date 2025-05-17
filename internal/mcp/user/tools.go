@@ -287,7 +287,8 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				"a more granular view of each person's capacity. An individual's capacity is based on their working hours, "+
 				"returned in the workload response, versus the total estimated time on their assigned tasks (minus any "+
 				"unavailable time assigned to them) in the selected time frame. A user is considered over capacity when "+
-				"their capacity exceeds their working hours."),
+				"their capacity exceeds their working hours. Missing dates in the response should be interpreted as the user "+
+				"not having any tasks assigned to them on that date and being available."),
 			mcp.WithString("start-date",
 				mcp.Required(),
 				mcp.Description("The start date of the workload period. The date must be in the format YYYY-MM-DD."),
