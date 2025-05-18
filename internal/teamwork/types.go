@@ -122,7 +122,7 @@ func (d OptionalDateTime) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON decodes a JSON string into an OptionalDateTime type.
 func (d *OptionalDateTime) UnmarshalJSON(data []byte) error {
-	if len(data) == 0 || string(data) == `""` {
+	if len(data) == 0 || string(data) == `""` || string(data) == "null" {
 		return nil
 	}
 	return (*time.Time)(d).UnmarshalJSON(data)
