@@ -209,7 +209,7 @@ type Delete struct {
 	}
 }
 
-// HTTPRequest creates an HTTP request to delete a tag by its ID.
+// HTTPRequest creates an HTTP request to delete a tag.
 func (d Delete) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/projects/api/v3/tags/%d.json", server, d.Request.Path.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, uri, nil)
@@ -217,6 +217,5 @@ func (d Delete) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }

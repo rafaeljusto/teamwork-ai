@@ -15,6 +15,13 @@ type Relationship struct {
 	Meta map[string]any `json:"meta,omitempty"`
 }
 
+// LegacyRelationship describes the relation between the main entity and a
+// sideload type.
+type LegacyRelationship struct {
+	ID   LegacyNumber `json:"id"`
+	Type string       `json:"type"`
+}
+
 // UserGroups represents a collection of users, companies, and teams.
 type UserGroups struct {
 	UserIDs    []int64 `json:"userIds"`
@@ -100,6 +107,25 @@ func (m *LegacyUserGroups) UnmarshalJSON(data []byte) error {
 // IsEmpty checks if the LegacyUserGroups contains no IDs.
 func (m LegacyUserGroups) IsEmpty() bool {
 	return len(m.UserIDs) == 0 && len(m.CompanyIDs) == 0 && len(m.TeamIDs) == 0
+}
+
+// OptionalDateTime is a type alias for time.Time, used to represent date and
+// time values in the API. The difference is that it will accept empty strings
+// as valid values.
+type OptionalDateTime time.Time
+
+// MarshalJSON encodes the OptionalDateTime as a string in the format
+// "2006-01-02T15:04:05Z07:00".
+func (d OptionalDateTime) MarshalJSON() ([]byte, error) {
+	return time.Time(d).MarshalJSON()
+}
+
+// UnmarshalJSON decodes a JSON string into an OptionalDateTime type.
+func (d *OptionalDateTime) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || string(data) == `""` {
+		return nil
+	}
+	return (*time.Time)(d).UnmarshalJSON(data)
 }
 
 // Date is a type alias for time.Time, used to represent date values in the API.
@@ -198,4 +224,22 @@ func (m *Money) Set(value float64) {
 // Value returns the value of Money as a float64.
 func (m Money) Value() float64 {
 	return float64(m) / 100
+}
+
+// LegacyNumericList is a type alias for a slice of int64, used to represent a
+// list of numeric values in the API.
+type LegacyNumericList []int64
+
+// MarshalJSON encodes the LegacyNumericList as a JSON array of strings.
+func (l LegacyNumericList) MarshalJSON() ([]byte, error) {
+	var result []string
+	for _, id := range l {
+		result = append(result, strconv.FormatInt(id, 10))
+	}
+	return fmt.Appendf(nil, `"%s"`, strings.Join(result, ",")), nil
+}
+
+// Add adds a numeric value to the LegacyNumericList.
+func (l *LegacyNumericList) Add(n float64) {
+	*l = append(*l, int64(n))
 }
