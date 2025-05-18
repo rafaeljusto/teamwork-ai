@@ -540,8 +540,7 @@ func OptionalNumericListParam[T int8 | int16 | int32 | int64 |
 // OptionalCustomNumericListParam retrieves an optional list of numeric
 // parameters from a map, converting each item to the specified numeric type
 // using a custom type that implements the Add method. It returns an error if
-// the key is not found or if the type conversion fails. If the target is nil,
-// it returns an error.
+// the key is not found or if the type conversion fails.
 func OptionalCustomNumericListParam[T interface{ Add(float64) }](target T, key string) ParamFunc {
 	return func(params map[string]any) error {
 		value, ok := params[key]
