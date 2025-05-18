@@ -144,6 +144,7 @@ MCP server.
 | Milestones        | ✅     | ✅       | ✅      | ❌     | Retrieve by project                                                                |
 | Job roles         | ✅     | ✅       | ✅      | ❌     |                                                                                    |
 | Comments          | ✅     | ✅       | ✅      | ❌     | Retrieve by task, milestone, notebook or file                                      |
+| Teams             | ✅     | ✅       | ✅      | ❌     |                                                                                    |
 
 > [!NOTE]
 > Not all properties are supported for each entity. And, for now, delete actions

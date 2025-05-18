@@ -113,7 +113,10 @@ func param[T any](
 // converting it to the target numeric type. It returns an error if the key is
 // not found or if the type conversion fails. If the target is nil, it returns
 // an error.
-func RequiredNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+func RequiredNumericParam[T int8 | int16 | int32 | int64 |
+	uint8 | uint16 | uint32 | uint64 |
+	float32 | float64 |
+	teamwork.LegacyNumber](
 	target *T,
 	key string,
 	middlewares ...ParamMiddleware[T],
@@ -126,7 +129,10 @@ func RequiredNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint
 // OptionalNumericParam retrieves an optional numeric parameter from a map,
 // converting it to the target numeric type. It returns an error if the type
 // conversion fails. If the target is nil, it returns an error.
-func OptionalNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+func OptionalNumericParam[T int8 | int16 | int32 | int64 |
+	uint8 | uint16 | uint32 | uint64 |
+	float32 | float64 |
+	teamwork.LegacyNumber](
 	target *T,
 	key string,
 	middlewares ...ParamMiddleware[T],
@@ -140,7 +146,10 @@ func OptionalNumericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint
 // map and sets it to a pointer target. It converts the value to the specified
 // numeric type and applies middleware functions to the value before setting it.
 // If the target is nil, it returns an error.
-func OptionalNumericPointerParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+func OptionalNumericPointerParam[T int8 | int16 | int32 | int64 |
+	uint8 | uint16 | uint32 | uint64 |
+	float32 | float64 |
+	teamwork.LegacyNumber](
 	target **T,
 	key string,
 	middlewares ...ParamMiddleware[T],
@@ -162,7 +171,10 @@ func OptionalNumericPointerParam[T int8 | int16 | int32 | int64 | uint8 | uint16
 	}
 }
 
-func numericParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+func numericParam[T int8 | int16 | int32 | int64 |
+	uint8 | uint16 | uint32 | uint64 |
+	float32 | float64 |
+	teamwork.LegacyNumber](
 	params map[string]any,
 	target *T,
 	key string,
@@ -495,7 +507,10 @@ func OptionalListParam[T any](target *[]T, key string) ParamFunc {
 // from a map, converting each item to the specified numeric type. It returns
 // an error if the key is not found or if the type conversion fails. If the
 // target is nil, it returns an error.
-func OptionalNumericListParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](
+func OptionalNumericListParam[T int8 | int16 | int32 | int64 |
+	uint8 | uint16 | uint32 | uint64 |
+	float32 | float64 |
+	teamwork.LegacyNumber](
 	target *[]T, key string,
 ) ParamFunc {
 	return func(params map[string]any) error {
@@ -517,6 +532,32 @@ func OptionalNumericListParam[T int8 | int16 | int32 | int64 | uint8 | uint16 | 
 				return fmt.Errorf("invalid type in %s: expected float64, got %T", key, item)
 			}
 			*target = append(*target, T(v))
+		}
+		return nil
+	}
+}
+
+// OptionalCustomNumericListParam retrieves an optional list of numeric
+// parameters from a map, converting each item to the specified numeric type
+// using a custom type that implements the Add method. It returns an error if
+// the key is not found or if the type conversion fails. If the target is nil,
+// it returns an error.
+func OptionalCustomNumericListParam[T interface{ Add(float64) }](target T, key string) ParamFunc {
+	return func(params map[string]any) error {
+		value, ok := params[key]
+		if !ok {
+			return nil
+		}
+		array, ok := value.([]any)
+		if !ok {
+			return fmt.Errorf("invalid type for %s: expected []any, got %T", key, value)
+		}
+		for _, item := range array {
+			v, ok := item.(float64)
+			if !ok {
+				return fmt.Errorf("invalid type in %s: expected float64, got %T", key, item)
+			}
+			target.Add(v)
 		}
 		return nil
 	}

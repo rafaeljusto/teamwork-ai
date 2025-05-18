@@ -238,7 +238,7 @@ type Delete struct {
 	}
 }
 
-// HTTPRequest creates an HTTP request to update a milestone.
+// HTTPRequest creates an HTTP request to delete a milestone.
 func (d Delete) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	uri := fmt.Sprintf("%s/milestones/%d.json", server, d.Request.Path.ID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, uri, nil)
@@ -246,6 +246,5 @@ func (d Delete) HTTPRequest(ctx context.Context, server string) (*http.Request, 
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }
