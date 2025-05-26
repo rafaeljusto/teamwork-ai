@@ -50,7 +50,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twtask.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
 				twmcp.OptionalPointerParam(&multiple.Request.Filters.MatchAllTags, "match-all-tags"),
@@ -106,7 +106,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twtask.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.ProjectID, "project-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
@@ -163,7 +163,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twtask.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.TasklistID, "tasklist-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
@@ -198,7 +198,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twtask.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "task-id"),
 			)
 			if err != nil {
@@ -275,7 +275,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var task twtask.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&task.Name, "name"),
 				twmcp.RequiredNumericParam(&task.TasklistID, "tasklist-id"),
 				twmcp.OptionalPointerParam(&task.Description, "description"),
@@ -292,7 +292,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			if assignees, ok := request.Params.Arguments["assignees"]; ok {
+			if assignees, ok := request.GetArguments()["assignees"]; ok {
 				assigneesMap, ok := assignees.(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid assignees")
@@ -375,7 +375,7 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var task twtask.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&task.ID, "task-id"),
 				twmcp.OptionalPointerParam(&task.Name, "name"),
 				twmcp.OptionalPointerParam(&task.Description, "description"),
@@ -392,7 +392,7 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			if assignees, ok := request.Params.Arguments["assignees"]; ok {
+			if assignees, ok := request.GetArguments()["assignees"]; ok {
 				assigneesMap, ok := assignees.(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid assignees")

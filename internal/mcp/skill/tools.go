@@ -33,7 +33,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var multiple twskill.Multiple
 			multiple.Request.Filters.Include = []string{"users"}
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
@@ -65,7 +65,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var skill twskill.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&skill.ID, "skill-id"),
 			)
 			if err != nil {
@@ -101,7 +101,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var skill twskill.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&skill.Name, "name"),
 				twmcp.OptionalNumericListParam(&skill.UserIDs, "user-ids"),
 			)
@@ -137,7 +137,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var skill twskill.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&skill.ID, "skill-id"),
 				twmcp.OptionalPointerParam(&skill.Name, "name"),
 				twmcp.OptionalNumericListParam(&skill.UserIDs, "user-ids"),

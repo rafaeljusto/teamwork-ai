@@ -36,7 +36,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twuser.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalParam(&multiple.Request.Filters.Type, "type",
 					twmcp.RestrictValues("account", "collaborator", "contact"),
@@ -84,7 +84,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twuser.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.ProjectID, "project-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalParam(&multiple.Request.Filters.Type, "type",
@@ -120,7 +120,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var user twuser.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&user.ID, "user-id"),
 			)
 			if err != nil {
@@ -170,7 +170,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var user twuser.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&user.FirstName, "first-name"),
 				twmcp.RequiredParam(&user.LastName, "last-name"),
 				twmcp.OptionalPointerParam(&user.Title, "title"),
@@ -225,7 +225,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var user twuser.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalPointerParam(&user.FirstName, "first-name"),
 				twmcp.OptionalPointerParam(&user.LastName, "last-name"),
 				twmcp.OptionalPointerParam(&user.Title, "title"),
@@ -265,7 +265,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var projectUsers twuser.AddProject
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&projectUsers.Request.Path.ProjectID, "project-id"),
 				twmcp.OptionalNumericListParam(&projectUsers.Request.Users.IDs, "user-ids"),
 			)
@@ -314,7 +314,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var single twworkload.Single
 			single.Request.Filters.Include = []string{"users.workingHours.workingHoursEntry"}
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredDateParam(&single.Request.Filters.StartDate, "start-date"),
 				twmcp.RequiredDateParam(&single.Request.Filters.EndDate, "end-date"),
 				twmcp.OptionalNumericListParam(&single.Request.Filters.UserIDs, "user-ids"),

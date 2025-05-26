@@ -34,7 +34,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 			var multiple twjobrole.Multiple
 			multiple.Request.Filters.Include = []string{"users"}
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
@@ -66,7 +66,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twjobrole.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "jobrole-id"),
 			)
 			if err != nil {
@@ -96,7 +96,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var jobrole twjobrole.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&jobrole.Name, "name"),
 			)
 			if err != nil {
@@ -126,7 +126,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var jobrole twjobrole.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&jobrole.ID, "jobrole-id"),
 				twmcp.RequiredParam(&jobrole.Name, "name"),
 			)
