@@ -157,7 +157,7 @@ func TestCreate(t *testing.T) {
 		name: "all fields",
 		create: tasklist.Create{
 			Name:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Description: pointerTo("This is a test tasklist"),
+			Description: teamwork.Ref("This is a test tasklist"),
 			ProjectID:   resourceIDs.projectID,
 			MilestoneID: &resourceIDs.milestoneID,
 		},
@@ -234,8 +234,8 @@ func TestUpdate(t *testing.T) {
 		name: "all fields",
 		create: tasklist.Update{
 			ID:          tasklistID,
-			Name:        pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description: pointerTo("This is a test tasklist"),
+			Name:        teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description: teamwork.Ref("This is a test tasklist"),
 			MilestoneID: &resourceIDs.milestoneID,
 		},
 	}}
@@ -452,10 +452,6 @@ func createMilestone(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {

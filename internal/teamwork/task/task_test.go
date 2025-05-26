@@ -157,12 +157,12 @@ func TestCreate(t *testing.T) {
 		name: "all fields",
 		create: task.Create{
 			Name:             fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Description:      pointerTo("This is a test task"),
-			Priority:         pointerTo("high"),
-			Progress:         pointerTo(int64(50)),
-			StartAt:          pointerTo(teamwork.Date(time.Now().Add(24 * time.Hour))),
-			DueAt:            pointerTo(teamwork.Date(time.Now().Add(48 * time.Hour))),
-			EstimatedMinutes: pointerTo(int64(120)),
+			Description:      teamwork.Ref("This is a test task"),
+			Priority:         teamwork.Ref("high"),
+			Progress:         teamwork.Ref(int64(50)),
+			StartAt:          teamwork.Ref(teamwork.Date(time.Now().Add(24 * time.Hour))),
+			DueAt:            teamwork.Ref(teamwork.Date(time.Now().Add(48 * time.Hour))),
+			EstimatedMinutes: teamwork.Ref(int64(120)),
 			TasklistID:       resourceIDs.tasklistID,
 			Assignees: &teamwork.UserGroups{
 				UserIDs: []int64{resourceIDs.userID},
@@ -242,13 +242,13 @@ func TestUpdate(t *testing.T) {
 		name: "all fields",
 		create: task.Update{
 			ID:               taskID,
-			Name:             pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description:      pointerTo("This is a test task"),
-			Priority:         pointerTo("high"),
-			Progress:         pointerTo(int64(50)),
-			StartAt:          pointerTo(teamwork.Date(time.Now().Add(24 * time.Hour))),
-			DueAt:            pointerTo(teamwork.Date(time.Now().Add(48 * time.Hour))),
-			EstimatedMinutes: pointerTo(int64(120)),
+			Name:             teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description:      teamwork.Ref("This is a test task"),
+			Priority:         teamwork.Ref("high"),
+			Progress:         teamwork.Ref(int64(50)),
+			StartAt:          teamwork.Ref(teamwork.Date(time.Now().Add(24 * time.Hour))),
+			DueAt:            teamwork.Ref(teamwork.Date(time.Now().Add(48 * time.Hour))),
+			EstimatedMinutes: teamwork.Ref(int64(120)),
 			TasklistID:       &resourceIDs.tasklistID,
 			Assignees: &teamwork.UserGroups{
 				UserIDs: []int64{resourceIDs.userID},
@@ -465,10 +465,6 @@ func createUser(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {

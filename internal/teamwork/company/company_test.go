@@ -143,21 +143,21 @@ func TestCreate(t *testing.T) {
 		name: "all fields",
 		create: company.Create{
 			Name:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			AddressOne:  pointerTo("123 Main St"),
-			AddressTwo:  pointerTo("Apt. 456"),
-			City:        pointerTo("Cork"),
-			CountryCode: pointerTo("IR"),
-			EmailOne:    pointerTo("test1@company.com"),
-			EmailTwo:    pointerTo("test2@company.com"),
-			EmailThree:  pointerTo("test3@company.com"),
-			Fax:         pointerTo("123-456-7890"),
-			Phone:       pointerTo("123-456-7890"),
-			Profile:     pointerTo("This is a test company profile."),
-			State:       pointerTo("Cork"),
-			Website:     pointerTo("https://www.example.com"),
-			Zip:         pointerTo("12345"),
+			AddressOne:  teamwork.Ref("123 Main St"),
+			AddressTwo:  teamwork.Ref("Apt. 456"),
+			City:        teamwork.Ref("Cork"),
+			CountryCode: teamwork.Ref("IR"),
+			EmailOne:    teamwork.Ref("test1@company.com"),
+			EmailTwo:    teamwork.Ref("test2@company.com"),
+			EmailThree:  teamwork.Ref("test3@company.com"),
+			Fax:         teamwork.Ref("123-456-7890"),
+			Phone:       teamwork.Ref("123-456-7890"),
+			Profile:     teamwork.Ref("This is a test company profile."),
+			State:       teamwork.Ref("Cork"),
+			Website:     teamwork.Ref("https://www.example.com"),
+			Zip:         teamwork.Ref("12345"),
 			ManagerID:   &resourceIDs.userID,
-			IndustryID:  pointerTo(int64(1)), // Web Development Agency,
+			IndustryID:  teamwork.Ref(int64(1)), // Web Development Agency,
 			TagIDs:      []int64{resourceIDs.tagID},
 		},
 	}}
@@ -231,22 +231,22 @@ func TestUpdate(t *testing.T) {
 	}{{
 		name: "all fields",
 		create: company.Update{
-			Name:        pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			AddressOne:  pointerTo("123 Main St"),
-			AddressTwo:  pointerTo("Apt. 456"),
-			City:        pointerTo("Cork"),
-			CountryCode: pointerTo("IR"),
-			EmailOne:    pointerTo("test1@company.com"),
-			EmailTwo:    pointerTo("test2@company.com"),
-			EmailThree:  pointerTo("test3@company.com"),
-			Fax:         pointerTo("123-456-7890"),
-			Phone:       pointerTo("123-456-7890"),
-			Profile:     pointerTo("This is a test company profile."),
-			State:       pointerTo("Cork"),
-			Website:     pointerTo("https://www.example.com"),
-			Zip:         pointerTo("12345"),
+			Name:        teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			AddressOne:  teamwork.Ref("123 Main St"),
+			AddressTwo:  teamwork.Ref("Apt. 456"),
+			City:        teamwork.Ref("Cork"),
+			CountryCode: teamwork.Ref("IR"),
+			EmailOne:    teamwork.Ref("test1@company.com"),
+			EmailTwo:    teamwork.Ref("test2@company.com"),
+			EmailThree:  teamwork.Ref("test3@company.com"),
+			Fax:         teamwork.Ref("123-456-7890"),
+			Phone:       teamwork.Ref("123-456-7890"),
+			Profile:     teamwork.Ref("This is a test company profile."),
+			State:       teamwork.Ref("Cork"),
+			Website:     teamwork.Ref("https://www.example.com"),
+			Zip:         teamwork.Ref("12345"),
 			ManagerID:   &resourceIDs.userID,
-			IndustryID:  pointerTo(int64(1)), // Web Development Agency,
+			IndustryID:  teamwork.Ref(int64(1)), // Web Development Agency,
 			TagIDs:      []int64{resourceIDs.tagID},
 		},
 	}}
@@ -355,10 +355,6 @@ func createUser(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {

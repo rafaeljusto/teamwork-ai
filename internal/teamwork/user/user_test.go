@@ -136,10 +136,10 @@ func TestCreate(t *testing.T) {
 		create: user.Create{
 			FirstName: fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
 			LastName:  fmt.Sprintf("user%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Title:     pointerTo("Test User"),
+			Title:     teamwork.Ref("Test User"),
 			Email:     fmt.Sprintf("email%d%d@example.com", time.Now().UnixNano(), rand.Intn(100)),
-			Admin:     pointerTo(true),
-			Type:      pointerTo("account"),
+			Admin:     teamwork.Ref(true),
+			Type:      teamwork.Ref("account"),
 			CompanyID: &resourceIDs.companyID,
 		},
 	}}
@@ -216,12 +216,12 @@ func TestUpdate(t *testing.T) {
 		name: "all fields",
 		create: user.Update{
 			ID:        userID,
-			FirstName: pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			LastName:  pointerTo(fmt.Sprintf("user%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Title:     pointerTo("Test User"),
-			Email:     pointerTo(fmt.Sprintf("email%d%d@example.com", time.Now().UnixNano(), rand.Intn(100))),
-			Admin:     pointerTo(true),
-			Type:      pointerTo("account"),
+			FirstName: teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			LastName:  teamwork.Ref(fmt.Sprintf("user%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Title:     teamwork.Ref("Test User"),
+			Email:     teamwork.Ref(fmt.Sprintf("email%d%d@example.com", time.Now().UnixNano(), rand.Intn(100))),
+			Admin:     teamwork.Ref(true),
+			Type:      teamwork.Ref("account"),
 			CompanyID: &resourceIDs.companyID,
 		},
 	}}

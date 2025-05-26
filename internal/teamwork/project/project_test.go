@@ -145,9 +145,9 @@ func TestCreate(t *testing.T) {
 		name: "all fields",
 		create: project.Create{
 			Name:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Description: pointerTo("This is a test project"),
-			StartAt:     pointerTo(teamwork.LegacyDate(time.Now().Add(24 * time.Hour))),
-			EndAt:       pointerTo(teamwork.LegacyDate(time.Now().Add(48 * time.Hour))),
+			Description: teamwork.Ref("This is a test project"),
+			StartAt:     teamwork.Ref(teamwork.LegacyDate(time.Now().Add(24 * time.Hour))),
+			EndAt:       teamwork.Ref(teamwork.LegacyDate(time.Now().Add(48 * time.Hour))),
 			CompanyID:   resourceIDs.companyID,
 			OwnerID:     &resourceIDs.userID,
 			Tags:        []int64{resourceIDs.tagID},
@@ -223,10 +223,10 @@ func TestUpdate(t *testing.T) {
 	}{{
 		name: "all fields",
 		create: project.Update{
-			Name:        pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description: pointerTo("This is a test project"),
-			StartAt:     pointerTo(teamwork.LegacyDate(time.Now().Add(24 * time.Hour))),
-			EndAt:       pointerTo(teamwork.LegacyDate(time.Now().Add(48 * time.Hour))),
+			Name:        teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description: teamwork.Ref("This is a test project"),
+			StartAt:     teamwork.Ref(teamwork.LegacyDate(time.Now().Add(24 * time.Hour))),
+			EndAt:       teamwork.Ref(teamwork.LegacyDate(time.Now().Add(48 * time.Hour))),
 			CompanyID:   &resourceIDs.companyID,
 			OwnerID:     &resourceIDs.userID,
 			Tags:        []int64{resourceIDs.tagID},
@@ -383,10 +383,6 @@ func createUser(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {

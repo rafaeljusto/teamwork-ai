@@ -293,6 +293,94 @@ func timeParam(
 	return nil
 }
 
+// RequiredTimeOnlyParam retrieves a required time parameter from a map,
+// converting it to a teamwork.Time type. It returns an error if the key is not
+// found or if the type conversion fails. If the target is nil, it returns an
+// error.
+func RequiredTimeOnlyParam(
+	target *teamwork.Time,
+	key string,
+	middlewares ...ParamMiddleware[string],
+) ParamFunc {
+	return func(params map[string]any) error {
+		return timeOnlyParam(params, target, key, false, middlewares...)
+	}
+}
+
+// OptionalTimeOnlyParam retrieves an optional time parameter from a map,
+// converting it to a teamwork.Time type. It returns an error if the type
+// conversion fails. If the target is nil, it returns an error.
+func OptionalTimeOnlyParam(
+	target *teamwork.Time,
+	key string,
+	middlewares ...ParamMiddleware[string],
+) ParamFunc {
+	return func(params map[string]any) error {
+		return timeOnlyParam(params, target, key, true, middlewares...)
+	}
+}
+
+// OptionalTimeOnlyPointerParam retrieves an optional time parameter from a map
+// and sets it to a pointer target. It converts the value to a teamwork.Time
+// type and applies middleware functions to the value before setting it. If the
+// target is nil, it returns an error.
+func OptionalTimeOnlyPointerParam(
+	target **teamwork.Time,
+	key string,
+	middlewares ...ParamMiddleware[string],
+) ParamFunc {
+	return func(params map[string]any) error {
+		if target == nil {
+			return fmt.Errorf("target cannot be nil")
+		}
+		var temp teamwork.Time
+		var set bool
+		middlewares = append(middlewares, func(*string) (bool, error) { set = true; return true, nil })
+		if err := timeOnlyParam(params, &temp, key, true, middlewares...); err != nil {
+			return err
+		}
+		if set {
+			*target = &temp
+		}
+		return nil
+	}
+}
+
+func timeOnlyParam(
+	params map[string]any,
+	target *teamwork.Time,
+	key string,
+	optional bool,
+	middlewares ...ParamMiddleware[string],
+) error {
+	if target == nil {
+		return fmt.Errorf("target cannot be nil")
+	}
+	value, ok := params[key]
+	if !ok {
+		if optional {
+			return nil
+		}
+		return fmt.Errorf("parameter %s is required", key)
+	}
+	v, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("invalid type for %s: expected string, got %T", key, value)
+	}
+	for _, middleware := range middlewares {
+		var err error
+		if ok, err = middleware(&v); err != nil || !ok {
+			return err
+		}
+	}
+	t, err := time.Parse("15:04:05", v)
+	if err != nil {
+		return fmt.Errorf("invalid time-only format for %s: %w", key, err)
+	}
+	*target = teamwork.Time(t)
+	return nil
+}
+
 // RequiredDateParam retrieves a required date parameter from a map, converting
 // it to a teamwork.Date type. It returns an error if the key is not found or if
 // the type conversion fails. The date format is expected to be "YYYY-MM-DD". If

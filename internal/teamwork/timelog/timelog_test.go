@@ -1,4 +1,4 @@
-package milestone_test
+package timelog_test
 
 import (
 	"context"
@@ -10,10 +10,11 @@ import (
 	"time"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/milestone"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/project"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/tag"
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/tasklist"
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/timelog"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
 )
 
@@ -24,6 +25,7 @@ var (
 	resourceIDs struct {
 		projectID  int64
 		tasklistID int64
+		taskID     int64
 		tagID      int64
 		userID     int64
 	}
@@ -34,49 +36,46 @@ func TestSingle(t *testing.T) {
 		t.Skip("Skipping test because the engine is not initialized")
 	}
 
-	create := milestone.Create{
-		Name:      fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		DueDate:   teamwork.LegacyDate(time.Now().Add(24 * time.Hour)),
+	create := timelog.Create{
+		Date:      teamwork.Date(time.Now()),
+		Hours:     1,
 		ProjectID: resourceIDs.projectID,
-		Assignees: teamwork.LegacyUserGroups{
-			UserIDs: []int64{resourceIDs.userID},
-		},
 	}
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var milestoneID int64
-	milestoneIDSetter := teamwork.WithIDCallback("milestoneId", func(i int64) {
-		milestoneID = i
+	var timelogID int64
+	timelogIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timelogID = i
 	})
-	if err := engine.Do(ctx, &create, milestoneIDSetter); err != nil {
-		t.Fatalf("failed to create milestone: %v", err)
+	if err := engine.Do(ctx, &create, timelogIDSetter); err != nil {
+		t.Fatalf("failed to create timelog: %v", err)
 	}
 	t.Cleanup(func() {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var milestoneDelete milestone.Delete
-		milestoneDelete.Request.Path.ID = milestoneID
-		if err := engine.Do(ctx, &milestoneDelete); err != nil {
-			t.Logf("⚠️  failed to delete milestone: %v", err)
+		var timelogDelete timelog.Delete
+		timelogDelete.Request.Path.ID = timelogID
+		if err := engine.Do(ctx, &timelogDelete); err != nil {
+			t.Logf("⚠️  failed to delete timelog: %v", err)
 		}
 	})
 
 	ctx, cancel = context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var single milestone.Single
-	single.ID = milestoneID
+	var single timelog.Single
+	single.ID = timelogID
 
 	if err := engine.Do(ctx, &single); err != nil {
-		t.Fatalf("failed to get milestone: %v", err)
+		t.Fatalf("failed to get timelog: %v", err)
 	}
-	if single.ID != milestoneID {
-		t.Errorf("expected milestone ID %d, got %d", milestoneID, single.ID)
+	if single.ID != timelogID {
+		t.Errorf("expected timelog ID %d, got %d", timelogID, single.ID)
 	}
 }
 
@@ -85,48 +84,81 @@ func TestMultiple(t *testing.T) {
 		t.Skip("Skipping test because the engine is not initialized")
 	}
 
-	create := milestone.Create{
-		Name:      fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		DueDate:   teamwork.LegacyDate(time.Now().Add(24 * time.Hour)),
+	createWithinProject := timelog.Create{
+		Date:      teamwork.Date(time.Now()),
+		Hours:     1,
 		ProjectID: resourceIDs.projectID,
-		Assignees: teamwork.LegacyUserGroups{
-			UserIDs: []int64{resourceIDs.userID},
-		},
 	}
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var milestoneID int64
-	milestoneIDSetter := teamwork.WithIDCallback("milestoneId", func(i int64) {
-		milestoneID = i
+	var projectTimelogID int64
+	timelogIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		projectTimelogID = i
 	})
-	if err := engine.Do(ctx, &create, milestoneIDSetter); err != nil {
-		t.Fatalf("failed to create milestone: %v", err)
+	if err := engine.Do(ctx, &createWithinProject, timelogIDSetter); err != nil {
+		t.Fatalf("failed to create timelog: %v", err)
 	}
 	t.Cleanup(func() {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var milestoneDelete milestone.Delete
-		milestoneDelete.Request.Path.ID = milestoneID
-		if err := engine.Do(ctx, &milestoneDelete); err != nil {
-			t.Logf("⚠️  failed to delete milestone: %v", err)
+		var timelogDelete timelog.Delete
+		timelogDelete.Request.Path.ID = projectTimelogID
+		if err := engine.Do(ctx, &timelogDelete); err != nil {
+			t.Logf("⚠️  failed to delete timelog: %v", err)
+		}
+	})
+
+	createWithinTask := timelog.Create{
+		Date:   teamwork.Date(time.Now()),
+		Hours:  1,
+		TaskID: resourceIDs.taskID,
+	}
+
+	ctx = context.Background()
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var taskTimelogID int64
+	timelogIDSetter = teamwork.WithIDCallback("id", func(i int64) {
+		taskTimelogID = i
+	})
+	if err := engine.Do(ctx, &createWithinTask, timelogIDSetter); err != nil {
+		t.Fatalf("failed to create timelog: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		var timelogDelete timelog.Delete
+		timelogDelete.Request.Path.ID = taskTimelogID
+		if err := engine.Do(ctx, &timelogDelete); err != nil {
+			t.Logf("⚠️  failed to delete timelog: %v", err)
 		}
 	})
 
 	tests := []struct {
 		name     string
-		multiple milestone.Multiple
+		multiple timelog.Multiple
 	}{{
-		name: "all milestones",
+		name: "all timelogs",
 	}, {
-		name: "milestones for project",
-		multiple: func() milestone.Multiple {
-			var multiple milestone.Multiple
+		name: "timelogs for project",
+		multiple: func() timelog.Multiple {
+			var multiple timelog.Multiple
 			multiple.Request.Path.ProjectID = resourceIDs.projectID
+			return multiple
+		}(),
+	}, {
+		name: "timelogs for task",
+		multiple: func() timelog.Multiple {
+			var multiple timelog.Multiple
+			multiple.Request.Path.TaskID = resourceIDs.taskID
 			return multiple
 		}(),
 	}}
@@ -138,10 +170,10 @@ func TestMultiple(t *testing.T) {
 			defer cancel()
 
 			if err := engine.Do(ctx, &tt.multiple); err != nil {
-				t.Errorf("failed to get milestones: %v", err)
+				t.Errorf("failed to get timelogs: %v", err)
 
-			} else if len(tt.multiple.Response.Milestones) == 0 {
-				t.Error("expected at least one milestone, got none")
+			} else if len(tt.multiple.Response.Timelogs) == 0 {
+				t.Error("expected at least one timelog, got none")
 			}
 		})
 	}
@@ -154,29 +186,48 @@ func TestCreate(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		create milestone.Create
+		create timelog.Create
 	}{{
-		name: "only required fields",
-		create: milestone.Create{
-			Name:      fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			DueDate:   teamwork.LegacyDate(time.Now().Add(24 * time.Hour)),
+		name: "only required fields for project",
+		create: timelog.Create{
+			Date:      teamwork.Date(time.Now()),
+			Hours:     1,
 			ProjectID: resourceIDs.projectID,
-			Assignees: teamwork.LegacyUserGroups{
-				UserIDs: []int64{resourceIDs.userID},
-			},
 		},
 	}, {
-		name: "all fields",
-		create: milestone.Create{
-			Name:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Description: teamwork.Ref("This is a test milestone"),
-			DueDate:     teamwork.LegacyDate(time.Now().Add(48 * time.Hour)),
+		name: "all fields for project",
+		create: timelog.Create{
+			Description: teamwork.Ref("This is a test timelog"),
+			Date:        teamwork.Date(time.Now().UTC()),
+			Time:        teamwork.Time(time.Now().UTC()),
+			IsUTC:       true,
+			Hours:       1,
+			Minutes:     30,
+			Billable:    true,
 			ProjectID:   resourceIDs.projectID,
-			TasklistIDs: []int64{resourceIDs.tasklistID},
+			UserID:      &resourceIDs.userID,
 			TagIDs:      []int64{resourceIDs.tagID},
-			Assignees: teamwork.LegacyUserGroups{
-				UserIDs: []int64{resourceIDs.userID},
-			},
+		},
+	}, {
+		name: "only required fields for task",
+		create: timelog.Create{
+			Date:   teamwork.Date(time.Now()),
+			Hours:  1,
+			TaskID: resourceIDs.taskID,
+		},
+	}, {
+		name: "all fields for task",
+		create: timelog.Create{
+			Description: teamwork.Ref("This is a test timelog"),
+			Date:        teamwork.Date(time.Now().UTC()),
+			Time:        teamwork.Time(time.Now().UTC()),
+			IsUTC:       true,
+			Hours:       1,
+			Minutes:     30,
+			Billable:    true,
+			TaskID:      resourceIDs.taskID,
+			UserID:      &resourceIDs.userID,
+			TagIDs:      []int64{resourceIDs.tagID},
 		},
 	}}
 
@@ -186,13 +237,13 @@ func TestCreate(t *testing.T) {
 			ctx, cancel := context.WithTimeout(ctx, timeout)
 			defer cancel()
 
-			var milestoneID int64
-			milestoneIDSetter := teamwork.WithIDCallback("milestoneId", func(id int64) {
-				milestoneID = id
+			var timelogID int64
+			timelogIDSetter := teamwork.WithIDCallback("id", func(id int64) {
+				timelogID = id
 			})
 
-			if err := engine.Do(ctx, &tt.create, milestoneIDSetter); err != nil {
-				t.Errorf("failed to create milestone: %v", err)
+			if err := engine.Do(ctx, &tt.create, timelogIDSetter); err != nil {
+				t.Errorf("failed to create timelog: %v", err)
 
 			} else {
 				t.Cleanup(func() {
@@ -200,10 +251,10 @@ func TestCreate(t *testing.T) {
 					ctx, cancel := context.WithTimeout(ctx, timeout)
 					defer cancel()
 
-					var milestoneDelete milestone.Delete
-					milestoneDelete.Request.Path.ID = milestoneID
-					if err := engine.Do(ctx, &milestoneDelete); err != nil {
-						t.Logf("⚠️  failed to delete milestone: %v", err)
+					var timelogDelete timelog.Delete
+					timelogDelete.Request.Path.ID = timelogID
+					if err := engine.Do(ctx, &timelogDelete); err != nil {
+						t.Logf("⚠️  failed to delete timelog: %v", err)
 					}
 				})
 			}
@@ -216,53 +267,51 @@ func TestUpdate(t *testing.T) {
 		t.Skip("Skipping test because the engine is not initialized")
 	}
 
-	create := milestone.Create{
-		Name:      fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		DueDate:   teamwork.LegacyDate(time.Now().Add(24 * time.Hour)),
+	create := timelog.Create{
+		Date:      teamwork.Date(time.Now()),
+		Hours:     1,
 		ProjectID: resourceIDs.projectID,
-		Assignees: teamwork.LegacyUserGroups{
-			UserIDs: []int64{resourceIDs.userID},
-		},
 	}
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var milestoneID int64
-	milestoneIDSetter := teamwork.WithIDCallback("milestoneId", func(i int64) {
-		milestoneID = i
+	var timelogID int64
+	timelogIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timelogID = i
 	})
-	if err := engine.Do(ctx, &create, milestoneIDSetter); err != nil {
-		t.Fatalf("failed to create milestone: %v", err)
+	if err := engine.Do(ctx, &create, timelogIDSetter); err != nil {
+		t.Fatalf("failed to create timelog: %v", err)
 	}
 	t.Cleanup(func() {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var milestoneDelete milestone.Delete
-		milestoneDelete.Request.Path.ID = milestoneID
-		if err := engine.Do(ctx, &milestoneDelete); err != nil {
-			t.Logf("⚠️  failed to delete milestone: %v", err)
+		var timelogDelete timelog.Delete
+		timelogDelete.Request.Path.ID = timelogID
+		if err := engine.Do(ctx, &timelogDelete); err != nil {
+			t.Logf("⚠️  failed to delete timelog: %v", err)
 		}
 	})
 
 	tests := []struct {
 		name   string
-		create milestone.Update
+		create timelog.Update
 	}{{
 		name: "all fields",
-		create: milestone.Update{
-			ID:          milestoneID,
-			Name:        teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description: teamwork.Ref("This is a test milestone"),
-			DueDate:     teamwork.Ref(teamwork.LegacyDate(time.Now().Add(48 * time.Hour))),
-			TasklistIDs: []int64{resourceIDs.tasklistID},
+		create: timelog.Update{
+			ID:          timelogID,
+			Description: teamwork.Ref("Updated description"),
+			Date:        teamwork.Ref(teamwork.Date(time.Now().UTC())),
+			Time:        teamwork.Ref(teamwork.Time(time.Now().UTC())),
+			IsUTC:       teamwork.Ref(true),
+			Hours:       teamwork.Ref(int64(2)),
+			Minutes:     teamwork.Ref(int64(15)),
+			Billable:    teamwork.Ref(true),
+			UserID:      teamwork.Ref(resourceIDs.userID),
 			TagIDs:      []int64{resourceIDs.tagID},
-			Assignees: &teamwork.LegacyUserGroups{
-				UserIDs: []int64{resourceIDs.userID},
-			},
 		},
 	}}
 
@@ -273,7 +322,7 @@ func TestUpdate(t *testing.T) {
 			defer cancel()
 
 			if err := engine.Do(ctx, &tt.create); err != nil {
-				t.Errorf("failed to update milestone: %v", err)
+				t.Errorf("failed to update timelog: %v", err)
 			}
 		})
 	}
@@ -364,6 +413,52 @@ func createTasklist(logger *slog.Logger) func() {
 		if err := engine.Do(ctx, &tasklistDelete); err != nil {
 			logger.Warn("⚠️  failed to delete tasklist",
 				slog.Int64("id", resourceIDs.tasklistID),
+				slog.String("error", err.Error()),
+			)
+		}
+	}
+}
+
+func createTask(logger *slog.Logger) func() {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	taskCreate := task.Create{
+		Name:       fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
+		TasklistID: resourceIDs.tasklistID,
+	}
+
+	taskIDSetter := teamwork.WithIDCallback("id", func(id int64) {
+		resourceIDs.taskID = id
+	})
+
+	logger.Info("⚙️  Creating task")
+	if err := engine.Do(ctx, &taskCreate, taskIDSetter); err != nil {
+		logger.Error("failed to create task",
+			slog.String("error", err.Error()),
+		)
+		return func() {}
+	}
+	logger.Info("✅ Created task",
+		slog.Int64("id", resourceIDs.taskID),
+		slog.String("name", taskCreate.Name),
+	)
+
+	return func() {
+		logger.Info("🗑️  Cleaning up task",
+			slog.Int64("id", resourceIDs.taskID),
+		)
+
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		var taskDelete task.Delete
+		taskDelete.Request.Path.ID = resourceIDs.taskID
+		if err := engine.Do(ctx, &taskDelete); err != nil {
+			logger.Warn("⚠️  failed to delete task",
+				slog.Int64("id", resourceIDs.taskID),
 				slog.String("error", err.Error()),
 			)
 		}
@@ -511,6 +606,13 @@ func TestMain(m *testing.M) {
 		return
 	}
 	defer deleteTasklist()
+
+	deleteTask := createTask(logger)
+	if resourceIDs.taskID == 0 {
+		exitCode = 1
+		return
+	}
+	defer deleteTask()
 
 	deleteTag := createTag(logger)
 	if resourceIDs.tagID == 0 {

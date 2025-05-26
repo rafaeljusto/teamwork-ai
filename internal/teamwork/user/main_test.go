@@ -224,10 +224,6 @@ func createjobRole(logger *slog.Logger) func() {
 	}
 }
 
-func pointerTo[T any](t T) *T {
-	return &t
-}
-
 func startEngine() *teamwork.Engine {
 	server, token := os.Getenv("TWAI_TEAMWORK_SERVER"), os.Getenv("TWAI_TEAMWORK_API_TOKEN")
 	if server == "" || token == "" {

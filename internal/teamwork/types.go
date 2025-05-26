@@ -167,6 +167,45 @@ func (d Date) String() string {
 	return time.Time(d).Format("2006-01-02")
 }
 
+// Time is a type alias for time.Time, used to represent time values in the API.
+type Time time.Time
+
+// MarshalJSON encodes the Time as a string in the format "15:04:05".
+func (t Time) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + time.Time(t).Format("15:04:05") + `"`), nil
+}
+
+// UnmarshalJSON decodes a JSON string into a Date type.
+func (t *Time) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	parsedTime, err := time.Parse("15:04:05", str)
+	if err != nil {
+		return err
+	}
+	*t = Time(parsedTime)
+	return nil
+}
+
+// MarshalText encodes the Time as a string in the format "15:04:05".
+func (t Time) MarshalText() ([]byte, error) {
+	return t.MarshalJSON()
+}
+
+// UnmarshalText decodes a text string into a Time type. This is required when
+// using Time type as a map key.
+func (t *Time) UnmarshalText(text []byte) error {
+	return t.UnmarshalJSON(text)
+}
+
+// String returns the string representation of the Time in the format
+// "15:04:05".
+func (t Time) String() string {
+	return time.Time(t).Format("15:04:05")
+}
+
 // LegacyDate is a type alias for time.Time, used to represent date values in
 // the API.
 type LegacyDate time.Time
