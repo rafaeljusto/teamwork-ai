@@ -31,7 +31,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twteam.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
@@ -64,7 +64,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twteam.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "team-id"),
 			)
 			if err != nil {
@@ -117,7 +117,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var team twteam.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&team.Name, "name"),
 				twmcp.OptionalPointerParam(&team.Handle, "handle"),
 				twmcp.OptionalPointerParam(&team.Description, "description"),
@@ -175,7 +175,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var team twteam.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&team.ID, "team-id"),
 				twmcp.OptionalPointerParam(&team.Name, "name"),
 				twmcp.OptionalPointerParam(&team.Handle, "handle"),

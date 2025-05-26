@@ -37,7 +37,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twcomment.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.UserIDs, "user-ids"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
@@ -86,7 +86,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twcomment.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.FileID, "file-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.UserIDs, "user-ids"),
@@ -136,7 +136,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twcomment.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.MilestoneID, "milestone-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.UserIDs, "user-ids"),
@@ -186,7 +186,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twcomment.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.NotebookID, "notebook-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.UserIDs, "user-ids"),
@@ -236,7 +236,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twcomment.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.TaskID, "task-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.UserIDs, "user-ids"),
@@ -270,7 +270,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twcomment.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "comment-id"),
 			)
 			if err != nil {
@@ -320,7 +320,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var comment twcomment.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&comment.Body, "body"),
 				twmcp.OptionalPointerParam(&comment.ContentType, "content-type"),
 			)
@@ -328,7 +328,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			object, ok := request.Params.Arguments["object"]
+			object, ok := request.GetArguments()["object"]
 			if !ok {
 				return nil, fmt.Errorf("missing required parameter: object")
 			}
@@ -372,7 +372,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var comment twcomment.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&comment.ID, "comment-id"),
 				twmcp.RequiredParam(&comment.Body, "body"),
 				twmcp.OptionalPointerParam(&comment.ContentType, "content-type"),

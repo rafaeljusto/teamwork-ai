@@ -46,7 +46,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twmilestone.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
 				twmcp.OptionalPointerParam(&multiple.Request.Filters.MatchAllTags, "match-all-tags"),
@@ -104,7 +104,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twmilestone.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.ProjectID, "project-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.TagIDs, "tag-ids"),
@@ -140,7 +140,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twmilestone.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "milestone-id"),
 			)
 			if err != nil {
@@ -208,7 +208,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var milestone twmilestone.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&milestone.Name, "name"),
 				twmcp.OptionalPointerParam(&milestone.Description, "description"),
 				twmcp.RequiredLegacyDateParam(&milestone.DueDate, "due-date"),
@@ -219,7 +219,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			assignees, ok := request.Params.Arguments["assignees"]
+			assignees, ok := request.GetArguments()["assignees"]
 			if !ok {
 				return nil, fmt.Errorf("missing required parameter: assignees")
 			}
@@ -299,7 +299,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var milestone twmilestone.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&milestone.ID, "milestone-id"),
 				twmcp.OptionalPointerParam(&milestone.Name, "name"),
 				twmcp.OptionalPointerParam(&milestone.Description, "description"),
@@ -311,7 +311,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				return nil, fmt.Errorf("invalid parameters: %w", err)
 			}
 
-			if assignees, ok := request.Params.Arguments["assignees"]; ok {
+			if assignees, ok := request.GetArguments()["assignees"]; ok {
 				assigneesMap, ok := assignees.(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid assignees")

@@ -30,7 +30,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twtasklist.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.PageSize, "page-size"),
@@ -71,7 +71,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twtasklist.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&multiple.Request.Path.ProjectID, "project-id"),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalNumericParam(&multiple.Request.Filters.Page, "page"),
@@ -104,7 +104,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twtasklist.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "tasklist-id"),
 			)
 			if err != nil {
@@ -144,7 +144,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasklist twtasklist.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&tasklist.Name, "name"),
 				twmcp.RequiredNumericParam(&tasklist.ProjectID, "project-id"),
 				twmcp.OptionalPointerParam(&tasklist.Description, "description"),
@@ -182,7 +182,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tasklist twtasklist.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&tasklist.ID, "tasklist-id"),
 				twmcp.OptionalPointerParam(&tasklist.Name, "name"),
 				twmcp.OptionalPointerParam(&tasklist.Description, "description"),

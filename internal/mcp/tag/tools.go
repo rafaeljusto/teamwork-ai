@@ -41,7 +41,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var multiple twtag.Multiple
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.OptionalParam(&multiple.Request.Filters.SearchTerm, "search-term"),
 				twmcp.OptionalParam(&multiple.Request.Filters.ItemType, "item-type"),
 				twmcp.OptionalNumericListParam(&multiple.Request.Filters.ProjectIDs, "project-ids"),
@@ -75,7 +75,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var single twtag.Single
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&single.ID, "tag-id"),
 			)
 			if err != nil {
@@ -108,7 +108,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tag twtag.Create
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredParam(&tag.Name, "name"),
 				twmcp.OptionalNumericPointerParam(&tag.ProjectID, "project-id"),
 			)
@@ -145,7 +145,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			var tag twtag.Update
 
-			err := twmcp.ParamGroup(request.Params.Arguments,
+			err := twmcp.ParamGroup(request.GetArguments(),
 				twmcp.RequiredNumericParam(&tag.ID, "tag-id"),
 				twmcp.OptionalPointerParam(&tag.Name, "name"),
 				twmcp.OptionalNumericPointerParam(&tag.ProjectID, "project-id"),
