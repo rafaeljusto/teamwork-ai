@@ -131,8 +131,8 @@ Where `<server>` is the URL of the remote MCP server.
 Below is a table summarizing the supported entities and their operations in the
 MCP server.
 
-| Entity            | Create | Retrieve | Update | Delete | Extra                                                                              |
-|-------------------|--------|----------|--------|--------|------------------------------------------------------------------------------------|
+| Entity            | Create | Retrieve | Update  | Delete | Extra                                                                              |
+|-------------------|--------|----------|---------|--------|------------------------------------------------------------------------------------|
 | Projects          | ✅     | ✅       | ✅      | ❌     |                                                                                    |
 | Tasklists         | ✅     | ✅       | ✅      | ❌     | Retrieve by project                                                                |
 | Tasks             | ✅     | ✅       | ✅      | ❌     | Retrieve by project; retrieve by tasklist                                          |
@@ -145,6 +145,7 @@ MCP server.
 | Job roles         | ✅     | ✅       | ✅      | ❌     |                                                                                    |
 | Comments          | ✅     | ✅       | ✅      | ❌     | Retrieve by task, milestone, notebook or file                                      |
 | Teams             | ✅     | ✅       | ✅      | ❌     |                                                                                    |
+| Timelog           | ✅     | ✅       | ✅      | ❌     | Retrieve by project or task                                                        |
 
 > [!NOTE]
 > Not all properties are supported for each entity. And, for now, delete actions

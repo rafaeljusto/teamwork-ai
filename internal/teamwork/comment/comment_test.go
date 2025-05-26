@@ -35,7 +35,7 @@ func TestSingle(t *testing.T) {
 	create := comment.Create{
 		Object:      teamwork.Relationship{ID: resourceIDs.taskID, Type: "tasks"},
 		Body:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		ContentType: pointerTo("TEXT"),
+		ContentType: teamwork.Ref("TEXT"),
 	}
 
 	ctx := context.Background()
@@ -83,7 +83,7 @@ func TestMultiple(t *testing.T) {
 	create := comment.Create{
 		Object:      teamwork.Relationship{ID: resourceIDs.taskID, Type: "tasks"},
 		Body:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		ContentType: pointerTo("TEXT"),
+		ContentType: teamwork.Ref("TEXT"),
 	}
 
 	ctx := context.Background()
@@ -152,7 +152,7 @@ func TestCreate(t *testing.T) {
 		create: comment.Create{
 			Object:      teamwork.Relationship{ID: resourceIDs.taskID, Type: "tasks"},
 			Body:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			ContentType: pointerTo("TEXT"),
+			ContentType: teamwork.Ref("TEXT"),
 		},
 	}}
 
@@ -195,7 +195,7 @@ func TestUpdate(t *testing.T) {
 	create := comment.Create{
 		Object:      teamwork.Relationship{ID: resourceIDs.taskID, Type: "tasks"},
 		Body:        fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		ContentType: pointerTo("TEXT"),
+		ContentType: teamwork.Ref("TEXT"),
 	}
 
 	ctx := context.Background()
@@ -229,7 +229,7 @@ func TestUpdate(t *testing.T) {
 		create: comment.Update{
 			ID:          commentID,
 			Body:        "<h1>test</h1>",
-			ContentType: pointerTo("HTML"),
+			ContentType: teamwork.Ref("HTML"),
 		},
 	}}
 
@@ -381,10 +381,6 @@ func createTask(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {

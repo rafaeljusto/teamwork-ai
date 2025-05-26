@@ -136,8 +136,8 @@ func Test_AutoAssignTask(t *testing.T) {
 			var taskData webhook.TaskData
 			taskData.Task.ID = 1
 			taskData.Task.Name = "task-1"
-			taskData.Task.StartDate = pointerTo(teamwork.Date(time.Now().AddDate(0, 0, 1)))
-			taskData.Task.DueDate = pointerTo(teamwork.Date(time.Now().AddDate(0, 0, 2)))
+			taskData.Task.StartDate = teamwork.Ref(teamwork.Date(time.Now().AddDate(0, 0, 1)))
+			taskData.Task.DueDate = teamwork.Ref(teamwork.Date(time.Now().AddDate(0, 0, 2)))
 			taskData.Task.EstimatedMinutes = 120
 			return taskData
 		}(),
@@ -158,10 +158,6 @@ func Test_AutoAssignTask(t *testing.T) {
 			}
 		})
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 type engineMock struct {
@@ -238,8 +234,8 @@ func teamworkEngine(
 			}
 		case *user.Multiple:
 			t.Response.Users = []user.User{
-				{ID: 1, FirstName: "James", LastName: "Smith", Cost: pointerTo(teamwork.Money(20000))},
-				{ID: 2, FirstName: "Michael", LastName: "Williams", Cost: pointerTo(teamwork.Money(10000))},
+				{ID: 1, FirstName: "James", LastName: "Smith", Cost: teamwork.Ref(teamwork.Money(20000))},
+				{ID: 2, FirstName: "Michael", LastName: "Williams", Cost: teamwork.Ref(teamwork.Money(10000))},
 			}
 		case *workload.Single:
 			t.Response.Workload.Users = []workload.User{

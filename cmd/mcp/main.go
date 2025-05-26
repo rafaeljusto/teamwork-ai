@@ -25,6 +25,7 @@ import (
 	mcptag "github.com/rafaeljusto/teamwork-ai/internal/mcp/tag"
 	mcptask "github.com/rafaeljusto/teamwork-ai/internal/mcp/task"
 	mcptasklist "github.com/rafaeljusto/teamwork-ai/internal/mcp/tasklist"
+	mcptimelog "github.com/rafaeljusto/teamwork-ai/internal/mcp/timelog"
 	mcpuser "github.com/rafaeljusto/teamwork-ai/internal/mcp/user"
 )
 
@@ -122,6 +123,7 @@ func newMCPServer(resources *config.Resources) *server.MCPServer {
 	mcpmilestone.Register(mcpServer, resources)
 	mcpjobrole.Register(mcpServer, resources)
 	mcpcomment.Register(mcpServer, resources)
+	mcptimelog.Register(mcpServer, resources)
 
 	return mcpServer
 }

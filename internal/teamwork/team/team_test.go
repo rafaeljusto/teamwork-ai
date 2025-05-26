@@ -172,8 +172,8 @@ func TestCreate(t *testing.T) {
 		name: "all fields for company",
 		create: team.Create{
 			Name:         fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Handle:       pointerTo(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description:  pointerTo("This is a test team."),
+			Handle:       teamwork.Ref(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description:  teamwork.Ref("This is a test team."),
 			ParentTeamID: &parentTeamID,
 			CompanyID:    &resourceIDs.companyID,
 			UserIDs:      []int64{resourceIDs.userID},
@@ -182,8 +182,8 @@ func TestCreate(t *testing.T) {
 		name: "all fields for project",
 		create: team.Create{
 			Name:         fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-			Handle:       pointerTo(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description:  pointerTo("This is a test team."),
+			Handle:       teamwork.Ref(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description:  teamwork.Ref("This is a test team."),
 			ParentTeamID: &parentTeamID,
 			ProjectID:    &resourceIDs.projectID,
 			UserIDs:      []int64{resourceIDs.userID},
@@ -259,18 +259,18 @@ func TestUpdate(t *testing.T) {
 	}{{
 		name: "all fields for company",
 		create: team.Update{
-			Name:        pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Handle:      pointerTo(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description: pointerTo("This is a test team."),
+			Name:        teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Handle:      teamwork.Ref(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description: teamwork.Ref("This is a test team."),
 			CompanyID:   &resourceIDs.companyID,
 			UserIDs:     []int64{resourceIDs.userID},
 		},
 	}, {
 		name: "all fields for project",
 		create: team.Update{
-			Name:        pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Handle:      pointerTo(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
-			Description: pointerTo("This is a test team."),
+			Name:        teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Handle:      teamwork.Ref(fmt.Sprintf("testhandle%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Description: teamwork.Ref("This is a test team."),
 			ProjectID:   &resourceIDs.projectID,
 			UserIDs:     []int64{resourceIDs.userID},
 		},
@@ -441,10 +441,6 @@ func createUser(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {

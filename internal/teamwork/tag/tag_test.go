@@ -215,7 +215,7 @@ func TestUpdate(t *testing.T) {
 		name: "all fields",
 		create: tag.Update{
 			ID:        tagID,
-			Name:      pointerTo(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
+			Name:      teamwork.Ref(fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100))),
 			ProjectID: &resourceIDs.projectID,
 		},
 	}}
@@ -276,10 +276,6 @@ func createProject(logger *slog.Logger) func() {
 			)
 		}
 	}
-}
-
-func pointerTo[T any](t T) *T {
-	return &t
 }
 
 func startEngine() *teamwork.Engine {
