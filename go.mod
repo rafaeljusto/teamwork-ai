@@ -2,7 +2,7 @@ module github.com/rafaeljusto/teamwork-ai
 
 go 1.24.2
 
-require github.com/mark3labs/mcp-go v0.28.0
+require github.com/mark3labs/mcp-go v0.30.0
 
 require (
 	github.com/google/go-cmp v0.7.0 // indirect
