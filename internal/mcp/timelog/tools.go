@@ -195,7 +195,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 		mcp.NewTool("create-timelog",
 			mcp.WithDescription("Create a new timelog in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
-			mcp.WithString("desciption",
+			mcp.WithString("description",
 				mcp.Description("A description of the timelog."),
 			),
 			mcp.WithString("date",
@@ -275,7 +275,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Required(),
 				mcp.Description("The ID of the timelog to update."),
 			),
-			mcp.WithString("desciption",
+			mcp.WithString("description",
 				mcp.Description("A description of the timelog."),
 			),
 			mcp.WithString("date",
