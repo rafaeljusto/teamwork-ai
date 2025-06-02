@@ -266,7 +266,7 @@ func createProject(logger *slog.Logger) func() {
 		resourceIDs.projectID = id
 	})
 
-	logger.Info("⚙️ Creating project")
+	logger.Info("⚙️  Creating project")
 	if err := engine.Do(ctx, &projectCreate, projectIDSetter); err != nil {
 		logger.Error("failed to create project",
 			slog.String("error", err.Error()),
@@ -374,7 +374,7 @@ func createUser(logger *slog.Logger) func() {
 	addProject.Request.Path.ProjectID = resourceIDs.projectID
 	addProject.Request.Users.IDs = []int64{resourceIDs.userID}
 
-	logger.Info("⚙️ Adding user to project")
+	logger.Info("⚙️  Adding user to project")
 	if err := engine.Do(ctx, &addProject); err != nil {
 		logger.Error("failed to add user to project",
 			slog.Int64("userID", resourceIDs.userID),

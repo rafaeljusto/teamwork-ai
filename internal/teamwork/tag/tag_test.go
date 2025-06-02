@@ -246,7 +246,7 @@ func createProject(logger *slog.Logger) func() {
 		resourceIDs.projectID = id
 	})
 
-	logger.Info("⚙️ Creating project")
+	logger.Info("⚙️  Creating project")
 	if err := engine.Do(ctx, &projectCreate, projectIDSetter); err != nil {
 		logger.Error("failed to create project",
 			slog.String("error", err.Error()),

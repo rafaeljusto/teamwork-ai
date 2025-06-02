@@ -44,7 +44,7 @@ The example above uses `jq` to parse the JSON response from the GitHub API,
 which is a command-line JSON processor. You can find installation instructions
 for it [here](https://jqlang.org/download/).
 
-### ⚙️ Configuring
+### ⚙️  Configuring
 
 The following environment variables are required to run the Assigner server:
 - `TWAI_TEAMWORK_SERVER`: The URL of your Teamwork.com installation. For

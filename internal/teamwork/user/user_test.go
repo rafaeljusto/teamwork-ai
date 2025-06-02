@@ -59,6 +59,24 @@ func TestSingle(t *testing.T) {
 	}
 }
 
+func TestMe(t *testing.T) {
+	if engine == nil {
+		t.Skip("Skipping test because the engine is not initialized")
+	}
+
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var me user.Me
+	if err := engine.Do(ctx, &me); err != nil {
+		t.Fatalf("failed to get me: %v", err)
+	}
+}
+
 func TestMultiple(t *testing.T) {
 	if engine == nil {
 		t.Skip("Skipping test because the engine is not initialized")
