@@ -1,4 +1,4 @@
-package timelog_test
+package timer_test
 
 import (
 	"context"
@@ -11,10 +11,9 @@ import (
 
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/project"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/tag"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/tasklist"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/timelog"
+	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/timer"
 	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
 )
 
@@ -26,8 +25,6 @@ var (
 		projectID  int64
 		tasklistID int64
 		taskID     int64
-		tagID      int64
-		userID     int64
 	}
 )
 
@@ -36,46 +33,42 @@ func TestSingle(t *testing.T) {
 		t.Skip("Skipping test because the engine is not initialized")
 	}
 
-	create := timelog.Create{
-		Date:      teamwork.Date(time.Now()),
-		Hours:     1,
-		ProjectID: resourceIDs.projectID,
-	}
+	var create timer.Create
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var timelogID int64
-	timelogIDSetter := teamwork.WithIDCallback("id", func(i int64) {
-		timelogID = i
+	var timerID int64
+	timerIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timerID = i
 	})
-	if err := engine.Do(ctx, &create, timelogIDSetter); err != nil {
-		t.Fatalf("failed to create timelog: %v", err)
+	if err := engine.Do(ctx, &create, timerIDSetter); err != nil {
+		t.Fatalf("failed to create timer: %v", err)
 	}
 	t.Cleanup(func() {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var timelogDelete timelog.Delete
-		timelogDelete.Request.Path.ID = timelogID
-		if err := engine.Do(ctx, &timelogDelete); err != nil {
-			t.Logf("⚠️  failed to delete timelog: %v", err)
+		var timerDelete timer.Delete
+		timerDelete.Request.Path.ID = timerID
+		if err := engine.Do(ctx, &timerDelete); err != nil {
+			t.Logf("⚠️  failed to delete timer: %v", err)
 		}
 	})
 
 	ctx, cancel = context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var single timelog.Single
-	single.ID = timelogID
+	var single timer.Single
+	single.ID = timerID
 
 	if err := engine.Do(ctx, &single); err != nil {
-		t.Fatalf("failed to get timelog: %v", err)
+		t.Fatalf("failed to get timer: %v", err)
 	}
-	if single.ID != timelogID {
-		t.Errorf("expected timelog ID %d, got %d", timelogID, single.ID)
+	if single.ID != timerID {
+		t.Errorf("expected timer ID %d, got %d", timerID, single.ID)
 	}
 }
 
@@ -84,83 +77,36 @@ func TestMultiple(t *testing.T) {
 		t.Skip("Skipping test because the engine is not initialized")
 	}
 
-	createWithinProject := timelog.Create{
-		Date:      teamwork.Date(time.Now()),
-		Hours:     1,
-		ProjectID: resourceIDs.projectID,
-	}
+	var create timer.Create
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var projectTimelogID int64
-	timelogIDSetter := teamwork.WithIDCallback("id", func(i int64) {
-		projectTimelogID = i
+	var timerID int64
+	timerIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timerID = i
 	})
-	if err := engine.Do(ctx, &createWithinProject, timelogIDSetter); err != nil {
-		t.Fatalf("failed to create timelog: %v", err)
+	if err := engine.Do(ctx, &create, timerIDSetter); err != nil {
+		t.Fatalf("failed to create timer: %v", err)
 	}
 	t.Cleanup(func() {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var timelogDelete timelog.Delete
-		timelogDelete.Request.Path.ID = projectTimelogID
-		if err := engine.Do(ctx, &timelogDelete); err != nil {
-			t.Logf("⚠️  failed to delete timelog: %v", err)
-		}
-	})
-
-	createWithinTask := timelog.Create{
-		Date:   teamwork.Date(time.Now()),
-		Hours:  1,
-		TaskID: resourceIDs.taskID,
-	}
-
-	ctx = context.Background()
-	ctx, cancel = context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	var taskTimelogID int64
-	timelogIDSetter = teamwork.WithIDCallback("id", func(i int64) {
-		taskTimelogID = i
-	})
-	if err := engine.Do(ctx, &createWithinTask, timelogIDSetter); err != nil {
-		t.Fatalf("failed to create timelog: %v", err)
-	}
-	t.Cleanup(func() {
-		ctx := context.Background()
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		defer cancel()
-
-		var timelogDelete timelog.Delete
-		timelogDelete.Request.Path.ID = taskTimelogID
-		if err := engine.Do(ctx, &timelogDelete); err != nil {
-			t.Logf("⚠️  failed to delete timelog: %v", err)
+		var timerDelete timer.Delete
+		timerDelete.Request.Path.ID = timerID
+		if err := engine.Do(ctx, &timerDelete); err != nil {
+			t.Logf("⚠️  failed to delete timer: %v", err)
 		}
 	})
 
 	tests := []struct {
 		name     string
-		multiple timelog.Multiple
+		multiple timer.Multiple
 	}{{
-		name: "all timelogs",
-	}, {
-		name: "timelogs for project",
-		multiple: func() timelog.Multiple {
-			var multiple timelog.Multiple
-			multiple.Request.Path.ProjectID = resourceIDs.projectID
-			return multiple
-		}(),
-	}, {
-		name: "timelogs for task",
-		multiple: func() timelog.Multiple {
-			var multiple timelog.Multiple
-			multiple.Request.Path.TaskID = resourceIDs.taskID
-			return multiple
-		}(),
+		name: "all timers",
 	}}
 
 	for _, tt := range tests {
@@ -170,10 +116,10 @@ func TestMultiple(t *testing.T) {
 			defer cancel()
 
 			if err := engine.Do(ctx, &tt.multiple); err != nil {
-				t.Errorf("failed to get timelogs: %v", err)
+				t.Errorf("failed to get timers: %v", err)
 
-			} else if len(tt.multiple.Response.Timelogs) == 0 {
-				t.Error("expected at least one timelog, got none")
+			} else if len(tt.multiple.Response.Timers) == 0 {
+				t.Error("expected at least one timer, got none")
 			}
 		})
 	}
@@ -186,48 +132,19 @@ func TestCreate(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		create timelog.Create
+		create timer.Create
 	}{{
-		name: "only required fields for project",
-		create: timelog.Create{
-			Date:      teamwork.Date(time.Now()),
-			Hours:     1,
-			ProjectID: resourceIDs.projectID,
-		},
+		name: "only required fields",
 	}, {
-		name: "all fields for project",
-		create: timelog.Create{
-			Description: teamwork.Ref("This is a test timelog"),
-			Date:        teamwork.Date(time.Now().UTC()),
-			Time:        teamwork.Time(time.Now().UTC()),
-			IsUTC:       true,
-			Hours:       1,
-			Minutes:     30,
-			Billable:    true,
-			ProjectID:   resourceIDs.projectID,
-			UserID:      &resourceIDs.userID,
-			TagIDs:      []int64{resourceIDs.tagID},
-		},
-	}, {
-		name: "only required fields for task",
-		create: timelog.Create{
-			Date:   teamwork.Date(time.Now()),
-			Hours:  1,
-			TaskID: resourceIDs.taskID,
-		},
-	}, {
-		name: "all fields for task",
-		create: timelog.Create{
-			Description: teamwork.Ref("This is a test timelog"),
-			Date:        teamwork.Date(time.Now().UTC()),
-			Time:        teamwork.Time(time.Now().UTC()),
-			IsUTC:       true,
-			Hours:       1,
-			Minutes:     30,
-			Billable:    true,
-			TaskID:      resourceIDs.taskID,
-			UserID:      &resourceIDs.userID,
-			TagIDs:      []int64{resourceIDs.tagID},
+		name: "all fields",
+		create: timer.Create{
+			Description:       teamwork.Ref("This is a test timer"),
+			Billable:          teamwork.Ref(true),
+			Running:           teamwork.Ref(true),
+			Seconds:           teamwork.Ref(int64(3600)), // 1 hour in seconds
+			StopRunningTimers: teamwork.Ref(true),
+			ProjectID:         &resourceIDs.projectID,
+			TaskID:            &resourceIDs.taskID,
 		},
 	}}
 
@@ -237,13 +154,13 @@ func TestCreate(t *testing.T) {
 			ctx, cancel := context.WithTimeout(ctx, timeout)
 			defer cancel()
 
-			var timelogID int64
-			timelogIDSetter := teamwork.WithIDCallback("id", func(id int64) {
-				timelogID = id
+			var timerID int64
+			timerIDSetter := teamwork.WithIDCallback("id", func(id int64) {
+				timerID = id
 			})
 
-			if err := engine.Do(ctx, &tt.create, timelogIDSetter); err != nil {
-				t.Errorf("failed to create timelog: %v", err)
+			if err := engine.Do(ctx, &tt.create, timerIDSetter); err != nil {
+				t.Errorf("failed to create timer: %v", err)
 
 			} else {
 				t.Cleanup(func() {
@@ -251,10 +168,10 @@ func TestCreate(t *testing.T) {
 					ctx, cancel := context.WithTimeout(ctx, timeout)
 					defer cancel()
 
-					var timelogDelete timelog.Delete
-					timelogDelete.Request.Path.ID = timelogID
-					if err := engine.Do(ctx, &timelogDelete); err != nil {
-						t.Logf("⚠️  failed to delete timelog: %v", err)
+					var timerDelete timer.Delete
+					timerDelete.Request.Path.ID = timerID
+					if err := engine.Do(ctx, &timerDelete); err != nil {
+						t.Logf("⚠️  failed to delete timer: %v", err)
 					}
 				})
 			}
@@ -267,51 +184,43 @@ func TestUpdate(t *testing.T) {
 		t.Skip("Skipping test because the engine is not initialized")
 	}
 
-	create := timelog.Create{
-		Date:      teamwork.Date(time.Now()),
-		Hours:     1,
-		ProjectID: resourceIDs.projectID,
-	}
+	var create timer.Create
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	var timelogID int64
-	timelogIDSetter := teamwork.WithIDCallback("id", func(i int64) {
-		timelogID = i
+	var timerID int64
+	timerIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timerID = i
 	})
-	if err := engine.Do(ctx, &create, timelogIDSetter); err != nil {
-		t.Fatalf("failed to create timelog: %v", err)
+	if err := engine.Do(ctx, &create, timerIDSetter); err != nil {
+		t.Fatalf("failed to create timer: %v", err)
 	}
 	t.Cleanup(func() {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 
-		var timelogDelete timelog.Delete
-		timelogDelete.Request.Path.ID = timelogID
-		if err := engine.Do(ctx, &timelogDelete); err != nil {
-			t.Logf("⚠️  failed to delete timelog: %v", err)
+		var timerDelete timer.Delete
+		timerDelete.Request.Path.ID = timerID
+		if err := engine.Do(ctx, &timerDelete); err != nil {
+			t.Logf("⚠️  failed to delete timer: %v", err)
 		}
 	})
 
 	tests := []struct {
 		name   string
-		create timelog.Update
+		create timer.Update
 	}{{
 		name: "all fields",
-		create: timelog.Update{
-			ID:          timelogID,
+		create: timer.Update{
+			ID:          timerID,
 			Description: teamwork.Ref("Updated description"),
-			Date:        teamwork.Ref(teamwork.Date(time.Now().UTC())),
-			Time:        teamwork.Ref(teamwork.Time(time.Now().UTC())),
-			IsUTC:       teamwork.Ref(true),
-			Hours:       teamwork.Ref(int64(2)),
-			Minutes:     teamwork.Ref(int64(15)),
 			Billable:    teamwork.Ref(true),
-			UserID:      teamwork.Ref(resourceIDs.userID),
-			TagIDs:      []int64{resourceIDs.tagID},
+			Running:     teamwork.Ref(true),
+			ProjectID:   &resourceIDs.projectID,
+			TaskID:      &resourceIDs.taskID,
 		},
 	}}
 
@@ -322,9 +231,141 @@ func TestUpdate(t *testing.T) {
 			defer cancel()
 
 			if err := engine.Do(ctx, &tt.create); err != nil {
-				t.Errorf("failed to update timelog: %v", err)
+				t.Errorf("failed to update timer: %v", err)
 			}
 		})
+	}
+}
+
+func TestPause(t *testing.T) {
+	if engine == nil {
+		t.Skip("Skipping test because the engine is not initialized")
+	}
+
+	var create timer.Create
+
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var timerID int64
+	timerIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timerID = i
+	})
+	if err := engine.Do(ctx, &create, timerIDSetter); err != nil {
+		t.Fatalf("failed to create timer: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		var timerDelete timer.Delete
+		timerDelete.Request.Path.ID = timerID
+		if err := engine.Do(ctx, &timerDelete); err != nil {
+			t.Logf("⚠️  failed to delete timer: %v", err)
+		}
+	})
+
+	ctx = context.Background()
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var pause timer.Pause
+	pause.Request.Path.ID = timerID
+	if err := engine.Do(ctx, &pause); err != nil {
+		t.Errorf("failed to pause timer: %v", err)
+	}
+}
+
+func TestComplete(t *testing.T) {
+	if engine == nil {
+		t.Skip("Skipping test because the engine is not initialized")
+	}
+
+	var create timer.Create
+	create.Seconds = teamwork.Ref(int64(3600)) // 1 hour in seconds
+	create.ProjectID = &resourceIDs.projectID
+	create.TaskID = &resourceIDs.taskID
+
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var timerID int64
+	timerIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timerID = i
+	})
+	if err := engine.Do(ctx, &create, timerIDSetter); err != nil {
+		t.Fatalf("failed to create timer: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		var timerDelete timer.Delete
+		timerDelete.Request.Path.ID = timerID
+		if err := engine.Do(ctx, &timerDelete); err != nil {
+			t.Logf("⚠️  failed to delete timer: %v", err)
+		}
+	})
+
+	ctx = context.Background()
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var complete timer.Complete
+	complete.Request.Path.ID = timerID
+	if err := engine.Do(ctx, &complete); err != nil {
+		t.Errorf("failed to complete timer: %v", err)
+	}
+}
+
+func TestResume(t *testing.T) {
+	if engine == nil {
+		t.Skip("Skipping test because the engine is not initialized")
+	}
+
+	var create timer.Create
+
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var timerID int64
+	timerIDSetter := teamwork.WithIDCallback("id", func(i int64) {
+		timerID = i
+	})
+	if err := engine.Do(ctx, &create, timerIDSetter); err != nil {
+		t.Fatalf("failed to create timer: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		var timerDelete timer.Delete
+		timerDelete.Request.Path.ID = timerID
+		if err := engine.Do(ctx, &timerDelete); err != nil {
+			t.Logf("⚠️  failed to delete timer: %v", err)
+		}
+	})
+
+	ctx = context.Background()
+	ctx, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var pause timer.Pause
+	pause.Request.Path.ID = timerID
+	if err := engine.Do(ctx, &pause); err != nil {
+		t.Errorf("failed to pause timer: %v", err)
+	}
+
+	var resume timer.Resume
+	resume.Request.Path.ID = timerID
+	if err := engine.Do(ctx, &resume); err != nil {
+		t.Errorf("failed to resume timer: %v", err)
 	}
 }
 
@@ -465,110 +506,32 @@ func createTask(logger *slog.Logger) func() {
 	}
 }
 
-func createTag(logger *slog.Logger) func() {
+func addLoggedUserAsProjectMember(logger *slog.Logger) {
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	tagCreate := tag.Create{
-		Name: fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-	}
-
-	tagIDSetter := teamwork.WithIDCallback("id", func(id int64) {
-		resourceIDs.tagID = id
-	})
-
-	logger.Info("⚙️  Creating tag")
-	if err := engine.Do(ctx, &tagCreate, tagIDSetter); err != nil {
-		logger.Error("failed to create tag",
+	var me user.Me
+	if err := engine.Do(ctx, &me); err != nil {
+		logger.Error("failed to get current user",
 			slog.String("error", err.Error()),
 		)
-		return func() {}
+		return
 	}
-	logger.Info("✅ Created tag",
-		slog.Int64("id", resourceIDs.tagID),
-		slog.String("name", tagCreate.Name),
-	)
-
-	return func() {
-		logger.Info("🗑️  Cleaning up tag",
-			slog.Int64("id", resourceIDs.tagID),
-		)
-
-		ctx := context.Background()
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		defer cancel()
-
-		var tagDelete tag.Delete
-		tagDelete.Request.Path.ID = resourceIDs.tagID
-		if err := engine.Do(ctx, &tagDelete); err != nil {
-			logger.Warn("⚠️  failed to delete tag",
-				slog.Int64("id", resourceIDs.tagID),
-				slog.String("error", err.Error()),
-			)
-		}
-	}
-}
-
-func createUser(logger *slog.Logger) func() {
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	userCreate := user.Create{
-		FirstName: fmt.Sprintf("test%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		LastName:  fmt.Sprintf("user%d%d", time.Now().UnixNano(), rand.Intn(100)),
-		Email:     fmt.Sprintf("test@test%d%d.com", time.Now().UnixNano(), rand.Intn(100)),
-	}
-
-	userIDSetter := teamwork.WithIDCallback("id", func(id int64) {
-		resourceIDs.userID = id
-	})
-
-	logger.Info("⚙️  Creating user")
-	if err := engine.Do(ctx, &userCreate, userIDSetter); err != nil {
-		logger.Error("failed to create user",
-			slog.String("error", err.Error()),
-		)
-		return func() {}
-	}
-	logger.Info("✅ Created user",
-		slog.Int64("id", resourceIDs.userID),
-		slog.String("name", fmt.Sprintf("%s %s", userCreate.FirstName, userCreate.LastName)),
-	)
 
 	var addProject user.AddProject
 	addProject.Request.Path.ProjectID = resourceIDs.projectID
-	addProject.Request.Users.IDs = []int64{resourceIDs.userID}
+	addProject.Request.Users.IDs = []int64{me.ID}
 
 	logger.Info("⚙️  Adding user to project")
 	if err := engine.Do(ctx, &addProject); err != nil {
 		logger.Error("failed to add user to project",
-			slog.Int64("userID", resourceIDs.userID),
+			slog.Int64("userID", me.ID),
 			slog.Int64("projectID", resourceIDs.projectID),
 			slog.String("error", err.Error()),
 		)
 	}
 	logger.Info("✅ Added user to project")
-
-	return func() {
-		logger.Info("🗑️  Cleaning up user",
-			slog.Int64("id", resourceIDs.userID),
-		)
-
-		ctx := context.Background()
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		defer cancel()
-
-		var userDelete user.Delete
-		userDelete.Request.Path.ID = resourceIDs.userID
-		if err := engine.Do(ctx, &userDelete); err != nil {
-			logger.Warn("⚠️  failed to delete user",
-				slog.Int64("id", resourceIDs.userID),
-				slog.String("error", err.Error()),
-			)
-		}
-	}
 }
 
 func startEngine() *teamwork.Engine {
@@ -614,19 +577,7 @@ func TestMain(m *testing.M) {
 	}
 	defer deleteTask()
 
-	deleteTag := createTag(logger)
-	if resourceIDs.tagID == 0 {
-		exitCode = 1
-		return
-	}
-	defer deleteTag()
-
-	deleteUser := createUser(logger)
-	if resourceIDs.userID == 0 {
-		exitCode = 1
-		return
-	}
-	defer deleteUser()
+	addLoggedUserAsProjectMember(logger)
 
 	reference := time.Now()
 	defer func() {

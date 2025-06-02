@@ -86,6 +86,40 @@ func (s *Single) PopulateResourceWebLink(server string) {
 	(*User)(s).PopulateResourceWebLink(server)
 }
 
+// Me represents a request to retrieve the logged user information.
+//
+// No public documentation available yet.
+type Me User
+
+// HTTPRequest creates an HTTP request to retrieve the logged user information.
+func (m Me) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
+	uri := fmt.Sprintf("%s/projects/api/v3/me.json", server)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	return req, nil
+}
+
+// UnmarshalJSON decodes the JSON data into a Me instance.
+func (m *Me) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		User User `json:"person"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	*m = Me(raw.User)
+	return nil
+}
+
+// PopulateResourceWebLink sets the website URL for the specific resource. It
+// should be called after the object is loaded (the ID is set).
+func (m *Me) PopulateResourceWebLink(server string) {
+	(*User)(m).PopulateResourceWebLink(server)
+}
+
 // Multiple represents a request to retrieve multiple users.
 //
 // https://apidocs.teamwork.com/docs/teamwork/v3/people/get-projects-api-v3-people-json

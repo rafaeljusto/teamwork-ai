@@ -35,7 +35,7 @@ The example above uses `jq` to parse the JSON response from the GitHub API,
 which is a command-line JSON processor. You can find installation instructions
 for it [here](https://jqlang.org/download/).
 
-### ⚙️ Configuring
+### ⚙️  Configuring
 
 The following environment variables are required to run the MCP server:
 - `TWAI_TEAMWORK_SERVER`: The URL of your Teamwork.com installation. For
@@ -146,6 +146,7 @@ MCP server.
 | Comments          | ✅     | ✅       | ✅      | ❌     | Retrieve by task, milestone, notebook or file                                      |
 | Teams             | ✅     | ✅       | ✅      | ❌     |                                                                                    |
 | Timelog           | ✅     | ✅       | ✅      | ❌     | Retrieve by project or task                                                        |
+| Timer             | ✅     | ✅       | ✅      | ❌     | Pause, resume and complete                                                         |
 
 > [!NOTE]
 > Not all properties are supported for each entity. And, for now, delete actions
