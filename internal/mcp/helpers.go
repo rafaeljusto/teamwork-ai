@@ -5,7 +5,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
 )
 
 // ParamGroup applies a series of functions to a map of parameters.
@@ -116,7 +116,7 @@ func param[T any](
 func RequiredNumericParam[T int8 | int16 | int32 | int64 |
 	uint8 | uint16 | uint32 | uint64 |
 	float32 | float64 |
-	teamwork.LegacyNumber](
+	twapi.LegacyNumber](
 	target *T,
 	key string,
 	middlewares ...ParamMiddleware[T],
@@ -132,7 +132,7 @@ func RequiredNumericParam[T int8 | int16 | int32 | int64 |
 func OptionalNumericParam[T int8 | int16 | int32 | int64 |
 	uint8 | uint16 | uint32 | uint64 |
 	float32 | float64 |
-	teamwork.LegacyNumber](
+	twapi.LegacyNumber](
 	target *T,
 	key string,
 	middlewares ...ParamMiddleware[T],
@@ -149,7 +149,7 @@ func OptionalNumericParam[T int8 | int16 | int32 | int64 |
 func OptionalNumericPointerParam[T int8 | int16 | int32 | int64 |
 	uint8 | uint16 | uint32 | uint64 |
 	float32 | float64 |
-	teamwork.LegacyNumber](
+	twapi.LegacyNumber](
 	target **T,
 	key string,
 	middlewares ...ParamMiddleware[T],
@@ -174,7 +174,7 @@ func OptionalNumericPointerParam[T int8 | int16 | int32 | int64 |
 func numericParam[T int8 | int16 | int32 | int64 |
 	uint8 | uint16 | uint32 | uint64 |
 	float32 | float64 |
-	teamwork.LegacyNumber](
+	twapi.LegacyNumber](
 	params map[string]any,
 	target *T,
 	key string,
@@ -294,11 +294,11 @@ func timeParam(
 }
 
 // RequiredTimeOnlyParam retrieves a required time parameter from a map,
-// converting it to a teamwork.Time type. It returns an error if the key is not
+// converting it to a twapi.Time type. It returns an error if the key is not
 // found or if the type conversion fails. If the target is nil, it returns an
 // error.
 func RequiredTimeOnlyParam(
-	target *teamwork.Time,
+	target *twapi.Time,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -308,10 +308,10 @@ func RequiredTimeOnlyParam(
 }
 
 // OptionalTimeOnlyParam retrieves an optional time parameter from a map,
-// converting it to a teamwork.Time type. It returns an error if the type
+// converting it to a twapi.Time type. It returns an error if the type
 // conversion fails. If the target is nil, it returns an error.
 func OptionalTimeOnlyParam(
-	target *teamwork.Time,
+	target *twapi.Time,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -321,11 +321,11 @@ func OptionalTimeOnlyParam(
 }
 
 // OptionalTimeOnlyPointerParam retrieves an optional time parameter from a map
-// and sets it to a pointer target. It converts the value to a teamwork.Time
+// and sets it to a pointer target. It converts the value to a twapi.Time
 // type and applies middleware functions to the value before setting it. If the
 // target is nil, it returns an error.
 func OptionalTimeOnlyPointerParam(
-	target **teamwork.Time,
+	target **twapi.Time,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -333,7 +333,7 @@ func OptionalTimeOnlyPointerParam(
 		if target == nil {
 			return fmt.Errorf("target cannot be nil")
 		}
-		var temp teamwork.Time
+		var temp twapi.Time
 		var set bool
 		middlewares = append(middlewares, func(*string) (bool, error) { set = true; return true, nil })
 		if err := timeOnlyParam(params, &temp, key, true, middlewares...); err != nil {
@@ -348,7 +348,7 @@ func OptionalTimeOnlyPointerParam(
 
 func timeOnlyParam(
 	params map[string]any,
-	target *teamwork.Time,
+	target *twapi.Time,
 	key string,
 	optional bool,
 	middlewares ...ParamMiddleware[string],
@@ -377,16 +377,16 @@ func timeOnlyParam(
 	if err != nil {
 		return fmt.Errorf("invalid time-only format for %s: %w", key, err)
 	}
-	*target = teamwork.Time(t)
+	*target = twapi.Time(t)
 	return nil
 }
 
 // RequiredDateParam retrieves a required date parameter from a map, converting
-// it to a teamwork.Date type. It returns an error if the key is not found or if
+// it to a twapi.Date type. It returns an error if the key is not found or if
 // the type conversion fails. The date format is expected to be "YYYY-MM-DD". If
 // the target is nil, it returns an error.
 func RequiredDateParam(
-	target *teamwork.Date,
+	target *twapi.Date,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -396,11 +396,11 @@ func RequiredDateParam(
 }
 
 // OptionalDateParam retrieves an optional date parameter from a map, converting
-// it to a teamwork.Date type. It returns an error if the type conversion fails.
+// it to a twapi.Date type. It returns an error if the type conversion fails.
 // The date format is expected to be "YYYY-MM-DD". If the target is nil, it
 // returns an error. If the key is not found, it does not set the target.
 func OptionalDateParam(
-	target *teamwork.Date,
+	target *twapi.Date,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -410,12 +410,12 @@ func OptionalDateParam(
 }
 
 // OptionalDatePointerParam retrieves an optional date parameter from a map and
-// sets it to a pointer target. It converts the value to a teamwork.Date type
+// sets it to a pointer target. It converts the value to a twapi.Date type
 // and applies middleware functions to the value before setting it. The date
 // format is expected to be "YYYY-MM-DD". If the target is nil, it returns an
 // error.
 func OptionalDatePointerParam(
-	target **teamwork.Date,
+	target **twapi.Date,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -423,7 +423,7 @@ func OptionalDatePointerParam(
 		if target == nil {
 			return fmt.Errorf("target cannot be nil")
 		}
-		var temp teamwork.Date
+		var temp twapi.Date
 		var set bool
 		middlewares = append(middlewares, func(*string) (bool, error) { set = true; return true, nil })
 		if err := dateParam(params, &temp, key, true, middlewares...); err != nil {
@@ -438,7 +438,7 @@ func OptionalDatePointerParam(
 
 func dateParam(
 	params map[string]any,
-	target *teamwork.Date,
+	target *twapi.Date,
 	key string,
 	optional bool,
 	middlewares ...ParamMiddleware[string],
@@ -467,16 +467,16 @@ func dateParam(
 	if err != nil {
 		return fmt.Errorf("invalid date format for %s: %w", key, err)
 	}
-	*target = teamwork.Date(t)
+	*target = twapi.Date(t)
 	return nil
 }
 
 // RequiredLegacyDateParam retrieves a required legacy date parameter from a
-// map, converting it to a teamwork.LegacyDate type. It returns an error if the
+// map, converting it to a twapi.LegacyDate type. It returns an error if the
 // key is not found or if the type conversion fails. The date format is expected
 // to be "YYYYMMDD". If the target is nil, it returns an error.
 func RequiredLegacyDateParam(
-	target *teamwork.LegacyDate,
+	target *twapi.LegacyDate,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -486,12 +486,12 @@ func RequiredLegacyDateParam(
 }
 
 // OptionalLegacyDateParam retrieves an optional legacy date parameter from a
-// map, converting it to a teamwork.LegacyDate type. It returns an error if the
+// map, converting it to a twapi.LegacyDate type. It returns an error if the
 // type conversion fails. The date format is expected to be "YYYYMMDD". If the
 // target is nil, it returns an error. If the key is not found, it does not set
 // the target.
 func OptionalLegacyDateParam(
-	target *teamwork.LegacyDate,
+	target *twapi.LegacyDate,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -502,11 +502,11 @@ func OptionalLegacyDateParam(
 
 // OptionalLegacyDatePointerParam retrieves an optional date parameter from a
 // map and sets it to a pointer target. It converts the value to a
-// teamwork.LegacyDate type and applies middleware functions to the value before
+// twapi.LegacyDate type and applies middleware functions to the value before
 // setting it. The date format is expected to be "YYYYMMDD". If the target is
 // nil, it returns an error.
 func OptionalLegacyDatePointerParam(
-	target **teamwork.LegacyDate,
+	target **twapi.LegacyDate,
 	key string,
 	middlewares ...ParamMiddleware[string],
 ) ParamFunc {
@@ -514,7 +514,7 @@ func OptionalLegacyDatePointerParam(
 		if target == nil {
 			return fmt.Errorf("target cannot be nil")
 		}
-		var temp teamwork.LegacyDate
+		var temp twapi.LegacyDate
 		var set bool
 		middlewares = append(middlewares, func(*string) (bool, error) { set = true; return true, nil })
 		if err := legacyDateParam(params, &temp, key, true, middlewares...); err != nil {
@@ -529,7 +529,7 @@ func OptionalLegacyDatePointerParam(
 
 func legacyDateParam(
 	params map[string]any,
-	target *teamwork.LegacyDate,
+	target *twapi.LegacyDate,
 	key string,
 	optional bool,
 	middlewares ...ParamMiddleware[string],
@@ -558,7 +558,7 @@ func legacyDateParam(
 	if err != nil {
 		return fmt.Errorf("invalid date format for %s: %w", key, err)
 	}
-	*target = teamwork.LegacyDate(t)
+	*target = twapi.LegacyDate(t)
 	return nil
 }
 
@@ -598,7 +598,7 @@ func OptionalListParam[T any](target *[]T, key string) ParamFunc {
 func OptionalNumericListParam[T int8 | int16 | int32 | int64 |
 	uint8 | uint16 | uint32 | uint64 |
 	float32 | float64 |
-	teamwork.LegacyNumber](
+	twapi.LegacyNumber](
 	target *[]T, key string,
 ) ParamFunc {
 	return func(params map[string]any) error {

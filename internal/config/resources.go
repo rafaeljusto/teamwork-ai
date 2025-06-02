@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/agentic"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
 )
 
 // Resources stores the resources for the web server.
@@ -14,7 +14,7 @@ type Resources struct {
 	Logger         *slog.Logger
 	Agentic        agentic.Agentic
 	TeamworkEngine interface {
-		Do(context.Context, teamwork.Entity, ...teamwork.Option) error
+		Do(context.Context, twapi.Entity, ...twapi.Option) error
 	}
 }
 
@@ -26,7 +26,7 @@ func NewResources(config *Config) *Resources {
 	resources := &Resources{
 		Logger:         logger,
 		Agentic:        agentic.Init(config.Agentic.Name, config.Agentic.DSN, logger),
-		TeamworkEngine: teamwork.NewEngine(config.TeamworkServer, config.TeamworkAPIToken, logger),
+		TeamworkEngine: twapi.NewEngine(config.TeamworkServer, config.TeamworkAPIToken, logger),
 	}
 
 	return resources

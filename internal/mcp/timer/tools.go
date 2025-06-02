@@ -9,7 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
-	twtimer "github.com/rafaeljusto/teamwork-ai/internal/teamwork/timer"
+	twtimer "github.com/rafaeljusto/teamwork-ai/internal/twapi/timer"
 )
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {

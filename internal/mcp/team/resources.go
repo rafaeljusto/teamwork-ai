@@ -10,8 +10,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
-	twteam "github.com/rafaeljusto/teamwork-ai/internal/teamwork/team"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	twteam "github.com/rafaeljusto/teamwork-ai/internal/twapi/team"
 )
 
 var resourceList = mcp.NewResource("twapi://teams", "teams",
@@ -62,7 +62,7 @@ func registerResources(mcpServer *server.MCPServer, configResources *config.Reso
 			}
 
 			var team twteam.Single
-			team.ID = teamwork.LegacyNumber(teamID)
+			team.ID = twapi.LegacyNumber(teamID)
 			if err := configResources.TeamworkEngine.Do(ctx, &team); err != nil {
 				return nil, err
 			}

@@ -9,8 +9,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
-	twtask "github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	twtask "github.com/rafaeljusto/teamwork-ai/internal/twapi/task"
 )
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
@@ -297,7 +297,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 				if !ok {
 					return nil, fmt.Errorf("invalid assignees")
 				} else if assigneesMap != nil {
-					task.Assignees = new(teamwork.UserGroups)
+					task.Assignees = new(twapi.UserGroups)
 
 					err = twmcp.ParamGroup(assigneesMap,
 						twmcp.OptionalNumericListParam(&task.Assignees.UserIDs, "user-ids"),
@@ -397,7 +397,7 @@ func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Re
 				if !ok {
 					return nil, fmt.Errorf("invalid assignees")
 				} else if assigneesMap != nil {
-					task.Assignees = new(teamwork.UserGroups)
+					task.Assignees = new(twapi.UserGroups)
 
 					err = twmcp.ParamGroup(assigneesMap,
 						twmcp.OptionalNumericListParam(&task.Assignees.UserIDs, "user-ids"),

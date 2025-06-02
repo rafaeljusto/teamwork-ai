@@ -9,8 +9,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
-	twmilestone "github.com/rafaeljusto/teamwork-ai/internal/teamwork/milestone"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	twmilestone "github.com/rafaeljusto/teamwork-ai/internal/twapi/milestone"
 )
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
@@ -316,7 +316,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				if !ok {
 					return nil, fmt.Errorf("invalid assignees")
 				} else if assigneesMap != nil {
-					milestone.Assignees = new(teamwork.LegacyUserGroups)
+					milestone.Assignees = new(twapi.LegacyUserGroups)
 
 					err = twmcp.ParamGroup(assigneesMap,
 						twmcp.OptionalNumericListParam(&milestone.Assignees.UserIDs, "user-ids"),
