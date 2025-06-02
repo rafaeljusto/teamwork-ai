@@ -9,13 +9,13 @@ import (
 
 	"github.com/rafaeljusto/teamwork-ai/internal/agentic/actions"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/comment"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/skill"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/workload"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/comment"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/task"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/user"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/workload"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
 )
 
@@ -136,8 +136,8 @@ func Test_AutoAssignTask(t *testing.T) {
 			var taskData webhook.TaskData
 			taskData.Task.ID = 1
 			taskData.Task.Name = "task-1"
-			taskData.Task.StartDate = teamwork.Ref(teamwork.Date(time.Now().AddDate(0, 0, 1)))
-			taskData.Task.DueDate = teamwork.Ref(teamwork.Date(time.Now().AddDate(0, 0, 2)))
+			taskData.Task.StartDate = twapi.Ref(twapi.Date(time.Now().AddDate(0, 0, 1)))
+			taskData.Task.DueDate = twapi.Ref(twapi.Date(time.Now().AddDate(0, 0, 2)))
 			taskData.Task.EstimatedMinutes = 120
 			return taskData
 		}(),
@@ -161,10 +161,10 @@ func Test_AutoAssignTask(t *testing.T) {
 }
 
 type engineMock struct {
-	do func(context.Context, teamwork.Entity, ...teamwork.Option) error
+	do func(context.Context, twapi.Entity, ...twapi.Option) error
 }
 
-func (e engineMock) Do(ctx context.Context, entity teamwork.Entity, optFuncs ...teamwork.Option) error {
+func (e engineMock) Do(ctx context.Context, entity twapi.Entity, optFuncs ...twapi.Option) error {
 	return e.do(ctx, entity, optFuncs...)
 }
 
@@ -193,15 +193,15 @@ func (a agenticMock) FindTaskSkillsAndJobRoles(
 func teamworkEngine(
 	expectedAssignees []user.User,
 	useRate, useWorkload bool,
-) func(context.Context, teamwork.Entity, ...teamwork.Option) error {
-	return func(_ context.Context, entity teamwork.Entity, _ ...teamwork.Option) error {
+) func(context.Context, twapi.Entity, ...twapi.Option) error {
+	return func(_ context.Context, entity twapi.Entity, _ ...twapi.Option) error {
 		switch t := entity.(type) {
 		case *skill.Multiple:
 			t.Response.Skills = []skill.Skill{
 				{
 					ID:   1,
 					Name: "skill-1",
-					Users: []teamwork.Relationship{
+					Users: []twapi.Relationship{
 						{ID: 1, Type: "users"},
 						{ID: 2, Type: "users"},
 					},
@@ -209,7 +209,7 @@ func teamworkEngine(
 				{
 					ID:   2,
 					Name: "skill-2",
-					Users: []teamwork.Relationship{
+					Users: []twapi.Relationship{
 						{ID: 2, Type: "users"},
 					},
 				},
@@ -219,7 +219,7 @@ func teamworkEngine(
 				{
 					ID:   1,
 					Name: "jobrole-1",
-					Users: []teamwork.Relationship{
+					Users: []twapi.Relationship{
 						{ID: 1, Type: "users"},
 						{ID: 2, Type: "users"},
 					},
@@ -227,40 +227,40 @@ func teamworkEngine(
 				{
 					ID:   2,
 					Name: "jobrole-2",
-					Users: []teamwork.Relationship{
+					Users: []twapi.Relationship{
 						{ID: 2, Type: "users"},
 					},
 				},
 			}
 		case *user.Multiple:
 			t.Response.Users = []user.User{
-				{ID: 1, FirstName: "James", LastName: "Smith", Cost: teamwork.Ref(teamwork.Money(20000))},
-				{ID: 2, FirstName: "Michael", LastName: "Williams", Cost: teamwork.Ref(teamwork.Money(10000))},
+				{ID: 1, FirstName: "James", LastName: "Smith", Cost: twapi.Ref(twapi.Money(20000))},
+				{ID: 2, FirstName: "Michael", LastName: "Williams", Cost: twapi.Ref(twapi.Money(10000))},
 			}
 		case *workload.Single:
 			t.Response.Workload.Users = []workload.User{
 				{
 					ID: 1,
-					Dates: map[teamwork.Date]workload.UserDate{
-						teamwork.Date(time.Now().AddDate(0, 0, 1)): {
+					Dates: map[twapi.Date]workload.UserDate{
+						twapi.Date(time.Now().AddDate(0, 0, 1)): {
 							Capacity:        87.5,
 							CapacityMinutes: 420,
 							UnavailableDay:  false,
 						},
-						teamwork.Date(time.Now().AddDate(0, 0, 2)): {
+						twapi.Date(time.Now().AddDate(0, 0, 2)): {
 							UnavailableDay: true,
 						},
 					},
 				},
 				{
 					ID: 2,
-					Dates: map[teamwork.Date]workload.UserDate{
-						teamwork.Date(time.Now().AddDate(0, 0, 1)): {
+					Dates: map[twapi.Date]workload.UserDate{
+						twapi.Date(time.Now().AddDate(0, 0, 1)): {
 							Capacity:        10,
 							CapacityMinutes: 48,
 							UnavailableDay:  false,
 						},
-						teamwork.Date(time.Now().AddDate(0, 0, 2)): {
+						twapi.Date(time.Now().AddDate(0, 0, 2)): {
 							Capacity:        80,
 							CapacityMinutes: 384,
 							UnavailableDay:  false,

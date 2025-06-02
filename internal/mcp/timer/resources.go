@@ -10,7 +10,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	twtimer "github.com/rafaeljusto/teamwork-ai/internal/teamwork/timer"
+	twtimer "github.com/rafaeljusto/teamwork-ai/internal/twapi/timer"
 )
 
 var resourceList = mcp.NewResource("twapi://timers", "timers",

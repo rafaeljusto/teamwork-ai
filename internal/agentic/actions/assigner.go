@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/comment"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/skill"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/task"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/user"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/workload"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/comment"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/task"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/user"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/workload"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
 )
 
@@ -183,7 +183,7 @@ func AutoAssignTask(
 	if !options.skipAssignment {
 		var taskUpdate task.Update
 		taskUpdate.ID = taskData.Task.ID
-		taskUpdate.Assignees = &teamwork.UserGroups{
+		taskUpdate.Assignees = &twapi.UserGroups{
 			UserIDs: idealUserIDs,
 		}
 		if err := resources.TeamworkEngine.Do(ctx, &taskUpdate); err != nil {
@@ -196,7 +196,7 @@ func AutoAssignTask(
 
 	if !options.skipComment {
 		var commentCreate comment.Create
-		commentCreate.Object = teamwork.Relationship{Type: "tasks", ID: taskData.Task.ID}
+		commentCreate.Object = twapi.Relationship{Type: "tasks", ID: taskData.Task.ID}
 		commentCreate.Body = "🤖 Assignment of this task was performed by artificial intelligence.\n"
 		for _, userID := range idealUserIDs {
 			if user, ok := projectUsersMap[userID]; ok {
@@ -259,21 +259,21 @@ func autoAssignTaskProcessRates(
 ) autoAssignTaskProcessor {
 	type userCost struct {
 		ID   int64
-		Cost teamwork.Money
+		Cost twapi.Money
 	}
 	logger = logger.With(
 		slog.String("subAction", "processRates"),
 	)
 	return func(userScores userScores) (userScores, error) {
 		var userCosts []userCost
-		distinctCosts := make(map[teamwork.Money]struct{})
+		distinctCosts := make(map[twapi.Money]struct{})
 		for _, userScore := range userScores {
 			user, ok := projectUsersMap[userScore.ID]
 			if !ok {
 				continue
 			}
 			if user.Cost == nil || *user.Cost == 0 || len(userCosts) == 0 {
-				var cost teamwork.Money
+				var cost twapi.Money
 				if user.Cost != nil {
 					cost = *user.Cost
 				}

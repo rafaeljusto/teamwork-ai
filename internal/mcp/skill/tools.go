@@ -9,7 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
-	twskill "github.com/rafaeljusto/teamwork-ai/internal/teamwork/skill"
+	twskill "github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 )
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {

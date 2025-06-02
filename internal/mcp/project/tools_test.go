@@ -9,7 +9,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	"github.com/rafaeljusto/teamwork-ai/internal/mcp/project"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
 )
 
 func TestTools_retrieveProjects(t *testing.T) {
@@ -167,6 +167,6 @@ type toolRequest struct {
 type engineMock struct {
 }
 
-func (e engineMock) Do(context.Context, teamwork.Entity, ...teamwork.Option) error {
+func (e engineMock) Do(context.Context, twapi.Entity, ...twapi.Option) error {
 	return nil
 }

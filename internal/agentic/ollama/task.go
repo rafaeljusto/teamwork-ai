@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork/skill"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
 )
 

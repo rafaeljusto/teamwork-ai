@@ -10,7 +10,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	twtasklist "github.com/rafaeljusto/teamwork-ai/internal/teamwork/tasklist"
+	twtasklist "github.com/rafaeljusto/teamwork-ai/internal/twapi/tasklist"
 )
 
 var resourceList = mcp.NewResource("twapi://tasklists", "tasklists",

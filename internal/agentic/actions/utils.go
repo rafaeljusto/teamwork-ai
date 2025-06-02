@@ -5,7 +5,7 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/teamwork"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
 )
 
 // intersection returns the intersection of two slices. It will sort the slices
@@ -32,7 +32,7 @@ func intersection[T interface {
 
 // extractMappedIDs ensure that only IDs from relationships mapped to the source
 // are returned.
-func extractMappedIDs[T any](relationships []teamwork.Relationship, sourceMap map[int64]T) []int64 {
+func extractMappedIDs[T any](relationships []twapi.Relationship, sourceMap map[int64]T) []int64 {
 	result := make([]int64, 0, len(relationships))
 	for _, relationship := range relationships {
 		_, ok := sourceMap[relationship.ID]
