@@ -163,12 +163,10 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 				mcp.Description("If true, the timer will start running immediately."),
 			),
 			mcp.WithNumber("project-id",
-				mcp.Description("The ID of the project to associate the timer with. "+
-					"Either project-id or task-id must be provided, but not both."),
+				mcp.Description("The ID of the project to associate the timer with."),
 			),
 			mcp.WithNumber("task-id",
-				mcp.Description("The ID of the task to associate the timer with. "+
-					"Either project-id or task-id must be provided, but not both."),
+				mcp.Description("The ID of the task to associate the timer with."),
 			),
 		),
 		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
