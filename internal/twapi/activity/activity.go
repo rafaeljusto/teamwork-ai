@@ -140,7 +140,7 @@ type Multiple struct {
 	}
 }
 
-// HTTPRequest creates an HTTP request to retrieve multiple projects.
+// HTTPRequest creates an HTTP request to retrieve multiple activities.
 func (m Multiple) HTTPRequest(ctx context.Context, server string) (*http.Request, error) {
 	var uri string
 	if m.Request.Path.ProjectID > 0 {
