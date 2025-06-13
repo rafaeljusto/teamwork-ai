@@ -601,13 +601,13 @@ func OptionalListParam[T any](target *[]T, key string) ParamFunc {
 					if err := decoder.UnmarshalText(input); err != nil {
 						return fmt.Errorf("failed to decode %v: %w", item, err)
 					}
-					return nil
+					*target = append(*target, zeroPointer.Elem().Interface().(T))
+					continue
 				}
 			}
 
 			v, ok := item.(T)
 			if !ok {
-				var zero T
 				return fmt.Errorf("invalid type in %s: expected %T, got %T", key, zero, item)
 			}
 			*target = append(*target, v)
