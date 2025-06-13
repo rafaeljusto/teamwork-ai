@@ -1,7 +1,9 @@
 package mcp
 
 import (
+	"encoding"
 	"fmt"
+	"reflect"
 	"slices"
 	"time"
 
@@ -580,6 +582,29 @@ func OptionalListParam[T any](target *[]T, key string) ParamFunc {
 		}
 		*target = make([]T, 0, len(array))
 		for _, item := range array {
+			var zero T
+
+			// check if the type implements encoding.TextUnmarshaler
+			zeroPointer := reflect.New(reflect.TypeOf(zero))
+			if decoder, ok := zeroPointer.Interface().(encoding.TextUnmarshaler); ok {
+				var input []byte
+				var inputOK bool
+				switch item := item.(type) {
+				case string:
+					input = []byte(item)
+					inputOK = true
+				case []byte:
+					input = item
+					inputOK = true
+				}
+				if inputOK {
+					if err := decoder.UnmarshalText(input); err != nil {
+						return fmt.Errorf("failed to decode %v: %w", item, err)
+					}
+					return nil
+				}
+			}
+
 			v, ok := item.(T)
 			if !ok {
 				var zero T

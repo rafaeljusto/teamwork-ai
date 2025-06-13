@@ -147,6 +147,7 @@ MCP server.
 | Teams             | ✅     | ✅       | ✅      | ❌     |                                                                                    |
 | Timelog           | ✅     | ✅       | ✅      | ❌     | Retrieve by project or task                                                        |
 | Timer             | ✅     | ✅       | ✅      | ❌     | Pause, resume and complete                                                         |
+| Activity          | ❌     | ✅       | ❌      | ❌     | Retrieve by project                                                                |
 
 > [!NOTE]
 > Not all properties are supported for each entity. And, for now, delete actions
