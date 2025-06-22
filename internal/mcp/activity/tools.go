@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-activities",
+		mcp.NewTool(twmcp.MethodRetrieveActivities.String(),
 			mcp.WithDescription("Retrieve multiple activities in a customer site of Teamwork.com. "+
 				"Feed of all activity across your projects, including updates to various project items."),
 			mcp.WithString("start-date",
@@ -86,7 +86,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project-activities",
+		mcp.NewTool(twmcp.MethodRetrieveProjectActivities.String(),
 			mcp.WithDescription("Retrieve multiple activities from a project in a customer site of Teamwork.com. "+
 				"Feed of all activity within a project."),
 			mcp.WithNumber("project-id",

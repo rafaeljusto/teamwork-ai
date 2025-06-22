@@ -15,7 +15,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-users",
+		mcp.NewTool(twmcp.MethodRetrieveUsers.String(),
 			mcp.WithDescription("Retrieve multiple users, also know as people, in a customer site of Teamwork.com. "+
 				"Users, also known as people, are the individuals who can be assigned to tasks."),
 			mcp.WithString("search-term",
@@ -60,7 +60,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project-users",
+		mcp.NewTool(twmcp.MethodRetrieveProjectUsers.String(),
 			mcp.WithDescription("Retrieve users, also known as people, from a specific project."),
 			mcp.WithNumber("project-id",
 				mcp.Required(),
@@ -109,7 +109,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-user",
+		mcp.NewTool(twmcp.MethodRetrieveUser.String(),
 			mcp.WithDescription("Retrieve a specific user, also know as person, in a customer site of Teamwork.com. "+
 				"Users, also known as person, is an individual who can be assigned to tasks."),
 			mcp.WithNumber("user-id",
@@ -139,7 +139,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-user",
+		mcp.NewTool(twmcp.MethodCreateUser.String(),
 			mcp.WithDescription("Create a new user, who can be assigned to tasks. "+
 				"User, also known as person, is an individual who can be assigned to tasks."),
 			mcp.WithString("first-name",
@@ -193,7 +193,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-user",
+		mcp.NewTool(twmcp.MethodUpdateUser.String(),
 			mcp.WithDescription("Update an existing user, who can be assigned to tasks. "+
 				"User, also known as person, is an individual who can be assigned to tasks."),
 			mcp.WithNumber("user-id",
@@ -248,7 +248,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("project-users",
+		mcp.NewTool(twmcp.MethodProjectUsers.String(),
 			mcp.WithDescription("Assign users to a specific project."),
 			mcp.WithNumber("project-id",
 				mcp.Required(),
@@ -281,7 +281,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-users-workload",
+		mcp.NewTool(twmcp.MethodRetrieveUsersWorkload.String(),
 			mcp.WithDescription("Retrieve the workload of users, also known as people, in a customer site of Teamwork.com. "+
 				"The workload allows you to see the users' overall workload on a short term, day-to-day basis, allowing for "+
 				"a more granular view of each person's capacity. An individual's capacity is based on their working hours, "+

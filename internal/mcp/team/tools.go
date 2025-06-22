@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-teams",
+		mcp.NewTool(twmcp.MethodRetrieveTeams.String(),
 			mcp.WithDescription("Retrieve multiple teams in a customer site of Teamwork.com. "+
 				"Teams replicate your organization's structure and group people on your site based on their "+
 				"position or contribution"),
@@ -52,7 +52,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-team",
+		mcp.NewTool(twmcp.MethodRetrieveTeam.String(),
 			mcp.WithDescription("Retrieve a specific team in a customer site of Teamwork.com. "+
 				"Teams replicate your organization's structure and group people on your site based on their "+
 				"position or contribution"),
@@ -83,7 +83,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-team",
+		mcp.NewTool(twmcp.MethodCreateTeam.String(),
 			mcp.WithDescription("Create a new team in a customer site of Teamwork.com. "+
 				"Teams replicate your organization's structure and group people on your site based on their "+
 				"position or contribution"),
@@ -138,7 +138,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-team",
+		mcp.NewTool(twmcp.MethodUpdateTeam.String(),
 			mcp.WithDescription("Update a team in a customer site of Teamwork.com. "+
 				"Teams replicate your organization's structure and group people on your site based on their "+
 				"position or contribution"),

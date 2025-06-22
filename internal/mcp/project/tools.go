@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-projects",
+		mcp.NewTool(twmcp.MethodRetrieveProjects.String(),
 			mcp.WithDescription("Retrieve multiple projects in a customer site of Teamwork.com. "+
 				"A project is central hubs to manage all of the components relating to what your team is working on."),
 			mcp.WithString("searchTerm",
@@ -64,7 +64,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project",
+		mcp.NewTool(twmcp.MethodRetrieveProject.String(),
 			mcp.WithDescription("Retrieve a specific project in a customer site of Teamwork.com. "+
 				"A project is central hubs to manage all of the components relating to what your team is working on."),
 			mcp.WithNumber("project-id",
@@ -94,7 +94,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-project",
+		mcp.NewTool(twmcp.MethodCreateProject.String(),
 			mcp.WithDescription("Create a new project in a customer site of Teamwork.com. "+
 				"A project is central hubs to manage all of the components relating to what your team is working on."),
 			mcp.WithString("name",
@@ -147,7 +147,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-project",
+		mcp.NewTool(twmcp.MethodUpdateProject.String(),
 			mcp.WithDescription("Update an existing project in a customer site of Teamwork.com. "+
 				"A project is central hubs to manage all of the components relating to what your team is working on."),
 			mcp.WithNumber("project-id",

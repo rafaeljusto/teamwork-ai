@@ -21,7 +21,7 @@ import (
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
 )
 
-var processing sync.Map
+var processingAutoAssignTask sync.Map
 
 // AutoAssignTaskOptions contains the options for the AutoAssignTask function.
 type AutoAssignTaskOptions struct {
@@ -89,11 +89,11 @@ func AutoAssignTask(
 		slog.Int64("taskID", taskData.Task.ID),
 	)
 
-	if _, ok := processing.LoadOrStore(taskData.Task.ID, struct{}{}); ok {
+	if _, ok := processingAutoAssignTask.LoadOrStore(taskData.Task.ID, struct{}{}); ok {
 		logger.Info("task already being processed, skipping AI assignment")
 		return nil
 	}
-	defer processing.Delete(taskData.Task.ID)
+	defer processingAutoAssignTask.Delete(taskData.Task.ID)
 
 	// if there's already an assigned user, we don't need to do anything
 	if len(taskData.Task.AssignedUserIDs) > 0 {

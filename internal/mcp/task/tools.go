@@ -21,7 +21,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 
 func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-tasks",
+		mcp.NewTool(twmcp.MethodRetrieveTasks.String(),
 			mcp.WithDescription("Retrieve multiple tasks in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithString("search-term",
@@ -73,7 +73,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project-tasks",
+		mcp.NewTool(twmcp.MethodRetrieveProjectTasks.String(),
 			mcp.WithDescription("Retrieve multiple tasks from a specific project in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithNumber("project-id",
@@ -130,7 +130,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-tasklist-tasks",
+		mcp.NewTool(twmcp.MethodRetrieveTasklistTasks.String(),
 			mcp.WithDescription("Retrieve multiple tasks from a specific tasklist in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithNumber("tasklist-id",
@@ -187,7 +187,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-task",
+		mcp.NewTool(twmcp.MethodRetrieveTask.String(),
 			mcp.WithDescription("Retrieve a specific task in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithNumber("task-id",
@@ -219,7 +219,7 @@ func registerToolsRetrieve(mcpServer *server.MCPServer, configResources *config.
 
 func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("create-task",
+		mcp.NewTool(twmcp.MethodCreateTask.String(),
 			mcp.WithDescription("Create a new task in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithString("name",
@@ -320,7 +320,7 @@ func registerToolsCreate(mcpServer *server.MCPServer, configResources *config.Re
 
 func registerToolsUpdate(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("update-task",
+		mcp.NewTool(twmcp.MethodUpdateTask.String(),
 			mcp.WithDescription("Update an existing task in a customer site of Teamwork.com. "+
 				"A task is an activity that need to be carried out by one or multiple project members."),
 			mcp.WithNumber("task-id",

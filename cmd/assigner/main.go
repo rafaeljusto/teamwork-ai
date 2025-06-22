@@ -39,6 +39,8 @@ func main() {
 	flag.BoolVar(&skipComment, "skip-comment", false, "Skip task comment (only assign)")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	c, errs := config.ParseFromEnvs()
 	if errs != nil {
 		// We are using a logger to print the errors because we don't have a
@@ -54,7 +56,13 @@ func main() {
 		}
 		exit(exitCodeInvalidInput)
 	}
-	resources := config.NewResources(c)
+	resources, err := config.InitResources(ctx, c)
+	if err != nil {
+		resources.Logger.Error("failed to initialize resources",
+			slog.String("error", err.Error()),
+		)
+		exit(exitCodeSetupFailure)
+	}
 
 	listener, err := net.Listen("tcp", ":"+strconv.FormatInt(c.Port, 10))
 	if err != nil {
@@ -89,7 +97,7 @@ func main() {
 	}()
 
 	<-done
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer func() {
 		cancel()
 	}()

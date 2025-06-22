@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-companies",
+		mcp.NewTool(twmcp.MethodRetrieveCompanies.String(),
 			mcp.WithDescription("Retrieve multiple companies, also know as clients, in a customer site of Teamwork.com. "+
 				"Companies, also know as clients, are organizations that the customer offers services to."),
 			mcp.WithString("search-term",
@@ -65,7 +65,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-company",
+		mcp.NewTool(twmcp.MethodRetrieveCompany.String(),
 			mcp.WithDescription("Retrieve a specific company, also know as client, in a customer site of Teamwork.com. "+
 				"Companies, also know as clients, are organizations that the customer offers services to."),
 			mcp.WithNumber("company-id",
@@ -95,7 +95,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-company",
+		mcp.NewTool(twmcp.MethodCreateCompany.String(),
 			mcp.WithDescription("Create a new company, also know as client, in a customer site of Teamwork.com. "+
 				"Companies, also know as clients, are organizations that the customer offers services to."),
 			mcp.WithString("name",
@@ -188,7 +188,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-company",
+		mcp.NewTool(twmcp.MethodUpdateCompany.String(),
 			mcp.WithDescription("Update a company, also know as client, in a customer site of Teamwork.com. "+
 				"Companies, also know as clients, are organizations that the customer offers services to."),
 			mcp.WithNumber("company-id",

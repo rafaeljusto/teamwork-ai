@@ -15,7 +15,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-milestones",
+		mcp.NewTool(twmcp.MethodRetrieveMilestones.String(),
 			mcp.WithDescription("Retrieve multiple milestones in a customer site of Teamwork.com. "+
 				"Milestone is a target date representing a point of progress, or goal within a "+
 				"project, that you can use task lists to track progress towards."),
@@ -69,7 +69,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project-milestones",
+		mcp.NewTool(twmcp.MethodRetrieveProjectMilestones.String(),
 			mcp.WithDescription("Retrieve multiple milestones from a specific project in a customer site of Teamwork.com. "+
 				"Milestone is a target date representing a point of progress, or goal within a "+
 				"project, that you can use task lists to track progress towards."),
@@ -128,7 +128,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-milestone",
+		mcp.NewTool(twmcp.MethodRetrieveMilestone.String(),
 			mcp.WithDescription("Retrieve a specific milestone in a customer site of Teamwork.com. "+
 				"Milestone is a target date representing a point of progress, or goal within a "+
 				"project, that you can use task lists to track progress towards."),
@@ -159,7 +159,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-milestone",
+		mcp.NewTool(twmcp.MethodCreateMilestone.String(),
 			mcp.WithDescription("Create a new milestone in a customer site of Teamwork.com. "+
 				"Milestone is a target date representing a point of progress, or goal within a "+
 				"project, that you can use task lists to track progress towards."),
@@ -249,7 +249,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-milestone",
+		mcp.NewTool(twmcp.MethodUpdateMilestone.String(),
 			mcp.WithDescription("Update a milestone in a customer site of Teamwork.com. "+
 				"Milestone is a target date representing a point of progress, or goal within a "+
 				"project, that you can use task lists to track progress towards."),

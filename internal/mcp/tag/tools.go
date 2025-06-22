@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-tags",
+		mcp.NewTool(twmcp.MethodRetrieveTags.String(),
 			mcp.WithDescription("Retrieve multiple tags in a customer site of Teamwork.com. "+
 				"Tags are a way to mark items so that you can use a filter to see just those items."),
 			mcp.WithString("search-term",
@@ -64,7 +64,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-tag",
+		mcp.NewTool(twmcp.MethodRetrieveTag.String(),
 			mcp.WithDescription("Retrieve a specific tag in a customer site of Teamwork.com. "+
 				"Tags are a way to mark items so that you can use a filter to see just those items."),
 			mcp.WithNumber("tag-id",
@@ -94,7 +94,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-tag",
+		mcp.NewTool(twmcp.MethodCreateTag.String(),
 			mcp.WithDescription("Create a new tag in a customer site of Teamwork.com. "+
 				"Tags are a way to mark items so that you can use a filter to see just those items."),
 			mcp.WithString("name",
@@ -128,7 +128,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-tag",
+		mcp.NewTool(twmcp.MethodUpdateTag.String(),
 			mcp.WithDescription("Update a tag in a customer site of Teamwork.com. "+
 				"Tags are a way to mark items so that you can use a filter to see just those items."),
 			mcp.WithNumber("tag-id",

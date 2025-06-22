@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-comments",
+		mcp.NewTool(twmcp.MethodRetrieveComments.String(),
 			mcp.WithDescription("Retrieve multiple comments in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithString("search-term",
@@ -59,7 +59,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-file-comments",
+		mcp.NewTool(twmcp.MethodRetrieveFileComments.String(),
 			mcp.WithDescription("Retrieve multiple comments from a file in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithNumber("file-id",
@@ -109,7 +109,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-milestone-comments",
+		mcp.NewTool(twmcp.MethodRetrieveMilestoneComments.String(),
 			mcp.WithDescription("Retrieve multiple comments from a milestone in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithNumber("milestone-id",
@@ -159,7 +159,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-notebook-comments",
+		mcp.NewTool(twmcp.MethodRetrieveNotebookComments.String(),
 			mcp.WithDescription("Retrieve multiple comments from a notebook in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, notebooks, files and notebooks."),
 			mcp.WithNumber("notebook-id",
@@ -209,7 +209,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-task-comments",
+		mcp.NewTool(twmcp.MethodRetrieveTaskComments.String(),
 			mcp.WithDescription("Retrieve multiple comments from a task in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithNumber("task-id",
@@ -259,7 +259,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-comment",
+		mcp.NewTool(twmcp.MethodRetrieveComment.String(),
 			mcp.WithDescription("Retrieve a specific comment in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithNumber("comment-id",
@@ -289,7 +289,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-comment",
+		mcp.NewTool(twmcp.MethodCreateComment.String(),
 			mcp.WithDescription("Create a new comment in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithObject("object",
@@ -354,7 +354,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-comment",
+		mcp.NewTool(twmcp.MethodUpdateComment.String(),
 			mcp.WithDescription("Update a comment in a customer site of Teamwork.com. "+
 				"Within Teamwork.com, you can comment on project items such as tasks, milestones, files and notebooks."),
 			mcp.WithNumber("comment-id",

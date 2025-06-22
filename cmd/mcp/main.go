@@ -14,6 +14,9 @@ import (
 	"time"
 
 	"github.com/mark3labs/mcp-go/server"
+	_ "github.com/rafaeljusto/teamwork-ai/internal/agentic/anthropic"
+	_ "github.com/rafaeljusto/teamwork-ai/internal/agentic/ollama"
+	_ "github.com/rafaeljusto/teamwork-ai/internal/agentic/openai"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	mcpactivity "github.com/rafaeljusto/teamwork-ai/internal/mcp/activity"
 	mcpcomment "github.com/rafaeljusto/teamwork-ai/internal/mcp/comment"
@@ -42,6 +45,8 @@ func main() {
 	serverMode := flag.String("mode", "sse", "server mode")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	c, errs := config.ParseFromEnvs()
 	if errs != nil {
 		// We are using a logger to print the errors because we don't have a
@@ -57,7 +62,15 @@ func main() {
 		}
 		exit(exitCodeInvalidInput)
 	}
-	resources := config.NewResources(c)
+	c.DisableMCPClient()
+
+	resources, err := config.InitResources(ctx, c)
+	if err != nil {
+		resources.Logger.Error("failed to initialize resources",
+			slog.String("error", err.Error()),
+		)
+		exit(exitCodeSetupFailure)
+	}
 
 	mcpServer := newMCPServer(resources)
 	switch *serverMode {
@@ -96,7 +109,7 @@ func main() {
 		}()
 
 		<-done
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer func() {
 			cancel()
 		}()
@@ -106,6 +119,12 @@ func main() {
 			)
 		}
 		resources.Logger.Info("server stopped")
+
+	default:
+		resources.Logger.Error("invalid server mode",
+			slog.String("mode", *serverMode),
+		)
+		exit(exitCodeInvalidInput)
 	}
 }
 

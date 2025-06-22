@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/activity"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
@@ -25,7 +26,7 @@ func Register(name string, agentic Agentic) {
 // Init initializes the agentic system with the provided name, and DSN. The name
 // must be from a pre-registered agentic implementation. The DSN is specific to
 // the agentic implementation and is used to configure it.
-func Init(name, dsn string, logger *slog.Logger) Agentic {
+func Init(name, dsn string, mcpClient *MCPClient, logger *slog.Logger) Agentic {
 	if name == "" {
 		return nil
 	}
@@ -33,7 +34,7 @@ func Init(name, dsn string, logger *slog.Logger) Agentic {
 	if !ok {
 		panic(fmt.Errorf("unknown agentic implementation: %s", name))
 	}
-	if err := agentic.Init(dsn, logger); err != nil {
+	if err := agentic.Init(dsn, mcpClient, logger); err != nil {
 		panic(fmt.Errorf("failed to initialize agentic implementation: %w", err))
 	}
 	return agentic
@@ -43,7 +44,7 @@ func Init(name, dsn string, logger *slog.Logger) Agentic {
 // decisions and performing tasks without constant human intervention.
 type Agentic interface {
 	// Init initializes the agentic system with the provided DSN.
-	Init(dsn string, logger *slog.Logger) error
+	Init(dsn string, mcpClient *MCPClient, logger *slog.Logger) error
 
 	// FindTaskSkillsAndJobRoles finds the skills and job roles for a given task.
 	// It uses the task data, available skills, and available job roles to
@@ -54,4 +55,7 @@ type Agentic interface {
 		availableSkills []skill.Skill,
 		availableJobRoles []jobrole.JobRole,
 	) (skillIDs, jobRoleIDs []int64, reasoning string, err error)
+
+	// SummarizeActivities summarizes the provided activities.
+	SummarizeActivities(ctx context.Context, activities []activity.Activity) (string, error)
 }
