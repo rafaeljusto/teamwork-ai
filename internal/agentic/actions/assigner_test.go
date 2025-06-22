@@ -7,9 +7,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rafaeljusto/teamwork-ai/internal/agentic"
 	"github.com/rafaeljusto/teamwork-ai/internal/agentic/actions"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	"github.com/rafaeljusto/teamwork-ai/internal/twapi/activity"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/comment"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
@@ -175,9 +177,10 @@ type agenticMock struct {
 		[]skill.Skill,
 		[]jobrole.JobRole,
 	) ([]int64, []int64, string, error)
+	summarizeActivities func(context.Context, []activity.Activity) (string, error)
 }
 
-func (a agenticMock) Init(string, *slog.Logger) error {
+func (a agenticMock) Init(string, *agentic.MCPClient, *slog.Logger) error {
 	return nil
 }
 
@@ -188,6 +191,10 @@ func (a agenticMock) FindTaskSkillsAndJobRoles(
 	availableJobRoles []jobrole.JobRole,
 ) ([]int64, []int64, string, error) {
 	return a.findTaskSkillsAndJobRoles(ctx, taskData, availableSkills, availableJobRoles)
+}
+
+func (a agenticMock) SummarizeActivities(ctx context.Context, activities []activity.Activity) (string, error) {
+	return a.summarizeActivities(ctx, activities)
 }
 
 func teamworkEngine(

@@ -54,3 +54,11 @@ skills and job roles from the task and assigning the best user to fulfill it.
 [![Assigner](https://img.youtube.com/vi/syeb50mia_M/0.jpg)](https://www.youtube.com/watch?v=syeb50mia_M)
 
 **For more information check [our documentation](cmd/assigner/README.md).**
+
+## Summarizer
+
+The summarizer is a command-line tool that generates summaries of activities
+from a Teamwork.com account within a specified date range. It can optionally
+target a specific project.
+
+**For more information check [our documentation](cmd/summarizer/README.md).**

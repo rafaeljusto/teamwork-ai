@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	twmcp "github.com/rafaeljusto/teamwork-ai/internal/mcp"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
 	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
@@ -46,7 +47,7 @@ func (o *ollama) FindTaskSkillsAndJobRoles(
 	aiRequest.addUserMessage("Available skills: " + encodedSkills)
 	aiRequest.addUserMessage("Available job roles: " + encodedJobRoles)
 
-	aiResponse, err := o.do(ctx, aiRequest)
+	aiResponse, err := o.do(ctx, aiRequest, twmcp.MethodNone)
 	if err != nil {
 		return nil, nil, "", fmt.Errorf("failed to find task skills and job roles: %w", err)
 	}

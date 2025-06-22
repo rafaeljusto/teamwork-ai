@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-timelogs",
+		mcp.NewTool(twmcp.MethodRetrieveTimelogs.String(),
 			mcp.WithDescription("Retrieve multiple timelogs in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
 			mcp.WithArray("tag-ids",
@@ -60,7 +60,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project-timelogs",
+		mcp.NewTool(twmcp.MethodRetrieveProjectTimelogs.String(),
 			mcp.WithDescription("Retrieve multiple timelogs from a specific project in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
 			mcp.WithNumber("project-id",
@@ -111,7 +111,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-task-timelogs",
+		mcp.NewTool(twmcp.MethodRetrieveTaskTimelogs.String(),
 			mcp.WithDescription("Retrieve multiple timelogs from a specific task in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
 			mcp.WithNumber("task-id",
@@ -162,7 +162,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-timelog",
+		mcp.NewTool(twmcp.MethodRetrieveTimelog.String(),
 			mcp.WithDescription("Retrieve a specific timelog in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
 			mcp.WithNumber("timelog-id",
@@ -192,7 +192,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-timelog",
+		mcp.NewTool(twmcp.MethodCreateTimelog.String(),
 			mcp.WithDescription("Create a new timelog in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
 			mcp.WithString("description",
@@ -268,7 +268,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-timelog",
+		mcp.NewTool(twmcp.MethodUpdateTimelog.String(),
 			mcp.WithDescription("Update a timelog in a customer site of Teamwork.com. "+
 				"Timelog is record of the amount a user spent working on a task or project."),
 			mcp.WithNumber("timelog-id",

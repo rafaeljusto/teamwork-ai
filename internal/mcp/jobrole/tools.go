@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-jobroles",
+		mcp.NewTool(twmcp.MethodRetrieveJobRoles.String(),
 			mcp.WithDescription("Retrieve multiple job roles in a customer site of Teamwork.com. "+
 				"Job role is a role that can be assigned to users."),
 			mcp.WithString("search-term",
@@ -55,7 +55,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-jobrole",
+		mcp.NewTool(twmcp.MethodRetrieveJobRole.String(),
 			mcp.WithDescription("Retrieve a specific job role in a customer site of Teamwork.com. "+
 				"Job role is a role that can be assigned to users."),
 			mcp.WithNumber("jobrole-id",
@@ -85,7 +85,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-jobrole",
+		mcp.NewTool(twmcp.MethodCreateJobRole.String(),
 			mcp.WithDescription("Create a new job role in a customer site of Teamwork.com. "+
 				"Job role is a role that can be assigned to users."),
 			mcp.WithString("name",
@@ -111,7 +111,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-jobrole",
+		mcp.NewTool(twmcp.MethodUpdateJobRole.String(),
 			mcp.WithDescription("Update a job role in a customer site of Teamwork.com. "+
 				"Job role is a role that can be assigned to users."),
 			mcp.WithNumber("jobrole-id",

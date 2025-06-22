@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-timers",
+		mcp.NewTool(twmcp.MethodRetrieveTimers.String(),
 			mcp.WithDescription("Retrieve multiple timers in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs."),
 			mcp.WithNumber("user-id",
@@ -67,7 +67,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-timer",
+		mcp.NewTool(twmcp.MethodRetrieveTimer.String(),
 			mcp.WithDescription("Retrieve a specific timer in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs."),
 			mcp.WithNumber("timer-id",
@@ -97,7 +97,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-timer",
+		mcp.NewTool(twmcp.MethodCreateTimer.String(),
 			mcp.WithDescription("Create a new timer in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs."),
 			mcp.WithString("description",
@@ -146,7 +146,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-timer",
+		mcp.NewTool(twmcp.MethodUpdateTimer.String(),
 			mcp.WithDescription("Update a timer in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs."),
 			mcp.WithNumber("timer-id",
@@ -192,7 +192,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("pause-timer",
+		mcp.NewTool(twmcp.MethodPauseTimer.String(),
 			mcp.WithDescription("Pause a running timer in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs."),
 			mcp.WithNumber("timer-id",
@@ -218,7 +218,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("complete-timer",
+		mcp.NewTool(twmcp.MethodCompleteTimer.String(),
 			mcp.WithDescription("Complete a running timer in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs. "+
 				"A timer must have a project ID associated with it to be completed. "+
@@ -246,7 +246,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("resume-timer",
+		mcp.NewTool(twmcp.MethodResumeTimer.String(),
 			mcp.WithDescription("Resume a running timer in a customer site of Teamwork.com. "+
 				"Timer is used to track ongoing work that will generate timelogs."),
 			mcp.WithNumber("timer-id",

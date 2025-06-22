@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-skills",
+		mcp.NewTool(twmcp.MethodRetrieveSkills.String(),
 			mcp.WithDescription("Retrieve multiple skills in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
 			mcp.WithString("search-term",
@@ -54,7 +54,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-skill",
+		mcp.NewTool(twmcp.MethodRetrieveSkill.String(),
 			mcp.WithDescription("Retrieve a specific skill in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
 			mcp.WithNumber("skill-id",
@@ -84,7 +84,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-skill",
+		mcp.NewTool(twmcp.MethodCreateSkill.String(),
 			mcp.WithDescription("Create a new skill in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
 			mcp.WithString("name",
@@ -117,7 +117,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-skill",
+		mcp.NewTool(twmcp.MethodUpdateSkill.String(),
 			mcp.WithDescription("Update an existing skill in a customer site of Teamwork.com. "+
 				"Skill is a knowledge or ability that can be assigned to users."),
 			mcp.WithNumber("skill-id",

@@ -14,7 +14,7 @@ import (
 
 func registerTools(mcpServer *server.MCPServer, configResources *config.Resources) {
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-tasklists",
+		mcp.NewTool(twmcp.MethodRetrieveTasklists.String(),
 			mcp.WithDescription("Retrieve multiple tasklists in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 			mcp.WithString("search-term",
@@ -51,7 +51,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-project-tasklists",
+		mcp.NewTool(twmcp.MethodRetrieveProjectTasklists.String(),
 			mcp.WithDescription("Retrieve multiple tasklists from a specific project in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 			mcp.WithNumber("project-id",
@@ -93,7 +93,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("retrieve-tasklist",
+		mcp.NewTool(twmcp.MethodRetrieveTasklist.String(),
 			mcp.WithDescription("Retrieve a specific tasklist in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 			mcp.WithNumber("tasklist-id",
@@ -123,7 +123,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("create-tasklist",
+		mcp.NewTool(twmcp.MethodCreateTasklist.String(),
 			mcp.WithDescription("Create a new tasklist in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 			mcp.WithString("name",
@@ -162,7 +162,7 @@ func registerTools(mcpServer *server.MCPServer, configResources *config.Resource
 	)
 
 	mcpServer.AddTool(
-		mcp.NewTool("update-tasklist",
+		mcp.NewTool(twmcp.MethodUpdateTasklist.String(),
 			mcp.WithDescription("Update an existing tasklist in a customer site of Teamwork.com. "+
 				"A tasklist group tasks together in a project for better organization."),
 			mcp.WithNumber("tasklist-id",

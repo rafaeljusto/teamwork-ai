@@ -30,10 +30,11 @@ func init() {
 // The API reference is available at:
 // https://platform.openai.com/docs/api-reference/introduction
 type openai struct {
-	client *http.Client
-	logger *slog.Logger
-	model  string
-	token  string
+	client    *http.Client
+	mcpClient *agentic.MCPClient
+	logger    *slog.Logger
+	model     string
+	token     string
 }
 
 // Init initializes the OpenAI instance with the provided DSN. The DSN must have
@@ -45,7 +46,8 @@ type openai struct {
 // "gpt-3.5-turbo"). The token should be the OpenAI API key.
 //
 // TODO(rafaeljusto): Add support for custom HTTP client.
-func (o *openai) Init(dsn string, logger *slog.Logger) error {
+func (o *openai) Init(dsn string, mcpClient *agentic.MCPClient, logger *slog.Logger) error {
+	o.mcpClient = mcpClient
 	o.client = http.DefaultClient
 	o.logger = logger
 

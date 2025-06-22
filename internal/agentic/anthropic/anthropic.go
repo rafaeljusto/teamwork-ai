@@ -30,10 +30,11 @@ func init() {
 // The API reference is available at:
 // https://docs.anthropic.com/en/api
 type anthropic struct {
-	client *http.Client
-	logger *slog.Logger
-	model  string
-	token  string
+	client    *http.Client
+	mcpClient *agentic.MCPClient
+	logger    *slog.Logger
+	model     string
+	token     string
 }
 
 // Init initializes the anthropic instance with the provided DSN. The DSN must
@@ -45,7 +46,8 @@ type anthropic struct {
 // "claude-1"). The token should be the Anthropic API key.
 //
 // TODO(rafaeljusto): Add support for custom HTTP client.
-func (a *anthropic) Init(dsn string, logger *slog.Logger) error {
+func (a *anthropic) Init(dsn string, mcpClient *agentic.MCPClient, logger *slog.Logger) error {
+	a.mcpClient = mcpClient
 	a.client = http.DefaultClient
 	a.logger = logger
 
