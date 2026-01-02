@@ -99,8 +99,27 @@ func (o *openai) do(ctx context.Context, aiRequest request) (response, error) {
 }
 
 type request struct {
-	Model string `json:"model"`
-	Input string `json:"prompt"`
+	Model    string           `json:"model"`
+	Messages []requestMessage `json:"input"`
+}
+
+func (r *request) addSystemMessage(content string) {
+	r.Messages = append(r.Messages, requestMessage{
+		Role:    "system",
+		Content: content,
+	})
+}
+
+func (r *request) addUserMessage(content string) {
+	r.Messages = append(r.Messages, requestMessage{
+		Role:    "user",
+		Content: content,
+	})
+}
+
+type requestMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 type response struct {

@@ -112,6 +112,13 @@ type request struct {
 	Stream   bool             `json:"stream"`
 }
 
+func (r *request) addSystemMessage(content string) {
+	r.Messages = append(r.Messages, requestMessage{
+		Role:    "system",
+		Content: content,
+	})
+}
+
 func (r *request) addUserMessage(content string) {
 	r.Messages = append(r.Messages, requestMessage{
 		Role:    "user",
