@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
+	"github.com/teamwork/twapi-go-sdk/projects"
 )
 
 // FindTaskSkillsAndJobRoles finds the skills and job roles for a given task. It
@@ -15,8 +14,8 @@ import (
 func (a *anthropic) FindTaskSkillsAndJobRoles(
 	ctx context.Context,
 	taskData webhook.TaskData,
-	availableSkills []skill.Skill,
-	availableJobRoles []jobrole.JobRole,
+	availableSkills []projects.Skill,
+	availableJobRoles []projects.JobRole,
 ) ([]int64, []int64, string, error) {
 	var encodedSkills string
 	for i, skill := range availableSkills {

@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
+	"github.com/teamwork/twapi-go-sdk/projects"
 )
 
 var findTaskSkillsAndJobRolesCompiled = template.Must(template.New("prompt").Parse(findTaskSkillsAndJobRolesPrompt))
@@ -19,8 +18,8 @@ var findTaskSkillsAndJobRolesCompiled = template.Must(template.New("prompt").Par
 func (o *openai) FindTaskSkillsAndJobRoles(
 	ctx context.Context,
 	taskData webhook.TaskData,
-	availableSkills []skill.Skill,
-	availableJobRoles []jobrole.JobRole,
+	availableSkills []projects.Skill,
+	availableJobRoles []projects.JobRole,
 ) ([]int64, []int64, string, error) {
 	var promptBuffer bytes.Buffer
 	templateData := newFindTaskSkillsAndJobRolesData(taskData, availableSkills, availableJobRoles)
@@ -77,8 +76,8 @@ func (i idName) Encode() string {
 
 func newFindTaskSkillsAndJobRolesData(
 	taskData webhook.TaskData,
-	skills []skill.Skill,
-	jobRoles []jobrole.JobRole,
+	skills []projects.Skill,
+	jobRoles []projects.JobRole,
 ) findTaskSkillsAndJobRolesData {
 	var data findTaskSkillsAndJobRolesData
 	data.Project.Name = taskData.Project.Name

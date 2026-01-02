@@ -11,14 +11,9 @@ import (
 	"time"
 
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/comment"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/task"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/user"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/workload"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
+	twapi "github.com/teamwork/twapi-go-sdk"
+	"github.com/teamwork/twapi-go-sdk/projects"
 )
 
 var processing sync.Map
@@ -181,12 +176,12 @@ func AutoAssignTask(
 	}
 
 	if !options.skipAssignment {
-		var taskUpdate task.Update
-		taskUpdate.ID = taskData.Task.ID
-		taskUpdate.Assignees = &twapi.UserGroups{
+		taskUpdate := projects.NewTaskUpdateRequest(taskData.Task.ID)
+		taskUpdate.Path.ID = taskData.Task.ID
+		taskUpdate.Assignees = &projects.UserGroups{
 			UserIDs: idealUserIDs,
 		}
-		if err := resources.TeamworkEngine.Do(ctx, &taskUpdate); err != nil {
+		if _, err := projects.TaskUpdate(ctx, resources.TeamworkEngine, taskUpdate); err != nil {
 			return fmt.Errorf("failed to assign task to users: %w", err)
 		}
 		logger.Info("task assigned to users based on AI",
@@ -195,16 +190,17 @@ func AutoAssignTask(
 	}
 
 	if !options.skipComment {
-		var commentCreate comment.Create
-		commentCreate.Object = twapi.Relationship{Type: "tasks", ID: taskData.Task.ID}
-		commentCreate.Body = "🤖 Assignment of this task was performed by artificial intelligence.\n"
+		commentCreate := projects.NewCommentCreateRequestInTask(
+			taskData.Task.ID,
+			"🤖 Assignment of this task was performed by artificial intelligence.\n",
+		)
 		for _, userID := range idealUserIDs {
 			if user, ok := projectUsersMap[userID]; ok {
 				commentCreate.Body += fmt.Sprintf("\n  • %s %s", user.FirstName, user.LastName)
 			}
 		}
 		commentCreate.Body += "\n\n" + reasoning
-		if err := resources.TeamworkEngine.Do(ctx, &commentCreate); err != nil {
+		if _, err := projects.CommentCreate(ctx, resources.TeamworkEngine, commentCreate); err != nil {
 			return fmt.Errorf("failed to create comment: %w", err)
 		}
 	}
@@ -253,7 +249,7 @@ func (u userScores) chooseIDs() []int64 {
 type autoAssignTaskProcessor func(userIDs userScores) (userScores, error)
 
 func autoAssignTaskProcessRates(
-	projectUsersMap map[int64]user.User,
+	projectUsersMap map[int64]projects.User,
 	reasoning *string,
 	logger *slog.Logger,
 ) autoAssignTaskProcessor {
@@ -346,29 +342,32 @@ func autoAssignTaskProcessWorkload(
 			return userScores, nil
 		}
 
-		var single workload.Single
-		single.Request.Filters.StartDate = *taskData.Task.StartDate
-		single.Request.Filters.EndDate = *taskData.Task.DueDate
-		single.Request.Filters.UserIDs = userScores.ids()
-		single.Request.Filters.PageSize = int64(len(single.Request.Filters.UserIDs))
-		single.Request.Filters.Include = []string{"users.workingHours.workingHoursEntry"}
+		var workloadRequest projects.WorkloadRequest
+		workloadRequest.Filters.StartDate = *taskData.Task.StartDate
+		workloadRequest.Filters.EndDate = *taskData.Task.DueDate
+		workloadRequest.Filters.UserIDs = userScores.ids()
+		workloadRequest.Filters.PageSize = int64(len(workloadRequest.Filters.UserIDs))
+		workloadRequest.Filters.Include = []projects.WorkloadGetRequestSideload{
+			projects.WorkloadGetRequestSideloadWorkingHourEntries,
+		}
 
-		if err := resources.TeamworkEngine.Do(ctx, &single); err != nil {
+		workloadResponse, err := projects.WorkloadGet(ctx, resources.TeamworkEngine, workloadRequest)
+		if err != nil {
 			return nil, fmt.Errorf("failed to load workload: %w", err)
 		}
 
 		availableUserIDs := make(map[int64]struct{})
-		for _, user := range single.Response.Workload.Users {
+		for _, user := range workloadResponse.Workload.Users {
 			userIDStr := strconv.FormatInt(user.ID, 10)
 			var workingHoursID int64
-			if relationship := single.Response.Included.Users[userIDStr].WorkingHour; relationship != nil {
+			if relationship := workloadResponse.Included.Users[userIDStr].WorkingHour; relationship != nil {
 				workingHoursID = relationship.ID
 			}
 
 			var availableHours float64
 			for date, dateData := range user.Dates {
 				var workingHours *float64
-				for _, entry := range single.Response.Included.WorkingHoursEntries {
+				for _, entry := range workloadResponse.Included.WorkingHoursEntries {
 					if entry.WorkingHour.ID != workingHoursID {
 						continue
 					}
@@ -380,8 +379,9 @@ func autoAssignTaskProcessWorkload(
 				if workingHours == nil {
 					workingHours = func() *float64 {
 						var v float64
-						if single.Response.Included.Users != nil {
-							v = single.Response.Included.Users[userIDStr].LengthOfDay
+						if workloadResponse.Included.Users != nil {
+							//nolint:staticcheck
+							v = workloadResponse.Included.Users[userIDStr].LengthOfDay
 						}
 						if v == 0 {
 							// last resort to a default value
@@ -423,10 +423,10 @@ func autoAssignTaskProcessWorkload(
 	}
 }
 
-type skills []skill.Skill
+type skills []projects.Skill
 
-func (s skills) toMap() map[int64]skill.Skill {
-	m := make(map[int64]skill.Skill, len(s))
+func (s skills) toMap() map[int64]projects.Skill {
+	m := make(map[int64]projects.Skill, len(s))
 	for _, skill := range s {
 		m[skill.ID] = skill
 	}
@@ -434,19 +434,36 @@ func (s skills) toMap() map[int64]skill.Skill {
 }
 
 func loadSkills(ctx context.Context, resources *config.Resources) (skills, error) {
-	var multipleSkills skill.Multiple
-	multipleSkills.Request.Filters.Include = []string{"users"}
-	multipleSkills.Request.Filters.PageSize = 500 // TODO(@rafaeljusto): support pagination
-	if err := resources.TeamworkEngine.Do(ctx, &multipleSkills); err != nil {
-		return nil, fmt.Errorf("failed to load skills: %w", err)
+	skillsNext, err := twapi.Iterate[projects.SkillListRequest, *projects.SkillListResponse](
+		ctx,
+		resources.TeamworkEngine,
+		projects.NewSkillListRequest(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build skills iterator: %w", err)
 	}
-	return multipleSkills.Response.Skills, nil
+
+	var skills skills
+	for {
+		skillsResponse, hasSkillsNext, err := skillsNext()
+		if err != nil {
+			return nil, fmt.Errorf("failed to list skills: %w", err)
+		}
+		if skillsResponse == nil {
+			break
+		}
+		skills = append(skills, skillsResponse.Skills...)
+		if !hasSkillsNext {
+			break
+		}
+	}
+	return skills, nil
 }
 
-type jobRoles []jobrole.JobRole
+type jobRoles []projects.JobRole
 
-func (j jobRoles) toMap() map[int64]jobrole.JobRole {
-	m := make(map[int64]jobrole.JobRole, len(j))
+func (j jobRoles) toMap() map[int64]projects.JobRole {
+	m := make(map[int64]projects.JobRole, len(j))
 	for _, jobRole := range j {
 		m[jobRole.ID] = jobRole
 	}
@@ -454,19 +471,36 @@ func (j jobRoles) toMap() map[int64]jobrole.JobRole {
 }
 
 func loadJobRoles(ctx context.Context, resources *config.Resources) (jobRoles, error) {
-	var multipleJobRoles jobrole.Multiple
-	multipleJobRoles.Request.Filters.Include = []string{"users"}
-	multipleJobRoles.Request.Filters.PageSize = 500 // TODO(@rafaeljusto): support pagination
-	if err := resources.TeamworkEngine.Do(ctx, &multipleJobRoles); err != nil {
-		return nil, fmt.Errorf("failed to load job roles: %w", err)
+	jobRolesNext, err := twapi.Iterate[projects.JobRoleListRequest, *projects.JobRoleListResponse](
+		ctx,
+		resources.TeamworkEngine,
+		projects.NewJobRoleListRequest(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build job roles iterator: %w", err)
 	}
-	return multipleJobRoles.Response.JobRoles, nil
+
+	var jobRoles jobRoles
+	for {
+		jobRolesResponse, hasJobRolesNext, err := jobRolesNext()
+		if err != nil {
+			return nil, fmt.Errorf("failed to list job roles: %w", err)
+		}
+		if jobRolesResponse == nil {
+			break
+		}
+		jobRoles = append(jobRoles, jobRolesResponse.JobRoles...)
+		if !hasJobRolesNext {
+			break
+		}
+	}
+	return jobRoles, nil
 }
 
-type projectUsers []user.User
+type projectUsers []projects.User
 
-func (p projectUsers) toMap() map[int64]user.User {
-	m := make(map[int64]user.User, len(p))
+func (p projectUsers) toMap() map[int64]projects.User {
+	m := make(map[int64]projects.User, len(p))
 	for _, user := range p {
 		m[user.ID] = user
 	}
@@ -474,11 +508,31 @@ func (p projectUsers) toMap() map[int64]user.User {
 }
 
 func loadProjectUsers(ctx context.Context, resources *config.Resources, projectID int64) (projectUsers, error) {
-	var projectUsers user.Multiple
-	projectUsers.Request.Path.ProjectID = projectID
-	projectUsers.Request.Filters.PageSize = 500 // TODO(@rafaeljusto): support pagination
-	if err := resources.TeamworkEngine.Do(ctx, &projectUsers); err != nil {
-		return nil, fmt.Errorf("failed to load project users: %w", err)
+	userListRequest := projects.NewUserListRequest()
+	userListRequest.Path.ProjectID = projectID
+
+	projectUsersNext, err := twapi.Iterate[projects.UserListRequest, *projects.UserListResponse](
+		ctx,
+		resources.TeamworkEngine,
+		userListRequest,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build project users iterator: %w", err)
 	}
-	return projectUsers.Response.Users, nil
+
+	var projectUsers projectUsers
+	for {
+		projectUsersResponse, hasProjectUsersNext, err := projectUsersNext()
+		if err != nil {
+			return nil, fmt.Errorf("failed to list project users: %w", err)
+		}
+		if projectUsersResponse == nil {
+			break
+		}
+		projectUsers = append(projectUsers, projectUsersResponse.Users...)
+		if !hasProjectUsersNext {
+			break
+		}
+	}
+	return projectUsers, nil
 }
