@@ -49,9 +49,8 @@ for it [here](https://jqlang.org/download/).
 The following environment variables are required to run the Assigner server:
 - `TWAI_TEAMWORK_SERVER`: The URL of your Teamwork.com installation. For
   example, `https://<installation>.teamwork.com`.
-- `TWAI_TEAMWORK_API_TOKEN`: The API token for your Teamwork.com account. You can
-  generate a new API token in your Teamwork.com profile. For more information,
-  check the [API documentation](https://apidocs.teamwork.com/guides/teamwork/authentication#basic-authentication).
+- `TWAI_TEAMWORK_API_TOKEN`: The Bearer token for your Teamwork.com account.For more information,
+  check the [documentation](https://apidocs.teamwork.com/guides/teamwork/authentication#o-auth-2-0).
 - `TWAI_AGENTIC_NAME`: The name of the agent that will be used to extract
   information from the task. The possible values are `anthropic`, `openai` and
   `ollama`.
@@ -69,6 +68,8 @@ The following environment variables are required to run the Assigner server:
     number of the Ollama server. The `model` is the name of the model to use
     (e.g. `llama2`), all available models can be found
     [here](https://ollama.com/search).
+- `TWAI_MCP_ENDPOINT`: The endpoint of the MCP server to use for retrieving
+  the prompt used to extract skills and job roles from the task information.
 
 Other optional environment variables are:
 - `TWAI_PORT`: The port to run the Assigner server. By default it will use a

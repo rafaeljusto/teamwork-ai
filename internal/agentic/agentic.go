@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
-	"github.com/teamwork/twapi-go-sdk/projects"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 var registered map[string]Agentic
@@ -49,8 +48,6 @@ type Agentic interface {
 	// determine the most relevant skills and job roles IDs for the task.
 	FindTaskSkillsAndJobRoles(
 		ctx context.Context,
-		taskDate webhook.TaskData,
-		availableSkills []projects.Skill,
-		availableJobRoles []projects.JobRole,
+		promptMessages []*mcp.PromptMessage,
 	) (skillIDs, jobRoleIDs []int64, reasoning string, err error)
 }

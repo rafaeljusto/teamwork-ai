@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
 	twapi "github.com/teamwork/twapi-go-sdk"
@@ -96,6 +97,29 @@ func AutoAssignTask(
 		return nil
 	}
 
+	mcpSession, err := resources.MCPClient.Connect(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to connect to MCP server: %w", err)
+	}
+	defer func() {
+		if err := mcpSession.Close(); err != nil {
+			logger.Error("failed to close MCP session", slog.String("error", err.Error()))
+		}
+	}()
+
+	taskSkillsAndJobRolesPrompt, err := mcpSession.GetPrompt(ctx, &mcp.GetPromptParams{
+		Name: "twprojects_task_skills_and_roles",
+		Arguments: map[string]string{
+			"task_id": strconv.FormatInt(taskData.Task.ID, 10),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to get prompt from MCP: %w", err)
+	}
+	if taskSkillsAndJobRolesPrompt == nil || taskSkillsAndJobRolesPrompt.Messages == nil {
+		return fmt.Errorf("no prompt outputs received from MCP")
+	}
+
 	skills, err := loadSkills(ctx, resources)
 	if err != nil {
 		return fmt.Errorf("failed to load skills: %w", err)
@@ -114,10 +138,16 @@ func AutoAssignTask(
 	}
 	projectUsersMap := projectUsers.toMap()
 
-	skillIDs, jobRoleIDs, reasoning, err := resources.Agentic.FindTaskSkillsAndJobRoles(ctx, taskData, skills, jobRoles)
+	skillIDs, jobRoleIDs, reasoning, err :=
+		resources.Agentic.FindTaskSkillsAndJobRoles(ctx, taskSkillsAndJobRolesPrompt.Messages)
 	if err != nil {
 		return fmt.Errorf("failed to find task skills and job roles: %w", err)
 	}
+	logger.Debug("AI suggested the following job roles and skills",
+		slog.Any("skillIDs", skillIDs),
+		slog.Any("jobRoleIDs", jobRoleIDs),
+		slog.String("reasoning", reasoning),
+	)
 
 	var userIDsWithSkills []int64
 	for _, skillID := range skillIDs {
@@ -434,10 +464,13 @@ func (s skills) toMap() map[int64]projects.Skill {
 }
 
 func loadSkills(ctx context.Context, resources *config.Resources) (skills, error) {
+	skillListRequest := projects.NewSkillListRequest()
+	skillListRequest.Filters.Include = []projects.SkillListRequestSideload{projects.SkillListRequestSideloadUsers}
+
 	skillsNext, err := twapi.Iterate[projects.SkillListRequest, *projects.SkillListResponse](
 		ctx,
 		resources.TeamworkEngine,
-		projects.NewSkillListRequest(),
+		skillListRequest,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build skills iterator: %w", err)
@@ -471,10 +504,15 @@ func (j jobRoles) toMap() map[int64]projects.JobRole {
 }
 
 func loadJobRoles(ctx context.Context, resources *config.Resources) (jobRoles, error) {
+	jobRoleListRequest := projects.NewJobRoleListRequest()
+	jobRoleListRequest.Filters.Include = []projects.JobRoleListRequestSideload{
+		projects.JobRoleListRequestSideloadUsers,
+	}
+
 	jobRolesNext, err := twapi.Iterate[projects.JobRoleListRequest, *projects.JobRoleListResponse](
 		ctx,
 		resources.TeamworkEngine,
-		projects.NewJobRoleListRequest(),
+		jobRoleListRequest,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build job roles iterator: %w", err)

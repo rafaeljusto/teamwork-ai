@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/rafaeljusto/teamwork-ai/internal/agentic/actions"
 	"github.com/rafaeljusto/teamwork-ai/internal/config"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
@@ -40,18 +41,10 @@ func Test_AutoAssignTask(t *testing.T) {
 			Agentic: agenticMock{
 				findTaskSkillsAndJobRoles: func(
 					_ context.Context,
-					taskData webhook.TaskData,
-					availableSkills []projects.Skill,
-					availableJobRoles []projects.JobRole,
+					promptMessages []*mcp.PromptMessage,
 				) ([]int64, []int64, string, error) {
-					if taskData.Task.ID != 1 {
-						return nil, nil, "", fmt.Errorf("unexpected task ID: %d", taskData.Task.ID)
-					}
-					if len(availableSkills) != 2 {
-						return nil, nil, "", fmt.Errorf("unexpected number of skills: %d", len(availableSkills))
-					}
-					if len(availableJobRoles) != 2 {
-						return nil, nil, "", fmt.Errorf("unexpected number of job roles: %d", len(availableJobRoles))
+					if len(promptMessages) != 2 {
+						return nil, nil, "", fmt.Errorf("unexpected number of prompts: %d", len(promptMessages))
 					}
 					return []int64{1}, []int64{}, "Some interesting explanation.", nil
 				},
@@ -79,18 +72,10 @@ func Test_AutoAssignTask(t *testing.T) {
 			Agentic: agenticMock{
 				findTaskSkillsAndJobRoles: func(
 					_ context.Context,
-					taskData webhook.TaskData,
-					availableSkills []projects.Skill,
-					availableJobRoles []projects.JobRole,
+					promptMessages []*mcp.PromptMessage,
 				) ([]int64, []int64, string, error) {
-					if taskData.Task.ID != 1 {
-						return nil, nil, "", fmt.Errorf("unexpected task ID: %d", taskData.Task.ID)
-					}
-					if len(availableSkills) != 2 {
-						return nil, nil, "", fmt.Errorf("unexpected number of skills: %d", len(availableSkills))
-					}
-					if len(availableJobRoles) != 2 {
-						return nil, nil, "", fmt.Errorf("unexpected number of job roles: %d", len(availableJobRoles))
+					if len(promptMessages) != 2 {
+						return nil, nil, "", fmt.Errorf("unexpected number of prompts: %d", len(promptMessages))
 					}
 					return []int64{1}, []int64{}, "Some interesting explanation.", nil
 				},
@@ -117,18 +102,10 @@ func Test_AutoAssignTask(t *testing.T) {
 			Agentic: agenticMock{
 				findTaskSkillsAndJobRoles: func(
 					_ context.Context,
-					taskData webhook.TaskData,
-					availableSkills []projects.Skill,
-					availableJobRoles []projects.JobRole,
+					promptMessages []*mcp.PromptMessage,
 				) ([]int64, []int64, string, error) {
-					if taskData.Task.ID != 1 {
-						return nil, nil, "", fmt.Errorf("unexpected task ID: %d", taskData.Task.ID)
-					}
-					if len(availableSkills) != 2 {
-						return nil, nil, "", fmt.Errorf("unexpected number of skills: %d", len(availableSkills))
-					}
-					if len(availableJobRoles) != 2 {
-						return nil, nil, "", fmt.Errorf("unexpected number of job roles: %d", len(availableJobRoles))
+					if len(promptMessages) != 2 {
+						return nil, nil, "", fmt.Errorf("unexpected number of prompts: %d", len(promptMessages))
 					}
 					return []int64{1}, []int64{}, "Some interesting explanation.", nil
 				},
@@ -151,6 +128,34 @@ func Test_AutoAssignTask(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// in-memory transports are not goroutine safe, so we need a new MCP mock
+			// per test case
+			tt.resources.MCPClient = config.NewMCPClient(mockMCP(t, func(srv *mcp.Server) {
+				srv.AddPrompt(&mcp.Prompt{
+					Name: "twprojects_task_skills_and_roles",
+					Arguments: []*mcp.PromptArgument{
+						{Name: "task_id", Required: true},
+					},
+				}, mcp.PromptHandler(func(context.Context, *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+					return &mcp.GetPromptResult{
+						Messages: []*mcp.PromptMessage{
+							{
+								Role: "system",
+								Content: &mcp.TextContent{
+									Text: "You are an expert at identifying skills and job roles required for tasks based on their details.",
+								},
+							},
+							{
+								Role: "user",
+								Content: &mcp.TextContent{
+									Text: "Given the details of the task, identify the relevant skills and job roles required to complete it.",
+								},
+							},
+						},
+					}, nil
+				}))
+			}))
+
 			if err := actions.AutoAssignTask(
 				context.Background(),
 				tt.resources,
@@ -166,9 +171,7 @@ func Test_AutoAssignTask(t *testing.T) {
 type agenticMock struct {
 	findTaskSkillsAndJobRoles func(
 		context.Context,
-		webhook.TaskData,
-		[]projects.Skill,
-		[]projects.JobRole,
+		[]*mcp.PromptMessage,
 	) ([]int64, []int64, string, error)
 }
 
@@ -178,11 +181,9 @@ func (a agenticMock) Init(string, *slog.Logger) error {
 
 func (a agenticMock) FindTaskSkillsAndJobRoles(
 	ctx context.Context,
-	taskData webhook.TaskData,
-	availableSkills []projects.Skill,
-	availableJobRoles []projects.JobRole,
+	promptMessages []*mcp.PromptMessage,
 ) ([]int64, []int64, string, error) {
-	return a.findTaskSkillsAndJobRoles(ctx, taskData, availableSkills, availableJobRoles)
+	return a.findTaskSkillsAndJobRoles(ctx, promptMessages)
 }
 
 func teamworkEngine(expectedAssignees []projects.User, useRate, useWorkload bool) twapi.HTTPClientFunc {
@@ -368,4 +369,27 @@ func teamworkEngine(expectedAssignees []projects.User, useRate, useWorkload bool
 			Header:     make(http.Header),
 		}, nil
 	}
+}
+
+func mockMCP(t *testing.T, register func(*mcp.Server)) mcp.Transport {
+	clientTransport, serverTransport := mcp.NewInMemoryTransports()
+
+	server := mcp.NewServer(&mcp.Implementation{
+		Name:    "test-server",
+		Version: "1.0.0",
+	}, &mcp.ServerOptions{})
+
+	register(server)
+
+	serverSession, err := server.Connect(t.Context(), serverTransport, nil)
+	if err != nil {
+		t.Fatalf("failed to initialize a MCP server session: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := serverSession.Close(); err != nil {
+			t.Logf("failed to close MCP server session: %v", err)
+		}
+	})
+
+	return clientTransport
 }

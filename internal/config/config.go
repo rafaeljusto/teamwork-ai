@@ -31,6 +31,9 @@ type Config struct {
 		// the chosen implementation.
 		DSN string
 	}
+
+	// MCPEndpoint is the endpoint of the MCP server.
+	MCPEndpoint string
 }
 
 // ParseFromEnvs parses the configuration from environment variables.
@@ -60,6 +63,8 @@ func ParseFromEnvs() (*Config, error) {
 
 	config.Agentic.Name = os.Getenv("TWAI_AGENTIC_NAME")
 	config.Agentic.DSN = os.Getenv("TWAI_AGENTIC_DSN")
+
+	config.MCPEndpoint = os.Getenv("TWAI_MCP_ENDPOINT")
 
 	if errs != nil {
 		return nil, errs
