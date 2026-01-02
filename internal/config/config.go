@@ -10,7 +10,7 @@ import (
 
 // Config stores the configuration of the application.
 type Config struct {
-	// Port is the port of the MCP server.
+	// Port is the port of the server.
 	Port int64
 
 	// LoggerLevel is the level of the logger.

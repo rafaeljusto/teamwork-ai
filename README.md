@@ -17,33 +17,8 @@ AI capabilities.
 
 ## MCP server
 
-Implements the Model Context Protocol (MCP) to allow AI agents to interact with
-Teamwork.com. This server acts as a bridge between AI clients and Teamwork.com,
-adding tools to create tasks, projects, and more.
-
-[![MCP example](https://img.youtube.com/vi/QTGM7cQT7Ew/0.jpg)](https://www.youtube.com/watch?v=QTGM7cQT7Ew)
-
-Some interesting things you can do with this server:
-
-```
-> Could you please create a projects with the steps to create a new house?
-
-The AI client will create a project named "New House" with tasklist and tasks
-with the specific steps to create a new house.
-```
-
-```
-> Could you assign the tasks from the "New House" project to users that have
-> the available skills to fulfill them? Leave the tasks unassigned if no
-> user has the required skills.
-
-The AI client will automatically query the projects, project's members, 
-tasklists, tasks and skills to correctly assign the tasks. It analyzes the
-tasklist name, the task title and description to find the best match for the
-users' skills.
-```
-
-**For more information check [our documentation](cmd/mcp/README.md).**
+The MCP server was moved to the official Teamwork.com repository:
+https://github.com/teamwork/mcp
 
 ## Assigner
 

@@ -5,7 +5,7 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi"
+	twapi "github.com/teamwork/twapi-go-sdk"
 )
 
 // intersection returns the intersection of two slices. It will sort the slices

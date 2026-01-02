@@ -15,8 +15,7 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /usr/src/teamwork-ai
 COPY --chown=root:root . /usr/src/teamwork-ai
-RUN go build -o /app/teamwork-ai-mcp ./cmd/mcp && \
-  go build -o /app/teamwork-ai-assigner ./cmd/assigner
+RUN go build -o /app/teamwork-ai-assigner ./cmd/assigner
 
 
 # ██▀███   █    ██  ███▄    █  ███▄    █ ▓█████  ██▀███  
@@ -35,7 +34,6 @@ ARG BUILD_DATE
 ARG BUILD_VCS_REF
 ARG BUILD_VERSION
 
-COPY --from=builder /app/teamwork-ai-mcp /bin/teamwork-ai-mcp
 COPY --from=builder /app/teamwork-ai-assigner /bin/teamwork-ai-assigner
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
@@ -50,4 +48,4 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 EXPOSE 80
 ENV TWAI_PORT=80
-ENTRYPOINT ["/bin/teamwork-ai-mcp"]
+ENTRYPOINT ["/bin/teamwork-ai-assigner"]

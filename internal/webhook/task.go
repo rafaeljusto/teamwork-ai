@@ -1,6 +1,6 @@
 package webhook
 
-import "github.com/rafaeljusto/teamwork-ai/internal/twapi"
+import twapi "github.com/teamwork/twapi-go-sdk"
 
 // TaskData represents the payload for the task related webhook events in
 // Teamwork.com.

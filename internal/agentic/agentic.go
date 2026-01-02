@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/jobrole"
-	"github.com/rafaeljusto/teamwork-ai/internal/twapi/skill"
 	"github.com/rafaeljusto/teamwork-ai/internal/webhook"
+	"github.com/teamwork/twapi-go-sdk/projects"
 )
 
 var registered map[string]Agentic
@@ -51,7 +50,7 @@ type Agentic interface {
 	FindTaskSkillsAndJobRoles(
 		ctx context.Context,
 		taskDate webhook.TaskData,
-		availableSkills []skill.Skill,
-		availableJobRoles []jobrole.JobRole,
+		availableSkills []projects.Skill,
+		availableJobRoles []projects.JobRole,
 	) (skillIDs, jobRoleIDs []int64, reasoning string, err error)
 }
