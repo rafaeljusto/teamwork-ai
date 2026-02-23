@@ -116,8 +116,8 @@ func Test_AutoAssignTask(t *testing.T) {
 			var taskData webhook.TaskData
 			taskData.Task.ID = 1
 			taskData.Task.Name = "task-1"
-			taskData.Task.StartDate = twapi.Ptr(twapi.Date(time.Now().AddDate(0, 0, 1)))
-			taskData.Task.DueDate = twapi.Ptr(twapi.Date(time.Now().AddDate(0, 0, 2)))
+			taskData.Task.StartDate = new(twapi.Date(time.Now().AddDate(0, 0, 1)))
+			taskData.Task.DueDate = new(twapi.Date(time.Now().AddDate(0, 0, 2)))
 			taskData.Task.EstimatedMinutes = 120
 			return taskData
 		}(),
@@ -237,8 +237,8 @@ func teamworkEngine(expectedAssignees []projects.User, useRate, useWorkload bool
 		case req.Method == http.MethodGet && strings.HasPrefix(req.URL.Path, "example.com/projects/api/v3/people.json"):
 			entity = projects.UserListResponse{
 				Users: []projects.User{
-					{ID: 1, FirstName: "James", LastName: "Smith", Cost: twapi.Ptr(twapi.Money(20000))},
-					{ID: 2, FirstName: "Michael", LastName: "Williams", Cost: twapi.Ptr(twapi.Money(10000))},
+					{ID: 1, FirstName: "James", LastName: "Smith", Cost: new(twapi.Money(20000))},
+					{ID: 2, FirstName: "Michael", LastName: "Williams", Cost: new(twapi.Money(10000))},
 				},
 			}
 
@@ -330,18 +330,19 @@ func teamworkEngine(expectedAssignees []projects.User, useRate, useWorkload bool
 				return nil, fmt.Errorf("failed to decode comment create request: %w", err)
 			}
 
-			expectedBody := "🤖 Assignment of this task was performed by artificial intelligence.\n"
+			var expectedBody strings.Builder
+			expectedBody.WriteString("🤖 Assignment of this task was performed by artificial intelligence.\n")
 			for _, user := range expectedAssignees {
-				expectedBody += fmt.Sprintf("\n  • %s %s", user.FirstName, user.LastName)
+				expectedBody.WriteString(fmt.Sprintf("\n  • %s %s", user.FirstName, user.LastName))
 			}
-			expectedBody += "\n\nSome interesting explanation."
+			expectedBody.WriteString("\n\nSome interesting explanation.")
 			if useRate {
-				expectedBody += " Concerns over user cost significantly impacted the decision."
+				expectedBody.WriteString(" Concerns over user cost significantly impacted the decision.")
 			}
 			if useWorkload {
-				expectedBody += " Workload was a key consideration in the decision-making process."
+				expectedBody.WriteString(" Workload was a key consideration in the decision-making process.")
 			}
-			if t.Comment.Body != expectedBody {
+			if t.Comment.Body != expectedBody.String() {
 				return nil, fmt.Errorf("unexpected comment body: %s", t.Comment.Body)
 			}
 
