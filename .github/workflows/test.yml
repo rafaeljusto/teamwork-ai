@@ -6,9 +6,9 @@ on:
       - main
 
 env:
-  GO_VERSION: "1.24.x"
+  GO_VERSION: "1.26.x"
 
-  concurrency:
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
@@ -41,7 +41,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.1
+          version: v2.10
 
   test:
     runs-on: ubuntu-latest
