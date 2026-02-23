@@ -333,7 +333,7 @@ func teamworkEngine(expectedAssignees []projects.User, useRate, useWorkload bool
 			var expectedBody strings.Builder
 			expectedBody.WriteString("🤖 Assignment of this task was performed by artificial intelligence.\n")
 			for _, user := range expectedAssignees {
-				expectedBody.WriteString(fmt.Sprintf("\n  • %s %s", user.FirstName, user.LastName))
+				fmt.Fprintf(&expectedBody, "\n  • %s %s", user.FirstName, user.LastName)
 			}
 			expectedBody.WriteString("\n\nSome interesting explanation.")
 			if useRate {
