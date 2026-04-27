@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/modelcontextprotocol/go-sdk v1.5.0
-	github.com/teamwork/twapi-go-sdk v1.13.4
+	github.com/teamwork/twapi-go-sdk v1.13.5
 )
 
 require (
