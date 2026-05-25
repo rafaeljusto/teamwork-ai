@@ -3,7 +3,7 @@ module github.com/rafaeljusto/teamwork-ai
 go 1.26.0
 
 require (
-	github.com/modelcontextprotocol/go-sdk v1.6.0
+	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/teamwork/twapi-go-sdk v1.17.0
 )
 
