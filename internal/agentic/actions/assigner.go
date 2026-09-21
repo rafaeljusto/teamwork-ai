@@ -505,8 +505,8 @@ func (j jobRoles) toMap() map[int64]projects.JobRole {
 
 func loadJobRoles(ctx context.Context, resources *config.Resources) (jobRoles, error) {
 	jobRoleListRequest := projects.NewJobRoleListRequest()
-	jobRoleListRequest.Filters.Include = []projects.JobRoleListRequestSideload{
-		projects.JobRoleListRequestSideloadUsers,
+	jobRoleListRequest.Filters.Include = []projects.JobRoleRequestSideload{
+		projects.JobRoleRequestSideloadUsers,
 	}
 
 	jobRolesNext, err := twapi.Iterate[projects.JobRoleListRequest, *projects.JobRoleListResponse](
